@@ -1,0 +1,278 @@
+# News Analyzer Application Configuration
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: news-analyzer
+
+  profiles:
+    active: dev
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/newsanalyzer
+    username: devuser
+    password: devpass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Don't auto-create tables, use our SQL scripts
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://devuser:devpass@localhost:27017/newsanalyzer
+
+  # Redis Configuration
+  redis:
+    host: localhost
+    port: 6379
+    password: devpass
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 8
+        min-idle: 2
+
+  # Elasticsearch Configuration
+  elasticsearch:
+    uris: http://localhost:9200
+
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1 hour in milliseconds
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.newsanalyzer.org
+          audiences: news-analyzer-api
+
+# Application-specific Configuration
+news-analyzer:
+  # External API Configuration
+  external-apis:
+    congress:
+      base-url: https://api.congress.gov/v3
+      api-key: ${CONGRESS_API_KEY:demo-key}
+      rate-limit: 5000  # requests per hour
+
+    federal-register:
+      base-url: https://www.federalregister.gov/api/v1
+      rate-limit: 1000  # requests per hour
+
+    pubmed:
+      base-url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+      rate-limit: 3  # requests per second
+
+    arxiv:
+      base-url: http://export.arxiv.org/api
+      rate-limit: 1000  # requests per hour
+
+  # Analysis Configuration
+  analysis:
+    # Fact Validation Settings
+    fact-validation:
+      confidence-threshold: 0.7
+      max-concurrent-requests: 10
+      timeout-seconds: 30
+
+    # Bias Detection Settings
+    bias-detection:
+      sensitivity: medium  # low, medium, high
+      language-models:
+        - stanford-corenlp
+      confidence-threshold: 0.6
+
+    # Source Reliability Settings
+    source-reliability:
+      min-claims-for-scoring: 5
+      recency-weight: 0.3
+      volume-weight: 0.2
+
+  # Web Scraping Configuration
+  scraping:
+    user-agent: "NewsAnalyzer Bot 1.0"
+    timeout-seconds: 30
+    max-retries: 3
+    respect-robots-txt: true
+    selenium:
+      headless: true
+      page-load-timeout: 30
+
+  # Caching Configuration
+  caching:
+    source-reliability-ttl: 3600  # 1 hour
+    claim-validation-ttl: 86400   # 24 hours
+    bias-analysis-ttl: 21600      # 6 hours
+
+# Actuator Configuration (Monitoring)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.newsanalyzer: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: WARN
+    org.elasticsearch: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/news-analyzer.log
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # Development Database (same as default for now)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/newsanalyzer
+    username: devuser
+    password: devpass
+
+  # Show SQL in development
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Relaxed security for development
+news-analyzer:
+  security:
+    cors:
+      allowed-origins: "http://localhost:3000,http://localhost:8080"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+
+logging:
+  level:
+    com.newsanalyzer: DEBUG
+    org.springframework.web: DEBUG
+
+---
+# Test Profile
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  # Use in-memory H2 for tests
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # Use embedded MongoDB for tests
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/newsanalyzer_test
+
+  # Use embedded Redis for tests
+  redis:
+    host: localhost
+    port: 6370  # Different port for test
+
+# Disable external API calls in tests
+news-analyzer:
+  external-apis:
+    congress:
+      base-url: http://localhost:8099/mock-congress
+    federal-register:
+      base-url: http://localhost:8099/mock-federal-register
+
+logging:
+  level:
+    com.newsanalyzer: DEBUG
+    org.springframework.test: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # Production database configuration
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+
+  # Production MongoDB
+  data:
+    mongodb:
+      uri: ${MONGODB_URL}
+
+  # Production Redis
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD}
+
+  # Production Elasticsearch
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URL}
+
+# Production API keys
+news-analyzer:
+  external-apis:
+    congress:
+      api-key: ${CONGRESS_API_KEY}
+
+  security:
+    cors:
+      allowed-origins: ${ALLOWED_ORIGINS:https://newsanalyzer.com}
+
+# Production logging
+logging:
+  level:
+    com.newsanalyzer: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
