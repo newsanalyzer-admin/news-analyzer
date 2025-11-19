@@ -1,0 +1,86 @@
+
+I need a list of online government sources of information such as uscode.house.gov that have either downloadable content or an API
+
+Here are major US government sources with downloadable content or APIs:
+
+Legal & Legislative:
+
+uscode.house.gov - US Code in XML/HTML
+congress.gov - Bills, laws, Congressional Record (bulk data available)
+govinfo.gov - Government Publishing Office, extensive bulk data downloads
+courtlistener.com - Federal and state court opinions (API available)
+api.data.gov - Central hub for federal APIs
+Economic & Financial:
+
+data.treasury.gov - Treasury data with API
+fred.stlouisfed.org - Federal Reserve Economic Data (FRED API)
+bls.gov/developers - Bureau of Labor Statistics API
+census.gov/data/developers - Census Bureau APIs
+sec.gov/edgar - SEC filings, bulk data available
+Health & Science:
+
+data.cms.gov - Medicare/Medicaid data
+clinicaltrials.gov - API for clinical trial data
+ncbi.nlm.nih.gov/home/develop/api - National Library of Medicine APIs
+data.nasa.gov - NASA datasets and APIs
+General Data:
+
+data.gov - Central catalog of government datasets (200,000+)
+census.gov/data - Demographic and economic data
+niem.gov - National Information Exchange Model
+Transportation & Geography:
+
+usgs.gov - Geological and geographic data
+data.bts.gov - Bureau of Transportation Statistics
+Most of these offer REST APIs, bulk downloads, or both. What type of data are you specifically looking for?
+
+I'm building a web application that analyzes news articles for accuracy so I'm looking for sources of information that can be the 'source of truth' so they need to be 'official' or at least reliable
+
+Excellent use case! Here are the most reliable "source of truth" government repositories for fact-checking news:
+
+Legislative & Legal (Primary Sources):
+
+congress.gov - Official bills, laws, voting records, Congressional Record
+govinfo.gov - Authenticated government documents (Federal Register, CFR, Supreme Court opinions)
+supremecourt.gov - Official Supreme Court decisions and dockets
+regulations.gov - Federal rulemaking and public comments
+pacer.gov - Federal court records (requires account, small fees)
+Executive Branch & Policy:
+
+whitehouse.gov - Official statements, executive orders, press briefings
+state.gov - Official foreign policy positions, press releases
+federalregister.gov - Daily journal of US government (regulations, executive orders)
+Economic Data:
+
+bls.gov - Employment, inflation, wage data (CPI, unemployment rates)
+bea.gov - GDP, economic indicators
+census.gov - Population, demographic data
+treasury.gov - Government finances, debt data
+sec.gov/edgar - Corporate filings (for business news verification)
+Health & Safety:
+
+cdc.gov - Disease data, health statistics
+fda.gov - Drug approvals, recalls, safety data
+who.int - Global health data (international)
+Crime & Justice:
+
+fbi.gov/services/cjis/ucr - Uniform Crime Reports
+bjs.gov - Bureau of Justice Statistics
+Scientific:
+
+noaa.gov - Weather, climate data
+usgs.gov - Earthquakes, natural disasters, geography
+nasa.gov - Space, climate science
+International (Non-US):
+
+un.org - UN resolutions, reports
+europa.eu - EU official documents
+data.worldbank.org - Global economic indicators
+Key Considerations for Your App:
+
+Timeliness: Congress.gov and Federal Register are updated regularly
+Authentication: Govinfo.gov provides digitally signed documents for verification
+APIs: Most have APIs or structured data feeds
+Archived versions: Check archive.gov for historical snapshots to verify timing of policy changes
+For your accuracy analyzer, I'd prioritize govinfo.gov (most comprehensive authenticated documents), congress.gov (legislative claims), and bls.gov/bea.gov (economic claims) as your core foundation.
+---
