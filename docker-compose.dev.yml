@@ -1,0 +1,54 @@
+# NewsAnalyzer v2 - Development Docker Compose
+# For local development with hot reload
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: newsanalyzer-postgres-dev
+    environment:
+      POSTGRES_DB: newsanalyzer_dev
+      POSTGRES_USER: newsanalyzer
+      POSTGRES_PASSWORD: changeme_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newsanalyzer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: newsanalyzer-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Backend - run manually with Maven for hot reload
+  # Use: cd backend && ./mvnw spring-boot:run -Dspring.profiles.active=dev
+
+  # Frontend - run manually with pnpm for hot reload
+  # Use: cd frontend && pnpm dev
+
+  # Reasoning Service - run manually with uvicorn for hot reload
+  # Use: cd reasoning-service && uvicorn app.main:app --reload
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+networks:
+  default:
+    name: newsanalyzer-dev-network

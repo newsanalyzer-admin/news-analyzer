@@ -1,0 +1,57 @@
+# Production Profile Configuration
+# Copy this file to application-prod.yml and update with production settings
+# NEVER commit application-prod.yml to Git!
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:5432/${DB_NAME:newsanalyzer}
+    username: ${DB_USERNAME:newsanalyzer}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: 2000ms
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+# Security
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000  # 24 hours
+
+# External Services
+reasoning-service:
+  base-url: ${REASONING_SERVICE_URL:http://reasoning-service:8000}
+  timeout: 5000
+
+# Logging
+logging:
+  level:
+    com.newsanalyzer: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+
+# Server
+server:
+  port: 8080
+  forward-headers-strategy: framework  # For Nginx proxy

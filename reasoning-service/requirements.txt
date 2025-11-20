@@ -1,0 +1,36 @@
+# NewsAnalyzer Reasoning Service - Python Dependencies
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# HTTP Client
+httpx==0.26.0
+
+# NLP & Entity Extraction
+spacy==3.7.2
+transformers==4.36.2
+torch==2.1.2
+
+# Prolog Integration
+pyswip==0.2.10
+
+# Data Processing
+numpy==1.26.3
+pandas==2.1.4
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6
+
+# Testing
+pytest==7.4.4
+pytest-cov==4.1.0
+pytest-asyncio==0.23.3
+
+# Development
+black==23.12.1
+ruff==0.1.11
+mypy==1.8.0
