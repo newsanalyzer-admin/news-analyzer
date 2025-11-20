@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.newsanalyzer</groupId>
+    <groupId>org.newsanalyzer</groupId>
     <artifactId>newsanalyzer-backend</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <name>NewsAnalyzer Backend</name>

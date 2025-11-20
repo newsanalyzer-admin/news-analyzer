@@ -46,7 +46,7 @@ reasoning-service:
 # Logging
 logging:
   level:
-    com.newsanalyzer: DEBUG
+    org.newsanalyzer: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE

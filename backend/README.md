@@ -18,7 +18,7 @@ Spring Boot 3.2 REST API (Java 17) for NewsAnalyzer v2.
 backend/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/newsanalyzer/
+│   │   ├── java/org/newsanalyzer/
 │   │   │   ├── NewsAnalyzerApplication.java
 │   │   │   ├── config/           # Spring configuration
 │   │   │   ├── controller/       # REST controllers
