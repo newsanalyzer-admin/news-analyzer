@@ -6,6 +6,32 @@ NewsAnalyzer v2 uses **Schema.org JSON-LD** as the native format for entity repr
 
 ---
 
+## Important: "Entity" vs "Thing" Terminology
+
+**Schema.org uses "Thing" as the root class**, not "Entity". This is intentional and correct:
+
+- **"Entity"** = Our **internal database concept** (table name: `entities`)
+- **"Thing"** = **Schema.org's root class** (all Schema.org types inherit from Thing)
+
+**Our internal `entity_type` maps to Schema.org types:**
+```
+NewsAnalyzer Internal    →  Schema.org Hierarchy
+─────────────────────────────────────────────────
+entities (table)         →  Thing (root class)
+├── entity_type = "person"         → Person
+├── entity_type = "government_org" → GovernmentOrganization
+├── entity_type = "organization"   → Organization
+├── entity_type = "location"       → Place
+├── entity_type = "event"          → Event
+└── entity_type = "concept"        → Thing or CreativeWork
+```
+
+This separation provides:
+- **Database optimization** via `entity_type` (indexes, filtering, business logic)
+- **Semantic web standards** via `schema_org_type` (interoperability, LLMs, SEO)
+
+---
+
 ## 1. Architecture Integration Points
 
 ### 1.1 Data Storage (PostgreSQL)
@@ -14,27 +40,34 @@ NewsAnalyzer v2 uses **Schema.org JSON-LD** as the native format for entity repr
 ```sql
 CREATE TABLE entities (
     id UUID PRIMARY KEY,
-    entity_type VARCHAR(50),  -- Internal type: government_org, person, etc.
-    name VARCHAR(500),
-    properties JSONB,         -- Flexible, type-specific properties
 
-    -- Schema.org support
-    schema_org_type VARCHAR(255),  -- e.g., 'GovernmentOrganization', 'Person'
-    schema_org_data JSONB,         -- Full JSON-LD representation
+    -- Internal classification (for our queries/business logic)
+    entity_type VARCHAR(50) NOT NULL,  -- 'government_org', 'person', etc.
+    name VARCHAR(500) NOT NULL,
+    properties JSONB DEFAULT '{}'::jsonb,
+
+    -- Schema.org semantic layer (standardized vocabulary)
+    schema_org_type VARCHAR(255),      -- 'Person', 'GovernmentOrganization', etc.
+    schema_org_data JSONB,             -- Full JSON-LD representation
 
     source VARCHAR(100),
-    confidence_score REAL,
-    verified BOOLEAN,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    confidence_score REAL DEFAULT 1.0,
+    verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 );
 ```
+
+**Dual-Layer Design Benefits:**
+- `entity_type` = Fast queries, internal business logic, database optimization
+- `schema_org_type` = Standard vocabulary, external interoperability, future-proof
 
 **Why JSONB?**
 - Stores Schema.org JSON-LD natively
 - Queryable with PostgreSQL JSON operators
 - No rigid schema enforcement
 - Supports Schema.org's flexible vocabulary
+- Easily extensible as Schema.org evolves
 
 ### 1.2 Backend (Spring Boot)
 
