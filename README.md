@@ -4,7 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Documented-green.svg)](docs/architecture.md)
-[![API Tests](https://github.com/yourusername/AIProject2/actions/workflows/api-tests.yml/badge.svg)](https://github.com/yourusername/AIProject2/actions/workflows/api-tests.yml)
+[![API Tests](https://github.com/newsanalyzer-admin/news-analyzer/actions/workflows/api-tests.yml/badge.svg)](https://github.com/newsanalyzer-admin/news-analyzer/actions/workflows/api-tests.yml)
+[![Production](https://img.shields.io/badge/Production-Live-brightgreen.svg)](http://newsanalyzer.org)
 
 ---
 
@@ -82,8 +83,8 @@ newsanalyzer-v2/
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/newsanalyzer-v2.git
-cd newsanalyzer-v2
+git clone https://github.com/newsanalyzer-admin/news-analyzer.git
+cd news-analyzer
 ```
 
 ### 2. Start Databases
@@ -166,12 +167,13 @@ pytest --cov=app tests/     # With coverage
 
 ---
 
-## 🌐 Source Control & Mirrors
+## 🌐 Source Control & Production
 
-- **Primary Repository:** [GitHub](https://github.com/yourusername/newsanalyzer-v2) (you are here)
-- **Mirror Repository:** [Codeberg](https://codeberg.org/yourusername/newsanalyzer-v2) (European non-profit)
+- **Primary Repository:** [GitHub](https://github.com/newsanalyzer-admin/news-analyzer)
+- **Production Site:** [newsanalyzer.org](http://newsanalyzer.org)
+- **Production Docs:** [docs/deployment/PRODUCTION_ENVIRONMENT.md](docs/deployment/PRODUCTION_ENVIRONMENT.md)
 
-All commits are automatically mirrored to Codeberg for transparency and independence. Clone from either source - they are identical.
+Production is hosted on Hetzner Cloud (Germany) for data sovereignty and independence.
 
 ---
 
@@ -235,8 +237,8 @@ Open source for transparency and community benefit.
 ## 🙋 Support & Contact
 
 - **Documentation:** [docs/](docs/)
-- **Issues:** [GitHub Issues](https://github.com/yourusername/newsanalyzer-v2/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/newsanalyzer-v2/discussions)
+- **Issues:** [GitHub Issues](https://github.com/newsanalyzer-admin/news-analyzer/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/newsanalyzer-admin/news-analyzer/discussions)
 
 ---
 
