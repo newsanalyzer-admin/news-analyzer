@@ -4,7 +4,14 @@ on:
   pull_request:
     branches: [main, master]
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
+      - 'feature/**'
+      - 'fix/**'
+      - 'hotfix/**'
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       debug_enabled:

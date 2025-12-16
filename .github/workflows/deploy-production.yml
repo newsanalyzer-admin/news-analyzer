@@ -1,0 +1,184 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+        type: string
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  PRODUCTION_HOST: 5.78.71.195
+  PRODUCTION_USER: root
+  DEPLOY_PATH: /opt/newsanalyzer
+
+jobs:
+  # ==================== Validate Release ====================
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_release: ${{ steps.check.outputs.is_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Deploying version: $VERSION"
+          else
+            echo "version=manual-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+            echo "Manual deployment triggered"
+          fi
+
+      - name: Check if release tag
+        id: check
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate manual deploy confirmation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm_deploy }}" != "deploy" ]; then
+            echo "ERROR: You must type 'deploy' to confirm production deployment"
+            exit 1
+          fi
+
+  # ==================== Run Tests First ====================
+  test:
+    name: Run Tests Before Deploy
+    needs: validate
+    uses: ./.github/workflows/api-tests.yml
+
+  # ==================== Deploy to Production ====================
+  deploy:
+    name: Deploy to Hetzner
+    needs: [validate, test]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to production
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.PRODUCTION_USER }}@${{ env.PRODUCTION_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
+            cd ${{ env.DEPLOY_PATH }}
+
+            echo "=== Pulling latest code ==="
+            git fetch origin
+            git checkout ${{ github.ref_name }}
+            git pull origin ${{ github.ref_name }}
+
+            echo "=== Building Docker images ==="
+            docker compose -f docker-compose.deploy.yml build
+
+            echo "=== Deploying services ==="
+            docker compose -f docker-compose.deploy.yml up -d
+
+            echo "=== Waiting for services to be healthy ==="
+            sleep 30
+
+            echo "=== Checking service status ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}"
+
+            echo "=== Deployment complete ==="
+          DEPLOY_SCRIPT
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying production health..."
+          for i in {1..10}; do
+            if curl -sf http://${{ env.PRODUCTION_HOST }}/api/actuator/health > /dev/null 2>&1; then
+              echo "Production is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i/10 - Waiting for production..."
+            sleep 10
+          done
+          echo "WARNING: Could not verify production health"
+          exit 1
+
+      - name: Create deployment summary
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ needs.validate.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Production |" >> $GITHUB_STEP_SUMMARY
+          echo "| Host | ${{ env.PRODUCTION_HOST }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | http://newsanalyzer.org |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployed By | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployed At | $(date -u +"%Y-%m-%d %H:%M:%S UTC") |" >> $GITHUB_STEP_SUMMARY
+
+  # ==================== Create GitHub Release ====================
+  release:
+    name: Create GitHub Release
+    needs: [validate, deploy]
+    if: needs.validate.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          # Get commits since last tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log --oneline $PREV_TAG..HEAD --no-merges | head -20)
+          else
+            COMMITS=$(git log --oneline -20 --no-merges)
+          fi
+
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ needs.validate.outputs.version }}
+          body: |
+            ## What's Changed
+
+            ${{ steps.notes.outputs.commits }}
+
+            ## Deployment
+            - **Production URL:** http://newsanalyzer.org
+            - **Deployed:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
