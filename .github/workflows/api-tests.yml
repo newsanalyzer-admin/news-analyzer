@@ -145,16 +145,18 @@ jobs:
             --spring.datasource.url=jdbc:postgresql://localhost:5432/newsanalyzer_test \
             --spring.datasource.username=postgres \
             --spring.datasource.password=postgres \
-            --server.port=8080 &
-          echo "Backend starting in background..."
+            --server.port=8080 > /tmp/backend.log 2>&1 &
+          echo $! > /tmp/backend.pid
+          echo "Backend starting in background (PID: $(cat /tmp/backend.pid))..."
 
       # ==================== Start Reasoning Service ====================
       - name: Start Reasoning Service
         working-directory: ./reasoning-service
         run: |
           echo "Starting Python reasoning service on port 8000..."
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-          echo "Reasoning service starting in background..."
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 > /tmp/reasoning.log 2>&1 &
+          echo $! > /tmp/reasoning.pid
+          echo "Reasoning service starting in background (PID: $(cat /tmp/reasoning.pid))..."
 
       # ==================== Wait for Services ====================
       - name: Wait for services to be healthy
@@ -170,6 +172,9 @@ jobs:
             fi
             if [ $i -eq 60 ]; then
               echo "✗ Backend failed to start within 2 minutes"
+              echo "========== BACKEND LOGS =========="
+              cat /tmp/backend.log || echo "No backend log file"
+              echo "========== END BACKEND LOGS =========="
               exit 1
             fi
             echo "  Attempt $i/60 - Backend not ready, waiting..."
@@ -185,6 +190,9 @@ jobs:
             fi
             if [ $i -eq 60 ]; then
               echo "✗ Reasoning Service failed to start within 2 minutes"
+              echo "========== REASONING LOGS =========="
+              cat /tmp/reasoning.log || echo "No reasoning log file"
+              echo "========== END REASONING LOGS =========="
               exit 1
             fi
             echo "  Attempt $i/60 - Reasoning Service not ready, waiting..."
