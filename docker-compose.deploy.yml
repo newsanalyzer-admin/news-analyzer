@@ -20,6 +20,18 @@ services:
     networks:
       - newsanalyzer-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: newsanalyzer-redis
+    restart: unless-stopped
+    networks:
+      - newsanalyzer-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -31,10 +43,14 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NAME:-newsanalyzer}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-newsanalyzer}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - REASONING_SERVICE_URL=http://reasoning-service:8000
       - CONGRESS_API_KEY=${CONGRESS_API_KEY:-}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - newsanalyzer-network
