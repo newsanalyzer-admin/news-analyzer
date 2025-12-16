@@ -617,7 +617,7 @@ INSERT INTO government_organizations (
     NULL,
     'branch',
     'executive',
-    0,
+    1,
     '1789-04-30',
     'The Executive Branch carries out and enforces laws under the leadership of the President.',
     1.0,
@@ -640,74 +640,74 @@ BEGIN
         data_quality_score, created_by
     ) VALUES
     -- Original 4 departments
-    ('Department of State', 'DOS', 'department', 'executive', exec_branch_id, 1,
+    ('Department of State', 'DOS', 'department', 'executive', exec_branch_id, 2,
      '1789-07-27', 'https://www.state.gov',
      ARRAY['foreign_affairs', 'diplomacy', 'international_relations'], 1.0, 'seed_data'),
 
-    ('Department of the Treasury', 'Treasury', 'department', 'executive', exec_branch_id, 1,
+    ('Department of the Treasury', 'Treasury', 'department', 'executive', exec_branch_id, 2,
      '1789-09-02', 'https://home.treasury.gov',
      ARRAY['fiscal_policy', 'taxation', 'currency'], 1.0, 'seed_data'),
 
-    ('Department of Defense', 'DOD', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Defense', 'DOD', 'department', 'executive', exec_branch_id, 2,
      '1949-08-10', 'https://www.defense.gov',
      ARRAY['national_defense', 'military_operations'], 1.0, 'seed_data'),
 
-    ('Department of Justice', 'DOJ', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Justice', 'DOJ', 'department', 'executive', exec_branch_id, 2,
      '1870-06-22', 'https://www.justice.gov',
      ARRAY['law_enforcement', 'legal_affairs', 'civil_rights'], 1.0, 'seed_data'),
 
     -- Interior (1849)
-    ('Department of the Interior', 'DOI', 'department', 'executive', exec_branch_id, 1,
+    ('Department of the Interior', 'DOI', 'department', 'executive', exec_branch_id, 2,
      '1849-03-03', 'https://www.doi.gov',
      ARRAY['public_lands', 'natural_resources', 'indigenous_affairs'], 1.0, 'seed_data'),
 
     -- Agriculture (1889)
-    ('Department of Agriculture', 'USDA', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Agriculture', 'USDA', 'department', 'executive', exec_branch_id, 2,
      '1889-02-09', 'https://www.usda.gov',
      ARRAY['agriculture', 'food_safety', 'rural_development'], 1.0, 'seed_data'),
 
     -- Commerce (1903)
-    ('Department of Commerce', 'DOC', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Commerce', 'DOC', 'department', 'executive', exec_branch_id, 2,
      '1903-02-14', 'https://www.commerce.gov',
      ARRAY['economic_development', 'trade', 'business'], 1.0, 'seed_data'),
 
     -- Labor (1913)
-    ('Department of Labor', 'DOL', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Labor', 'DOL', 'department', 'executive', exec_branch_id, 2,
      '1913-03-04', 'https://www.dol.gov',
      ARRAY['labor_standards', 'worker_protection', 'employment'], 1.0, 'seed_data'),
 
     -- Health and Human Services (1979)
-    ('Department of Health and Human Services', 'HHS', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Health and Human Services', 'HHS', 'department', 'executive', exec_branch_id, 2,
      '1979-05-04', 'https://www.hhs.gov',
      ARRAY['public_health', 'social_services', 'medicare_medicaid'], 1.0, 'seed_data'),
 
     -- Housing and Urban Development (1965)
-    ('Department of Housing and Urban Development', 'HUD', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Housing and Urban Development', 'HUD', 'department', 'executive', exec_branch_id, 2,
      '1965-09-09', 'https://www.hud.gov',
      ARRAY['housing', 'urban_development', 'fair_housing'], 1.0, 'seed_data'),
 
     -- Transportation (1966)
-    ('Department of Transportation', 'DOT', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Transportation', 'DOT', 'department', 'executive', exec_branch_id, 2,
      '1966-10-15', 'https://www.transportation.gov',
      ARRAY['transportation_infrastructure', 'highway_safety', 'aviation'], 1.0, 'seed_data'),
 
     -- Energy (1977)
-    ('Department of Energy', 'DOE', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Energy', 'DOE', 'department', 'executive', exec_branch_id, 2,
      '1977-08-04', 'https://www.energy.gov',
      ARRAY['energy_policy', 'nuclear_security', 'renewable_energy'], 1.0, 'seed_data'),
 
     -- Education (1979)
-    ('Department of Education', 'ED', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Education', 'ED', 'department', 'executive', exec_branch_id, 2,
      '1979-05-04', 'https://www.ed.gov',
      ARRAY['education_policy', 'student_aid', 'educational_research'], 1.0, 'seed_data'),
 
     -- Veterans Affairs (1989)
-    ('Department of Veterans Affairs', 'VA', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Veterans Affairs', 'VA', 'department', 'executive', exec_branch_id, 2,
      '1989-03-15', 'https://www.va.gov',
      ARRAY['veterans_benefits', 'healthcare', 'military_pensions'], 1.0, 'seed_data'),
 
     -- Homeland Security (2002)
-    ('Department of Homeland Security', 'DHS', 'department', 'executive', exec_branch_id, 1,
+    ('Department of Homeland Security', 'DHS', 'department', 'executive', exec_branch_id, 2,
      '2002-11-25', 'https://www.dhs.gov',
      ARRAY['national_security', 'border_security', 'cybersecurity', 'disaster_response'], 1.0, 'seed_data');
 
@@ -717,23 +717,23 @@ BEGIN
         established_date, website_url, jurisdiction_areas,
         data_quality_score, created_by
     ) VALUES
-    ('Environmental Protection Agency', 'EPA', 'independent_agency', 'executive', exec_branch_id, 1,
+    ('Environmental Protection Agency', 'EPA', 'independent_agency', 'executive', exec_branch_id, 2,
      '1970-12-02', 'https://www.epa.gov',
      ARRAY['environmental_protection', 'pollution_control', 'clean_air', 'clean_water'], 1.0, 'seed_data'),
 
-    ('National Aeronautics and Space Administration', 'NASA', 'independent_agency', 'executive', exec_branch_id, 1,
+    ('National Aeronautics and Space Administration', 'NASA', 'independent_agency', 'executive', exec_branch_id, 2,
      '1958-07-29', 'https://www.nasa.gov',
      ARRAY['space_exploration', 'aeronautics', 'scientific_research'], 1.0, 'seed_data'),
 
-    ('Central Intelligence Agency', 'CIA', 'independent_agency', 'executive', exec_branch_id, 1,
+    ('Central Intelligence Agency', 'CIA', 'independent_agency', 'executive', exec_branch_id, 2,
      '1947-09-18', 'https://www.cia.gov',
      ARRAY['foreign_intelligence', 'national_security'], 1.0, 'seed_data'),
 
-    ('Federal Bureau of Investigation', 'FBI', 'independent_agency', 'executive', exec_branch_id, 1,
+    ('Federal Bureau of Investigation', 'FBI', 'independent_agency', 'executive', exec_branch_id, 2,
      '1908-07-26', 'https://www.fbi.gov',
      ARRAY['law_enforcement', 'counterterrorism', 'cybercrime'], 1.0, 'seed_data'),
 
-    ('Social Security Administration', 'SSA', 'independent_agency', 'executive', exec_branch_id, 1,
+    ('Social Security Administration', 'SSA', 'independent_agency', 'executive', exec_branch_id, 2,
      '1935-08-14', 'https://www.ssa.gov',
      ARRAY['social_security', 'retirement_benefits', 'disability_insurance'], 1.0, 'seed_data');
 END $$;
