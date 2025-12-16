@@ -428,7 +428,7 @@ WITH RECURSIVE org_tree AS (
         parent_id,
         org_level,
         ARRAY[official_name]::TEXT[] AS hierarchy_path,
-        official_name AS hierarchy_string,
+        official_name::TEXT AS hierarchy_string,
         0 AS depth
     FROM government_organizations
     WHERE parent_id IS NULL
