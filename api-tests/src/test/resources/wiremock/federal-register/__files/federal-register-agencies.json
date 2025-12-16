@@ -1,0 +1,57 @@
+[
+    {
+        "id": 1,
+        "name": "Department of Agriculture",
+        "short_name": "USDA",
+        "description": "The Department of Agriculture provides leadership on food, agriculture, natural resources, rural development, nutrition, and related issues.",
+        "url": "https://www.usda.gov",
+        "parent_id": null,
+        "logo": null,
+        "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/agriculture-department/recent_articles.json",
+        "slug": "agriculture-department"
+    },
+    {
+        "id": 2,
+        "name": "Environmental Protection Agency",
+        "short_name": "EPA",
+        "description": "The Environmental Protection Agency protects human health and the environment.",
+        "url": "https://www.epa.gov",
+        "parent_id": null,
+        "logo": null,
+        "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/environmental-protection-agency/recent_articles.json",
+        "slug": "environmental-protection-agency"
+    },
+    {
+        "id": 3,
+        "name": "Department of Defense",
+        "short_name": "DOD",
+        "description": "The Department of Defense provides the military forces needed to deter war and ensure our nation's security.",
+        "url": "https://www.defense.gov",
+        "parent_id": null,
+        "logo": null,
+        "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/defense-department/recent_articles.json",
+        "slug": "defense-department"
+    },
+    {
+        "id": 4,
+        "name": "Department of State",
+        "short_name": "State",
+        "description": "The Department of State leads U.S. foreign policy.",
+        "url": "https://www.state.gov",
+        "parent_id": null,
+        "logo": null,
+        "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/state-department/recent_articles.json",
+        "slug": "state-department"
+    },
+    {
+        "id": 5,
+        "name": "National Aeronautics and Space Administration",
+        "short_name": "NASA",
+        "description": "NASA explores the unknown in air and space.",
+        "url": "https://www.nasa.gov",
+        "parent_id": null,
+        "logo": null,
+        "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/national-aeronautics-and-space-administration/recent_articles.json",
+        "slug": "national-aeronautics-and-space-administration"
+    }
+]

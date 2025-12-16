@@ -3,14 +3,25 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
+  // Image optimization configuration
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'bioguide.congress.gov',
+        pathname: '/bioguide/photo/**',
+      },
+    ],
+  },
+
   // API proxy configuration for development
   async rewrites() {
     return [
       {
         source: '/api/:path*',
         destination: process.env.NEXT_PUBLIC_API_URL
-          ? `${process.env.NEXT_PUBLIC_API_URL}/:path*`
-          : 'http://localhost:8080/:path*',
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`
+          : 'http://localhost:8080/api/:path*',
       },
     ]
   },

@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import entities, reasoning, fallacies
+from app.api import entities, reasoning, fallacies, government_orgs
 
 app = FastAPI(
     title="NewsAnalyzer Reasoning Service",
@@ -57,6 +57,7 @@ async def health():
 app.include_router(entities.router, prefix="/entities", tags=["entities"])
 app.include_router(reasoning.router, prefix="/reasoning", tags=["reasoning"])
 app.include_router(fallacies.router, prefix="/fallacies", tags=["fallacies"])
+app.include_router(government_orgs.router, prefix="/government-orgs", tags=["government-organizations"])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,7 @@
+ {
+    "python.defaultInterpreterPath": "C:/Users/sowoo/miniconda3/envs/newsanalyzer/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.compile.nullAnalysis.mode": "automatic"
+  }
+  

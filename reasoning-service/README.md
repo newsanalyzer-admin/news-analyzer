@@ -16,66 +16,85 @@ Python FastAPI service for entity extraction, logical reasoning, and Prolog infe
 ## Features
 
 1. **Entity Extraction** - Extract government entities, persons, organizations, locations, events, and concepts
-2. **Logical Reasoning** - Use Prolog for fact verification and relationship inference
-3. **Fallacy Detection** - Identify logical fallacies and cognitive biases
+2. **Government Organization Validation** - Validate and enrich extracted government entities against authoritative database
+3. **Logical Reasoning** - Use Prolog for fact verification and relationship inference
+4. **Fallacy Detection** - Identify logical fallacies and cognitive biases
 
 ## Project Structure
 
 ```
 reasoning-service/
 ├── app/
-│   ├── api/              # API routes
-│   │   ├── entities.py   # Entity extraction endpoints
-│   │   ├── reasoning.py  # Prolog reasoning endpoints
-│   │   └── fallacies.py  # Fallacy detection endpoints
-│   ├── services/         # Business logic
-│   ├── models/           # Pydantic models
-│   └── main.py           # FastAPI application
-├── tests/                # Unit and integration tests
-├── requirements.txt      # Python dependencies
-└── .env.example          # Environment variables template
+│   ├── api/                      # API routes
+│   │   ├── entities.py           # Entity extraction endpoints
+│   │   ├── reasoning.py          # Prolog reasoning endpoints
+│   │   └── fallacies.py          # Fallacy detection endpoints
+│   ├── services/                 # Business logic
+│   │   ├── entity_extractor.py  # spaCy-based entity extraction
+│   │   ├── gov_org_validator.py # Government org validation
+│   │   └── schema_mapper.py     # Schema.org mapping
+│   ├── models/                   # Pydantic models
+│   └── main.py                   # FastAPI application
+├── tests/                        # Unit and integration tests
+├── test_entity_validation.py     # Gov org validation test script
+├── requirements.txt              # Python dependencies
+├── PYTHON_311_SETUP.md           # Python 3.11 setup guide
+└── .env.example                  # Environment variables template
 ```
+
+## Government Organization Validation
+
+The service integrates with the NewsAnalyzer backend database to validate and enrich extracted government organization entities.
+
+**Matching Strategies:**
+1. **Exact Name Match** - "Environmental Protection Agency" → EPA (confidence: 1.0)
+2. **Exact Acronym Match** - "EPA" → Environmental Protection Agency (confidence: 1.0)
+3. **Fuzzy Match** - "Enviromental Protection Agency" → EPA (confidence: 0.95)
+4. **Partial Match** - "Protection Agency" → EPA (confidence: 0.60)
+
+**Enriched Data:**
+- Official name and acronym
+- Organization type (DEPARTMENT, AGENCY, BUREAU, etc.)
+- Branch (EXECUTIVE, LEGISLATIVE, JUDICIAL)
+- Government level (FEDERAL, STATE, LOCAL)
+- Website URL
+- Established date
+- Jurisdiction areas
+- Active status
+
+See `app/services/gov_org_validator.py` for implementation details.
 
 ## Setup
 
 ### Prerequisites
 
-- Python 3.11+
-- SWI-Prolog 8.4+ (for Prolog reasoning)
+- **Python 3.11** (Required - see [PYTHON_311_SETUP.md](./PYTHON_311_SETUP.md))
+- **Miniconda** (Recommended for environment management)
+- SWI-Prolog 8.4+ (for Prolog reasoning - optional)
 
-### 1. Create Virtual Environment
+### Quick Start (Using Conda)
 
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-```
+```powershell
+# Create and activate conda environment
+conda create -n newsanalyzer python=3.11 -y
+conda activate newsanalyzer
 
-### 2. Install Dependencies
+# Navigate to reasoning service
+cd reasoning-service
 
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Download spaCy Model
+# Download spaCy model
+python -m spacy download en_core_web_sm
 
-```bash
-python -m spacy download en_core_web_lg
-```
-
-### 4. Configure Environment
-
-```bash
-cp .env.example .env
-# Edit .env with your settings
-```
-
-### 5. Run Development Server
-
-```bash
+# Start the service
 uvicorn app.main:app --reload --port 8000
 ```
 
 The API will be available at http://localhost:8000
+
+For detailed setup instructions, see [PYTHON_311_SETUP.md](./PYTHON_311_SETUP.md)
 
 ## API Documentation
 
@@ -90,9 +109,21 @@ Once running, access:
 ```bash
 POST /entities/extract
 {
-  "text": "Congress passed a bill today...",
+  "text": "The Environmental Protection Agency announced new regulations today.",
   "confidence_threshold": 0.7
 }
+```
+
+**Response includes:**
+- Extracted entities with types (person, organization, location, government_org, etc.)
+- Government organization validation status
+- Official data for verified government entities (official name, acronym, branch, website, etc.)
+- Match confidence and type (exact, fuzzy, partial)
+- Suggested matches for unverified entities
+
+**Example:**
+```bash
+python test_entity_validation.py
 ```
 
 ### Prolog Reasoning

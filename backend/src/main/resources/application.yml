@@ -3,6 +3,10 @@ spring:
     name: newsanalyzer-backend
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
 
 # Default configuration (overridden by profile-specific configs)
 server:

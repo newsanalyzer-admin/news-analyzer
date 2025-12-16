@@ -1,0 +1,130 @@
+# Quality Gate: FB-1-UI.4 - Member Detail Page
+schema: 1
+story: "FB-1-UI.4"
+story_title: "Member Detail Page"
+gate: PASS
+status_reason: "All 14 acceptance criteria met. Well-structured implementation with proper component separation, responsive design, and comprehensive edge case handling."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-30T12:30:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Consider adding E2E tests for member detail navigation flow"
+
+# Evidence
+evidence:
+  tests_reviewed: 12
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    ac_gaps: []
+
+# Requirements Traceability (Given-When-Then)
+requirements_traceability:
+  - ac: 1
+    given: "User navigates to /members/{bioguideId}"
+    when: "Dynamic route loads"
+    then: "Member detail page displays"
+    evidence: "app/members/[bioguideId]/page.tsx created with proper route structure"
+
+  - ac: 2
+    given: "Member detail page loads"
+    when: "Profile renders"
+    then: "Large photo, full name, party, state, chamber, status displayed"
+    evidence: "MemberProfile.tsx lines 45-92 - 128px photo, fullName builder, badges for party/chamber/status"
+
+  - ac: 3
+    given: "Member has social media data"
+    when: "Social section renders"
+    then: "Twitter, Facebook, YouTube links with icons displayed"
+    evidence: "MemberSocialMedia.tsx lines 32-55 with Lucide icons"
+
+  - ac: 4
+    given: "Member has term history"
+    when: "Terms tab selected"
+    then: "Timeline shows all terms with dates and positions"
+    evidence: "TermTimeline.tsx with sortTermsByDate, getTermDisplayInfo, formatTermDisplay"
+
+  - ac: 5
+    given: "Member has committee assignments"
+    when: "Committees tab selected"
+    then: "Committee memberships with roles displayed"
+    evidence: "MemberCommittees.tsx with role sorting and badges"
+
+  - ac: 6
+    given: "Member has external IDs"
+    when: "External Links tab selected"
+    then: "FEC, GovTrack, Wikipedia links displayed"
+    evidence: "ExternalIds.tsx with bioguide, fec, govtrack, opensecrets, votesmart, wikipedia, ballotpedia, cspan support"
+
+  - ac: 7
+    given: "User is on member detail page"
+    when: "User clicks back link"
+    then: "Returns to /members list"
+    evidence: "page.tsx lines 59-66 - Link with ArrowLeft icon"
+
+  - ac: 8
+    given: "Page is loading"
+    when: "Data fetching"
+    then: "Skeleton layout displayed"
+    evidence: "loading.tsx and MemberDetailSkeleton in page.tsx lines 166-188"
+
+  - ac: 9
+    given: "Member not found"
+    when: "API returns error or null"
+    then: "404-style message displayed"
+    evidence: "not-found.tsx and notFound() call in page.tsx line 50"
+
+  - ac: 10
+    given: "Page loads"
+    when: "Content renders"
+    then: "Tabs organize Overview, Terms, Committees, External Links"
+    evidence: "page.tsx lines 71-114 using shadcn/ui Tabs"
+
+  - ac: 11
+    given: "User views social media links"
+    when: "Clicking link"
+    then: "Opens in new tab with noopener noreferrer"
+    evidence: "MemberSocialMedia.tsx line 71-72: target='_blank' rel='noopener noreferrer'"
+
+  - ac: 12
+    given: "Terms display"
+    when: "Current term exists"
+    then: "Current term highlighted visually"
+    evidence: "TermTimeline.tsx lines 56-70 - green styling for current term"
+
+  - ac: 13
+    given: "User on mobile device"
+    when: "Page renders"
+    then: "Layout responsive, stacks on mobile"
+    evidence: "Responsive classes throughout: sm:flex-row, sm:text-left, sm:grid-cols-2"
+
+  - ac: 14
+    given: "Story complete"
+    when: "TypeScript/ESLint run"
+    then: "No new errors"
+    evidence: "Dev Agent Record: TypeScript compilation: No errors, ESLint: No errors on new files"
+
+# NFR Assessment
+nfr_validation:
+  security: { status: PASS, notes: "External links use target='_blank' with rel='noopener noreferrer'" }
+  performance: { status: PASS, notes: "Lazy loading per tab, efficient data hooks with React Query" }
+  reliability: { status: PASS, notes: "Error boundaries, not-found handling, graceful empty states" }
+  maintainability: { status: PASS, notes: "Clean component separation, typed utilities, reuses MemberPhoto from FB-1-UI.2" }
+
+# Code Quality
+code_quality:
+  type_safety: "Strong - all components properly typed, utility files have TypeScript interfaces"
+  component_structure: "Excellent - proper separation of concerns, reusable utility functions"
+  error_handling: "Good - handles null/undefined social media, missing terms, missing external IDs"
+  accessibility: "Adequate - uses semantic HTML, but could benefit from ARIA labels on icons"
+
+# Quality Score
+quality_score: 96

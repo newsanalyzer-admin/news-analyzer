@@ -1,0 +1,248 @@
+package org.newsanalyzer.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.newsanalyzer.dto.JudgeDTO;
+import org.newsanalyzer.model.*;
+import org.newsanalyzer.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Service for querying federal judge data.
+ *
+ * Provides methods to search and filter judges by court, circuit, status, etc.
+ *
+ * @author James (Dev Agent)
+ * @since 2.0.0
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class JudgeService {
+
+    private final PersonRepository personRepository;
+    private final GovernmentPositionRepository positionRepository;
+    private final PositionHoldingRepository holdingRepository;
+    private final GovernmentOrganizationRepository orgRepository;
+
+    /**
+     * Find all current judges (active or senior status).
+     */
+    public Page<JudgeDTO> findCurrentJudges(Pageable pageable) {
+        // Find all current judicial holdings
+        Page<PositionHolding> holdings = holdingRepository.findByDataSource(DataSource.FJC, pageable);
+
+        List<JudgeDTO> judges = holdings.getContent().stream()
+                .filter(h -> h.getEndDate() == null) // Current judges only
+                .map(this::toJudgeDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(judges, pageable, holdings.getTotalElements());
+    }
+
+    /**
+     * Find all judges with optional filters.
+     */
+    public Page<JudgeDTO> findJudges(String courtLevel, String circuit, String status,
+                                      String search, Pageable pageable) {
+        // Get all FJC holdings
+        Page<PositionHolding> holdings = holdingRepository.findByDataSource(DataSource.FJC, pageable);
+
+        List<JudgeDTO> judges = holdings.getContent().stream()
+                .map(this::toJudgeDTO)
+                .filter(Objects::nonNull)
+                .filter(j -> matchesFilters(j, courtLevel, circuit, status, search))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(judges, pageable, holdings.getTotalElements());
+    }
+
+    /**
+     * Find judge by ID.
+     */
+    public Optional<JudgeDTO> findById(UUID id) {
+        return personRepository.findById(id)
+                .filter(p -> p.getDataSource() == DataSource.FJC)
+                .map(this::personToJudgeDTO);
+    }
+
+    /**
+     * Search judges by name.
+     */
+    public List<JudgeDTO> searchByName(String query) {
+        return personRepository.searchByName(query).stream()
+                .filter(p -> p.getDataSource() == DataSource.FJC)
+                .map(this::personToJudgeDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get statistics about judges.
+     */
+    public Map<String, Object> getStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        long totalFjcPersons = personRepository.countByDataSource(DataSource.FJC);
+        long totalFjcHoldings = holdingRepository.countByDataSource(DataSource.FJC);
+
+        // Count current holdings (no end date)
+        List<PositionHolding> fjcHoldings = holdingRepository.findByDataSource(DataSource.FJC);
+        long currentJudges = fjcHoldings.stream()
+                .filter(h -> h.getEndDate() == null)
+                .count();
+
+        stats.put("totalJudges", totalFjcPersons);
+        stats.put("totalAppointments", totalFjcHoldings);
+        stats.put("currentJudges", currentJudges);
+
+        return stats;
+    }
+
+    // =========================================================================
+    // Helper Methods
+    // =========================================================================
+
+    private JudgeDTO toJudgeDTO(PositionHolding holding) {
+        if (holding == null) return null;
+
+        Optional<Person> personOpt = personRepository.findById(holding.getPersonId());
+        Optional<GovernmentPosition> positionOpt = positionRepository.findById(holding.getPositionId());
+
+        if (personOpt.isEmpty()) return null;
+
+        Person person = personOpt.get();
+        GovernmentPosition position = positionOpt.orElse(null);
+        GovernmentOrganization court = null;
+
+        if (position != null && position.getOrganizationId() != null) {
+            court = orgRepository.findById(position.getOrganizationId()).orElse(null);
+        }
+
+        return buildJudgeDTO(person, position, holding, court);
+    }
+
+    private JudgeDTO personToJudgeDTO(Person person) {
+        if (person == null) return null;
+
+        // Find the most recent holding for this person
+        List<PositionHolding> holdings = holdingRepository.findByPersonIdOrderByStartDateDesc(person.getId());
+        PositionHolding holding = holdings.isEmpty() ? null : holdings.get(0);
+
+        GovernmentPosition position = null;
+        GovernmentOrganization court = null;
+
+        if (holding != null) {
+            position = positionRepository.findById(holding.getPositionId()).orElse(null);
+            if (position != null && position.getOrganizationId() != null) {
+                court = orgRepository.findById(position.getOrganizationId()).orElse(null);
+            }
+        }
+
+        return buildJudgeDTO(person, position, holding, court);
+    }
+
+    private JudgeDTO buildJudgeDTO(Person person, GovernmentPosition position,
+                                    PositionHolding holding, GovernmentOrganization court) {
+        JudgeDTO.JudgeDTOBuilder builder = JudgeDTO.builder()
+                .id(person.getId())
+                .firstName(person.getFirstName())
+                .middleName(person.getMiddleName())
+                .lastName(person.getLastName())
+                .suffix(person.getSuffix())
+                .fullName(person.getFullName())
+                .gender(person.getGender())
+                .birthDate(person.getBirthDate());
+
+        if (court != null) {
+            builder.courtName(court.getOfficialName())
+                   .courtOrganizationId(court.getId())
+                   .courtType(determineCourtType(court.getOfficialName()));
+        }
+
+        if (holding != null) {
+            builder.commissionDate(holding.getStartDate())
+                   .terminationDate(holding.getEndDate())
+                   .current(holding.isCurrent());
+
+            // Determine status
+            String status = determineStatus(holding.getEndDate());
+            builder.judicialStatus(status);
+        }
+
+        return builder.build();
+    }
+
+    private String determineCourtType(String courtName) {
+        if (courtName == null) return null;
+        String lower = courtName.toLowerCase();
+        if (lower.contains("supreme")) return "Supreme Court";
+        if (lower.contains("court of appeals") || lower.contains("circuit")) return "Court of Appeals";
+        if (lower.contains("district")) return "District Court";
+        if (lower.contains("bankruptcy")) return "Bankruptcy Court";
+        if (lower.contains("international trade")) return "Court of International Trade";
+        if (lower.contains("federal claims")) return "Court of Federal Claims";
+        if (lower.contains("tax")) return "Tax Court";
+        return "Other";
+    }
+
+    private String determineStatus(LocalDate endDate) {
+        if (endDate == null) return "ACTIVE";
+        if (endDate.isAfter(LocalDate.now())) return "ACTIVE";
+        return "FORMER";
+    }
+
+    private boolean matchesFilters(JudgeDTO judge, String courtLevel, String circuit,
+                                    String status, String search) {
+        // Filter by court level
+        if (courtLevel != null && !courtLevel.isEmpty()) {
+            if (judge.getCourtType() == null) return false;
+            if (!judge.getCourtType().toLowerCase().contains(courtLevel.toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Filter by circuit
+        if (circuit != null && !circuit.isEmpty()) {
+            if (judge.getCourtName() == null) return false;
+            if (!judge.getCourtName().toLowerCase().contains(circuit.toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Filter by status
+        if (status != null && !status.isEmpty()) {
+            if (!status.equalsIgnoreCase("ALL")) {
+                String judgeStatus = judge.getJudicialStatus();
+                if (judgeStatus == null || !judgeStatus.equalsIgnoreCase(status)) {
+                    return false;
+                }
+            }
+        }
+
+        // Filter by search term
+        if (search != null && !search.isEmpty()) {
+            String searchLower = search.toLowerCase();
+            boolean matches = false;
+            if (judge.getFullName() != null && judge.getFullName().toLowerCase().contains(searchLower)) {
+                matches = true;
+            }
+            if (judge.getCourtName() != null && judge.getCourtName().toLowerCase().contains(searchLower)) {
+                matches = true;
+            }
+            if (!matches) return false;
+        }
+
+        return true;
+    }
+}

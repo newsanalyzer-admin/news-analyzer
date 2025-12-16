@@ -2,8 +2,9 @@ package org.newsanalyzer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * NewsAnalyzer v2 - Main Application
@@ -12,8 +13,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * Hosted on Hetzner Cloud (Germany) for transparency and independence.
  */
 @SpringBootApplication
-@EnableJpaAuditing
 @EnableCaching
+@EnableScheduling
+@ConfigurationPropertiesScan
 public class NewsAnalyzerApplication {
 
     public static void main(String[] args) {

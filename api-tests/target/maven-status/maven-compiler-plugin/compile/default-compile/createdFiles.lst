@@ -1,0 +1,10 @@
+org\newsanalyzer\apitests\config\DatabaseConfig.class
+org\newsanalyzer\apitests\config\Endpoints$Backend.class
+org\newsanalyzer\apitests\util\DatabaseConnectionManager.class
+org\newsanalyzer\apitests\config\RestAssuredConfiguration.class
+org\newsanalyzer\apitests\util\DatabaseConnectionManager$TransactionVoidCallback.class
+org\newsanalyzer\apitests\config\Endpoints.class
+org\newsanalyzer\apitests\config\TestConfig.class
+org\newsanalyzer\apitests\util\DatabaseConnectionManager$TransactionCallback.class
+org\newsanalyzer\apitests\config\Endpoints$Reasoning.class
+org\newsanalyzer\apitests\util\FlywayMigrationRunner.class

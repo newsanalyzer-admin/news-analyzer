@@ -1,0 +1,92 @@
+# Development Profile Configuration
+# Copy this file to application-dev.yml and update with your local settings
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/newsanalyzer_dev
+    username: newsanalyzer
+    password: changeme_dev_password
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: none  # Flyway handles schema entirely
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 2000ms
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    locations: classpath:db/migration
+
+# Security
+jwt:
+  secret: dev_secret_key_change_in_production_at_least_256_bits_long
+  expiration: 86400000  # 24 hours in milliseconds
+
+# External Services
+reasoning-service:
+  base-url: http://localhost:8000
+  timeout: 5000
+
+# Congress.gov API
+congress:
+  api:
+    base-url: https://api.congress.gov/v3
+    key: ${CONGRESS_API_KEY:}
+    rate-limit: 5000
+    timeout: 30000
+
+# Federal Register API (Government Organizations and Regulations sync)
+federal-register:
+  base-url: https://www.federalregister.gov/api/v1
+  timeout: 30000
+  retry-attempts: 3
+  rate-limit-ms: 100
+  sync:
+    enabled: false  # Enable for automatic daily sync
+    cron: "0 0 3 * * *"  # 3:00 AM UTC daily
+    page-size: 100
+    max-pages: 100
+    initial-backfill-days: 365
+
+# Government Organization Sync
+gov-org:
+  sync:
+    enabled: false
+    schedule: "0 0 5 * * SUN"
+
+# Legislators Enrichment (unitedstates/congress-legislators GitHub repo)
+legislators:
+  github:
+    base-url: https://raw.githubusercontent.com/unitedstates/congress-legislators/main
+    api-url: https://api.github.com/repos/unitedstates/congress-legislators
+    current-file: legislators-current.yaml
+    historical-file: legislators-historical.yaml
+    timeout: 30000
+  sync:
+    schedule: "0 0 4 * * SUN"
+    historical-cutoff: "1990-01-01"
+
+# Logging
+logging:
+  level:
+    org.newsanalyzer: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

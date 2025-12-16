@@ -65,6 +65,16 @@ public class EntityDTO {
     private Boolean verified;
 
     /**
+     * Linked government organization ID (if entity_type = GOVERNMENT_ORG and validated)
+     */
+    private UUID governmentOrganizationId;
+
+    /**
+     * Linked government organization name (for convenience, avoids join in frontend)
+     */
+    private String governmentOrganizationName;
+
+    /**
      * Creation timestamp
      */
     private LocalDateTime createdAt;

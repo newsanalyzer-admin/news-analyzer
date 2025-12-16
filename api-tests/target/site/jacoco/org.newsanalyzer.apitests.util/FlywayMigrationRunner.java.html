@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlywayMigrationRunner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NewsAnalyzer API Tests</a> &gt; <a href="index.source.html" class="el_package">org.newsanalyzer.apitests.util</a> &gt; <span class="el_source">FlywayMigrationRunner.java</span></div><h1>FlywayMigrationRunner.java</h1><pre class="source lang-java linenums">package org.newsanalyzer.apitests.util;
+
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.output.CleanResult;
+import org.flywaydb.core.api.output.MigrateResult;
+
+import javax.sql.DataSource;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+/**
+ * Flyway migration runner for API integration tests.
+ * Points to backend's migration scripts and provides clean + migrate functionality.
+ */
+public class FlywayMigrationRunner {
+
+    // Path to backend migration scripts (relative to project root)
+    private static final String DEFAULT_MIGRATION_LOCATION = &quot;filesystem:../backend/src/main/resources/db/migration&quot;;
+
+    private final Flyway flyway;
+    private final DataSource dataSource;
+
+    /**
+     * Create migration runner with default migration location.
+     */
+    public FlywayMigrationRunner(DataSource dataSource) {
+<span class="nc" id="L29">        this(dataSource, DEFAULT_MIGRATION_LOCATION);</span>
+<span class="nc" id="L30">    }</span>
+
+    /**
+     * Create migration runner with custom migration location.
+     */
+<span class="nc" id="L35">    public FlywayMigrationRunner(DataSource dataSource, String migrationLocation) {</span>
+<span class="nc" id="L36">        this.dataSource = dataSource;</span>
+<span class="nc" id="L37">        this.flyway = Flyway.configure()</span>
+<span class="nc" id="L38">                .dataSource(dataSource)</span>
+<span class="nc" id="L39">                .locations(migrationLocation)</span>
+<span class="nc" id="L40">                .cleanDisabled(false)  // Enable clean for tests</span>
+<span class="nc" id="L41">                .baselineOnMigrate(true)  // Baseline if needed</span>
+<span class="nc" id="L42">                .validateOnMigrate(true)</span>
+<span class="nc" id="L43">                .outOfOrder(false)</span>
+<span class="nc" id="L44">                .load();</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Run all pending migrations.
+     * @return MigrateResult with migration details
+     */
+    public MigrateResult migrate() {
+<span class="nc" id="L52">        System.out.println(&quot;Running Flyway migrations...&quot;);</span>
+<span class="nc" id="L53">        MigrateResult result = flyway.migrate();</span>
+<span class="nc" id="L54">        System.out.printf(&quot;Migrations applied: %d, Schema version: %s%n&quot;,</span>
+<span class="nc" id="L55">                result.migrationsExecuted,</span>
+                result.targetSchemaVersion);
+<span class="nc" id="L57">        return result;</span>
+    }
+
+    /**
+     * Clean the database (drop all objects) and then migrate.
+     * Use this for a fresh database state.
+     * @return MigrateResult after clean and migrate
+     */
+    public MigrateResult cleanAndMigrate() {
+<span class="nc" id="L66">        System.out.println(&quot;Cleaning database...&quot;);</span>
+<span class="nc" id="L67">        CleanResult cleanResult = flyway.clean();</span>
+<span class="nc" id="L68">        System.out.printf(&quot;Cleaned %d schemas%n&quot;, cleanResult.schemasCleaned.size());</span>
+
+<span class="nc" id="L70">        return migrate();</span>
+    }
+
+    /**
+     * Clean the database (drop all objects).
+     * WARNING: This will delete all data!
+     * @return CleanResult with details
+     */
+    public CleanResult clean() {
+<span class="nc" id="L79">        System.out.println(&quot;Cleaning database...&quot;);</span>
+<span class="nc" id="L80">        return flyway.clean();</span>
+    }
+
+    /**
+     * Validate migrations without applying them.
+     * Checks if migrations are valid and consistent.
+     */
+    public void validate() {
+<span class="nc" id="L88">        System.out.println(&quot;Validating migrations...&quot;);</span>
+<span class="nc" id="L89">        flyway.validate();</span>
+<span class="nc" id="L90">        System.out.println(&quot;Migrations valid&quot;);</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * Get information about all migrations.
+     * @return MigrationInfoService with migration details
+     */
+    public MigrationInfoService info() {
+<span class="nc" id="L98">        return flyway.info();</span>
+    }
+
+    /**
+     * Print migration status to console.
+     */
+    public void printMigrationStatus() {
+<span class="nc" id="L105">        MigrationInfoService info = flyway.info();</span>
+<span class="nc" id="L106">        MigrationInfo[] all = info.all();</span>
+
+<span class="nc" id="L108">        System.out.println(&quot;\n=== Migration Status ===&quot;);</span>
+<span class="nc" id="L109">        System.out.printf(&quot;Current version: %s%n&quot;,</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                info.current() != null ? info.current().getVersion() : &quot;none&quot;);</span>
+<span class="nc" id="L111">        System.out.printf(&quot;Total migrations: %d%n&quot;, all.length);</span>
+<span class="nc" id="L112">        System.out.printf(&quot;Pending migrations: %d%n&quot;, info.pending().length);</span>
+
+<span class="nc" id="L114">        System.out.println(&quot;\nMigration history:&quot;);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        for (MigrationInfo migration : all) {</span>
+<span class="nc" id="L116">            System.out.printf(&quot;  %s | %s | %s | %s%n&quot;,</span>
+<span class="nc" id="L117">                    migration.getVersion(),</span>
+<span class="nc" id="L118">                    migration.getDescription(),</span>
+<span class="nc" id="L119">                    migration.getState(),</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                    migration.getInstalledOn() != null ? migration.getInstalledOn() : &quot;not applied&quot;);</span>
+        }
+<span class="nc" id="L122">        System.out.println(&quot;========================\n&quot;);</span>
+<span class="nc" id="L123">    }</span>
+
+    /**
+     * Check if any migrations are pending.
+     * @return true if there are pending migrations
+     */
+    public boolean hasPendingMigrations() {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        return flyway.info().pending().length &gt; 0;</span>
+    }
+
+    /**
+     * Get the current schema version.
+     * @return current version string or null if no migrations applied
+     */
+    public String getCurrentVersion() {
+<span class="nc" id="L138">        MigrationInfo current = flyway.info().current();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        return current != null ? current.getVersion().toString() : null;</span>
+    }
+
+    /**
+     * Baseline the database at the current state.
+     * Use when starting from an existing schema.
+     */
+    public void baseline() {
+<span class="nc" id="L147">        System.out.println(&quot;Baselining database...&quot;);</span>
+<span class="nc" id="L148">        flyway.baseline();</span>
+<span class="nc" id="L149">    }</span>
+
+    /**
+     * Repair the schema history table.
+     * Removes failed migration entries.
+     */
+    public void repair() {
+<span class="nc" id="L156">        System.out.println(&quot;Repairing migration history...&quot;);</span>
+<span class="nc" id="L157">        flyway.repair();</span>
+<span class="nc" id="L158">    }</span>
+
+    /**
+     * Get the underlying Flyway instance for advanced configuration.
+     */
+    public Flyway getFlyway() {
+<span class="nc" id="L164">        return flyway;</span>
+    }
+
+    /**
+     * Static factory method using DatabaseConnectionManager.
+     */
+    public static FlywayMigrationRunner create() {
+<span class="nc" id="L171">        DataSource dataSource = DatabaseConnectionManager.getInstance().getDataSource();</span>
+<span class="nc" id="L172">        return new FlywayMigrationRunner(dataSource);</span>
+    }
+
+    /**
+     * Static method to run migrations using default settings.
+     */
+    public static MigrateResult runMigrations() {
+<span class="nc" id="L179">        return create().migrate();</span>
+    }
+
+    /**
+     * Static method to clean and migrate using default settings.
+     */
+    public static MigrateResult cleanAndRunMigrations() {
+<span class="nc" id="L186">        return create().cleanAndMigrate();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

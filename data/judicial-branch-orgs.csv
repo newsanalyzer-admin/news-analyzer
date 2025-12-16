@@ -1,0 +1,125 @@
+officialName,acronym,branch,orgType,orgLevel,parentId,establishedDate,dissolvedDate,websiteUrl,jurisdictionAreas
+"Federal Judiciary",,judicial,branch,1,,"1789-09-24",,https://www.uscourts.gov,
+"Supreme Court of the United States",SCOTUS,judicial,commission,2,,"1789-09-24",,https://www.supremecourt.gov,
+"Administrative Office of the U.S. Courts",AO,judicial,office,2,,"1939-08-07",,https://www.uscourts.gov/about-federal-courts/judicial-administration/administrative-office-us-courts,
+"Federal Judicial Center",FJC,judicial,office,2,,"1967-12-20",,https://www.fjc.gov,
+"United States Sentencing Commission",USSC,judicial,commission,2,,"1984-10-12",,https://www.ussc.gov,
+"U.S. Court of Appeals for the First Circuit",CA1,judicial,commission,2,,"1891-03-03",,https://www.ca1.uscourts.gov,ME;MA;NH;RI;PR
+"U.S. Court of Appeals for the Second Circuit",CA2,judicial,commission,2,,"1891-03-03",,https://www.ca2.uscourts.gov,CT;NY;VT
+"U.S. Court of Appeals for the Third Circuit",CA3,judicial,commission,2,,"1891-03-03",,https://www.ca3.uscourts.gov,DE;NJ;PA;VI
+"U.S. Court of Appeals for the Fourth Circuit",CA4,judicial,commission,2,,"1891-03-03",,https://www.ca4.uscourts.gov,MD;NC;SC;VA;WV
+"U.S. Court of Appeals for the Fifth Circuit",CA5,judicial,commission,2,,"1891-03-03",,https://www.ca5.uscourts.gov,LA;MS;TX
+"U.S. Court of Appeals for the Sixth Circuit",CA6,judicial,commission,2,,"1891-03-03",,https://www.ca6.uscourts.gov,KY;MI;OH;TN
+"U.S. Court of Appeals for the Seventh Circuit",CA7,judicial,commission,2,,"1891-03-03",,https://www.ca7.uscourts.gov,IL;IN;WI
+"U.S. Court of Appeals for the Eighth Circuit",CA8,judicial,commission,2,,"1891-03-03",,https://www.ca8.uscourts.gov,AR;IA;MN;MO;NE;ND;SD
+"U.S. Court of Appeals for the Ninth Circuit",CA9,judicial,commission,2,,"1891-03-03",,https://www.ca9.uscourts.gov,AK;AZ;CA;HI;ID;MT;NV;OR;WA;GU;MP
+"U.S. Court of Appeals for the Tenth Circuit",CA10,judicial,commission,2,,"1929-02-28",,https://www.ca10.uscourts.gov,CO;KS;NM;OK;UT;WY
+"U.S. Court of Appeals for the Eleventh Circuit",CA11,judicial,commission,2,,"1981-10-01",,https://www.ca11.uscourts.gov,AL;FL;GA
+"U.S. Court of Appeals for the D.C. Circuit",CADC,judicial,commission,2,,"1893-02-09",,https://www.cadc.uscourts.gov,DC
+"U.S. Court of Appeals for the Federal Circuit",CAFC,judicial,commission,2,,"1982-04-02",,https://www.cafc.uscourts.gov,
+"U.S. Court of International Trade",CIT,judicial,commission,2,,"1980-10-10",,https://www.cit.uscourts.gov,
+"U.S. Court of Federal Claims",COFC,judicial,commission,2,,"1982-04-02",,https://www.uscfc.uscourts.gov,
+"U.S. Tax Court",USTC,judicial,commission,2,,"1942-02-25",,https://www.ustaxcourt.gov,
+"U.S. District Court for the District of Maine",DME,judicial,commission,3,CA1,"1789-09-24",,https://www.med.uscourts.gov,ME
+"U.S. District Court for the District of Massachusetts",DMA,judicial,commission,3,CA1,"1789-09-24",,https://www.mad.uscourts.gov,MA
+"U.S. District Court for the District of New Hampshire",DNH,judicial,commission,3,CA1,"1789-09-24",,https://www.nhd.uscourts.gov,NH
+"U.S. District Court for the District of Rhode Island",DRI,judicial,commission,3,CA1,"1790-06-23",,https://www.rid.uscourts.gov,RI
+"U.S. District Court for the District of Puerto Rico",DPR,judicial,commission,3,CA1,"1900-04-12",,https://www.prd.uscourts.gov,PR
+"U.S. District Court for the District of Connecticut",DCT,judicial,commission,3,CA2,"1789-09-24",,https://www.ctd.uscourts.gov,CT
+"U.S. District Court for the Eastern District of New York",EDNY,judicial,commission,3,CA2,"1865-02-25",,https://www.nyed.uscourts.gov,NY
+"U.S. District Court for the Northern District of New York",NDNY,judicial,commission,3,CA2,"1814-04-09",,https://www.nynd.uscourts.gov,NY
+"U.S. District Court for the Southern District of New York",SDNY,judicial,commission,3,CA2,"1814-04-09",,https://www.nysd.uscourts.gov,NY
+"U.S. District Court for the Western District of New York",WDNY,judicial,commission,3,CA2,"1900-06-29",,https://www.nywd.uscourts.gov,NY
+"U.S. District Court for the District of Vermont",DVT,judicial,commission,3,CA2,"1791-03-02",,https://www.vtd.uscourts.gov,VT
+"U.S. District Court for the District of Delaware",DDE,judicial,commission,3,CA3,"1789-09-24",,https://www.ded.uscourts.gov,DE
+"U.S. District Court for the District of New Jersey",DNJ,judicial,commission,3,CA3,"1789-09-24",,https://www.njd.uscourts.gov,NJ
+"U.S. District Court for the Eastern District of Pennsylvania",EDPA,judicial,commission,3,CA3,"1818-04-20",,https://www.paed.uscourts.gov,PA
+"U.S. District Court for the Middle District of Pennsylvania",MDPA,judicial,commission,3,CA3,"1901-03-02",,https://www.pamd.uscourts.gov,PA
+"U.S. District Court for the Western District of Pennsylvania",WDPA,judicial,commission,3,CA3,"1818-04-20",,https://www.pawd.uscourts.gov,PA
+"U.S. District Court for the District of the Virgin Islands",DVI,judicial,commission,3,CA3,"1984-10-05",,https://www.vid.uscourts.gov,VI
+"U.S. District Court for the District of Maryland",DMD,judicial,commission,3,CA4,"1789-09-24",,https://www.mdd.uscourts.gov,MD
+"U.S. District Court for the Eastern District of North Carolina",EDNC,judicial,commission,3,CA4,"1872-06-04",,https://www.nced.uscourts.gov,NC
+"U.S. District Court for the Middle District of North Carolina",MDNC,judicial,commission,3,CA4,"1927-03-03",,https://www.ncmd.uscourts.gov,NC
+"U.S. District Court for the Western District of North Carolina",WDNC,judicial,commission,3,CA4,"1872-06-04",,https://www.ncwd.uscourts.gov,NC
+"U.S. District Court for the District of South Carolina",DSC,judicial,commission,3,CA4,"1789-09-24",,https://www.scd.uscourts.gov,SC
+"U.S. District Court for the Eastern District of Virginia",EDVA,judicial,commission,3,CA4,"1871-07-15",,https://www.vaed.uscourts.gov,VA
+"U.S. District Court for the Western District of Virginia",WDVA,judicial,commission,3,CA4,"1871-07-15",,https://www.vawd.uscourts.gov,VA
+"U.S. District Court for the Northern District of West Virginia",NDWV,judicial,commission,3,CA4,"1901-06-06",,https://www.wvnd.uscourts.gov,WV
+"U.S. District Court for the Southern District of West Virginia",SDWV,judicial,commission,3,CA4,"1901-06-06",,https://www.wvsd.uscourts.gov,WV
+"U.S. District Court for the Eastern District of Louisiana",EDLA,judicial,commission,3,CA5,"1881-06-30",,https://www.laed.uscourts.gov,LA
+"U.S. District Court for the Middle District of Louisiana",MDLA,judicial,commission,3,CA5,"1971-02-04",,https://www.lamd.uscourts.gov,LA
+"U.S. District Court for the Western District of Louisiana",WDLA,judicial,commission,3,CA5,"1881-06-30",,https://www.lawd.uscourts.gov,LA
+"U.S. District Court for the Northern District of Mississippi",NDMS,judicial,commission,3,CA5,"1882-06-13",,https://www.msnd.uscourts.gov,MS
+"U.S. District Court for the Southern District of Mississippi",SDMS,judicial,commission,3,CA5,"1882-06-13",,https://www.mssd.uscourts.gov,MS
+"U.S. District Court for the Eastern District of Texas",EDTX,judicial,commission,3,CA5,"1857-02-21",,https://www.txed.uscourts.gov,TX
+"U.S. District Court for the Northern District of Texas",NDTX,judicial,commission,3,CA5,"1879-02-24",,https://www.txnd.uscourts.gov,TX
+"U.S. District Court for the Southern District of Texas",SDTX,judicial,commission,3,CA5,"1902-02-28",,https://www.txsd.uscourts.gov,TX
+"U.S. District Court for the Western District of Texas",WDTX,judicial,commission,3,CA5,"1857-02-21",,https://www.txwd.uscourts.gov,TX
+"U.S. District Court for the Eastern District of Kentucky",EDKY,judicial,commission,3,CA6,"1901-03-02",,https://www.kyed.uscourts.gov,KY
+"U.S. District Court for the Western District of Kentucky",WDKY,judicial,commission,3,CA6,"1901-03-02",,https://www.kywd.uscourts.gov,KY
+"U.S. District Court for the Eastern District of Michigan",EDMI,judicial,commission,3,CA6,"1863-02-24",,https://www.mied.uscourts.gov,MI
+"U.S. District Court for the Western District of Michigan",WDMI,judicial,commission,3,CA6,"1863-02-24",,https://www.miwd.uscourts.gov,MI
+"U.S. District Court for the Northern District of Ohio",NDOH,judicial,commission,3,CA6,"1855-02-10",,https://www.ohnd.uscourts.gov,OH
+"U.S. District Court for the Southern District of Ohio",SDOH,judicial,commission,3,CA6,"1855-02-10",,https://www.ohsd.uscourts.gov,OH
+"U.S. District Court for the Eastern District of Tennessee",EDTN,judicial,commission,3,CA6,"1797-01-31",,https://www.tned.uscourts.gov,TN
+"U.S. District Court for the Middle District of Tennessee",MDTN,judicial,commission,3,CA6,"1839-06-18",,https://www.tnmd.uscourts.gov,TN
+"U.S. District Court for the Western District of Tennessee",WDTN,judicial,commission,3,CA6,"1839-06-18",,https://www.tnwd.uscourts.gov,TN
+"U.S. District Court for the Central District of Illinois",CDIL,judicial,commission,3,CA7,"1978-02-07",,https://www.ilcd.uscourts.gov,IL
+"U.S. District Court for the Northern District of Illinois",NDIL,judicial,commission,3,CA7,"1855-02-13",,https://www.ilnd.uscourts.gov,IL
+"U.S. District Court for the Southern District of Illinois",SDIL,judicial,commission,3,CA7,"1855-02-13",,https://www.ilsd.uscourts.gov,IL
+"U.S. District Court for the Northern District of Indiana",NDIN,judicial,commission,3,CA7,"1928-06-22",,https://www.innd.uscourts.gov,IN
+"U.S. District Court for the Southern District of Indiana",SDIN,judicial,commission,3,CA7,"1928-06-22",,https://www.insd.uscourts.gov,IN
+"U.S. District Court for the Eastern District of Wisconsin",EDWI,judicial,commission,3,CA7,"1870-05-19",,https://www.wied.uscourts.gov,WI
+"U.S. District Court for the Western District of Wisconsin",WDWI,judicial,commission,3,CA7,"1870-05-19",,https://www.wiwd.uscourts.gov,WI
+"U.S. District Court for the Eastern District of Arkansas",EDAR,judicial,commission,3,CA8,"1851-03-03",,https://www.ared.uscourts.gov,AR
+"U.S. District Court for the Western District of Arkansas",WDAR,judicial,commission,3,CA8,"1851-03-03",,https://www.arwd.uscourts.gov,AR
+"U.S. District Court for the Northern District of Iowa",NDIA,judicial,commission,3,CA8,"1882-07-20",,https://www.iand.uscourts.gov,IA
+"U.S. District Court for the Southern District of Iowa",SDIA,judicial,commission,3,CA8,"1882-07-20",,https://www.iasd.uscourts.gov,IA
+"U.S. District Court for the District of Minnesota",DMN,judicial,commission,3,CA8,"1858-05-11",,https://www.mnd.uscourts.gov,MN
+"U.S. District Court for the Eastern District of Missouri",EDMO,judicial,commission,3,CA8,"1857-03-03",,https://www.moed.uscourts.gov,MO
+"U.S. District Court for the Western District of Missouri",WDMO,judicial,commission,3,CA8,"1857-03-03",,https://www.mowd.uscourts.gov,MO
+"U.S. District Court for the District of Nebraska",DNE,judicial,commission,3,CA8,"1867-03-25",,https://www.ned.uscourts.gov,NE
+"U.S. District Court for the District of North Dakota",DND,judicial,commission,3,CA8,"1889-11-02",,https://www.ndd.uscourts.gov,ND
+"U.S. District Court for the District of South Dakota",DSD,judicial,commission,3,CA8,"1889-11-02",,https://www.sdd.uscourts.gov,SD
+"U.S. District Court for the District of Alaska",DAK,judicial,commission,3,CA9,"1959-07-07",,https://www.akd.uscourts.gov,AK
+"U.S. District Court for the District of Arizona",DAZ,judicial,commission,3,CA9,"1912-03-22",,https://www.azd.uscourts.gov,AZ
+"U.S. District Court for the Central District of California",CDCA,judicial,commission,3,CA9,"1966-03-18",,https://www.cacd.uscourts.gov,CA
+"U.S. District Court for the Eastern District of California",EDCA,judicial,commission,3,CA9,"1966-03-18",,https://www.caed.uscourts.gov,CA
+"U.S. District Court for the Northern District of California",NDCA,judicial,commission,3,CA9,"1886-08-05",,https://www.cand.uscourts.gov,CA
+"U.S. District Court for the Southern District of California",SDCA,judicial,commission,3,CA9,"1886-08-05",,https://www.casd.uscourts.gov,CA
+"U.S. District Court for the District of Hawaii",DHI,judicial,commission,3,CA9,"1959-08-21",,https://www.hid.uscourts.gov,HI
+"U.S. District Court for the District of Idaho",DID,judicial,commission,3,CA9,"1890-07-03",,https://www.id.uscourts.gov,ID
+"U.S. District Court for the District of Montana",DMT,judicial,commission,3,CA9,"1889-11-08",,https://www.mtd.uscourts.gov,MT
+"U.S. District Court for the District of Nevada",DNV,judicial,commission,3,CA9,"1864-02-27",,https://www.nvd.uscourts.gov,NV
+"U.S. District Court for the District of Oregon",DOR,judicial,commission,3,CA9,"1859-02-14",,https://www.ord.uscourts.gov,OR
+"U.S. District Court for the Eastern District of Washington",EDWA,judicial,commission,3,CA9,"1905-03-02",,https://www.waed.uscourts.gov,WA
+"U.S. District Court for the Western District of Washington",WDWA,judicial,commission,3,CA9,"1905-03-02",,https://www.wawd.uscourts.gov,WA
+"U.S. District Court for the District of Guam",DGU,judicial,commission,3,CA9,"1950-08-01",,https://www.gud.uscourts.gov,GU
+"U.S. District Court for the District of the Northern Mariana Islands",DNMI,judicial,commission,3,CA9,"1977-11-03",,https://www.nmid.uscourts.gov,MP
+"U.S. District Court for the District of Colorado",DCO,judicial,commission,3,CA10,"1876-08-01",,https://www.cod.uscourts.gov,CO
+"U.S. District Court for the District of Kansas",DKS,judicial,commission,3,CA10,"1861-01-29",,https://www.ksd.uscourts.gov,KS
+"U.S. District Court for the District of New Mexico",DNM,judicial,commission,3,CA10,"1912-01-06",,https://www.nmd.uscourts.gov,NM
+"U.S. District Court for the Eastern District of Oklahoma",EDOK,judicial,commission,3,CA10,"1925-02-16",,https://www.oked.uscourts.gov,OK
+"U.S. District Court for the Northern District of Oklahoma",NDOK,judicial,commission,3,CA10,"1925-02-16",,https://www.oknd.uscourts.gov,OK
+"U.S. District Court for the Western District of Oklahoma",WDOK,judicial,commission,3,CA10,"1907-11-16",,https://www.okwd.uscourts.gov,OK
+"U.S. District Court for the District of Utah",DUT,judicial,commission,3,CA10,"1896-01-04",,https://www.utd.uscourts.gov,UT
+"U.S. District Court for the District of Wyoming",DWY,judicial,commission,3,CA10,"1890-07-10",,https://www.wyd.uscourts.gov,WY
+"U.S. District Court for the Middle District of Alabama",MDAL,judicial,commission,3,CA11,"1824-05-15",,https://www.almd.uscourts.gov,AL
+"U.S. District Court for the Northern District of Alabama",NDAL,judicial,commission,3,CA11,"1824-05-15",,https://www.alnd.uscourts.gov,AL
+"U.S. District Court for the Southern District of Alabama",SDAL,judicial,commission,3,CA11,"1824-05-15",,https://www.alsd.uscourts.gov,AL
+"U.S. District Court for the Middle District of Florida",MDFL,judicial,commission,3,CA11,"1962-07-30",,https://www.flmd.uscourts.gov,FL
+"U.S. District Court for the Northern District of Florida",NDFL,judicial,commission,3,CA11,"1847-02-23",,https://www.flnd.uscourts.gov,FL
+"U.S. District Court for the Southern District of Florida",SDFL,judicial,commission,3,CA11,"1962-07-30",,https://www.flsd.uscourts.gov,FL
+"U.S. District Court for the Middle District of Georgia",MDGA,judicial,commission,3,CA11,"1848-08-11",,https://www.gamd.uscourts.gov,GA
+"U.S. District Court for the Northern District of Georgia",NDGA,judicial,commission,3,CA11,"1848-08-11",,https://www.gand.uscourts.gov,GA
+"U.S. District Court for the Southern District of Georgia",SDGA,judicial,commission,3,CA11,"1848-08-11",,https://www.gasd.uscourts.gov,GA
+"U.S. District Court for the District of Columbia",DDC,judicial,commission,3,CADC,"1801-02-27",,https://www.dcd.uscourts.gov,DC
+"U.S. Court of Appeals for Veterans Claims",CAVC,judicial,commission,2,,"1988-11-18",,https://www.uscourts.cavc.gov,
+"U.S. Court of Appeals for the Armed Forces",CAAF,judicial,commission,2,,"1950-05-05",,https://www.armfor.uscourts.gov,
+"Judicial Conference of the United States",JCUS,judicial,office,2,,"1922-09-14",,https://www.uscourts.gov/about-federal-courts/governance-judicial-conference,
+"Judicial Panel on Multidistrict Litigation",JPML,judicial,commission,2,,"1968-04-29",,https://www.jpml.uscourts.gov,
+"U.S. Bankruptcy Appellate Panel for the First Circuit",BAP1,judicial,commission,3,CA1,"1996-10-01",,https://www.bap1.uscourts.gov,ME;MA;NH;RI;PR
+"U.S. Bankruptcy Appellate Panel for the Sixth Circuit",BAP6,judicial,commission,3,CA6,"1996-10-01",,https://www.bap6.uscourts.gov,KY;MI;OH;TN
+"U.S. Bankruptcy Appellate Panel for the Eighth Circuit",BAP8,judicial,commission,3,CA8,"1996-10-01",,https://www.bap8.uscourts.gov,AR;IA;MN;MO;NE;ND;SD
+"U.S. Bankruptcy Appellate Panel for the Ninth Circuit",BAP9,judicial,commission,3,CA9,"1979-11-06",,https://www.bap9.uscourts.gov,AK;AZ;CA;HI;ID;MT;NV;OR;WA;GU;MP
+"U.S. Bankruptcy Appellate Panel for the Tenth Circuit",BAP10,judicial,commission,3,CA10,"1996-10-01",,https://www.bap10.uscourts.gov,CO;KS;NM;OK;UT;WY

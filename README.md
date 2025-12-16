@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Documented-green.svg)](docs/architecture.md)
+[![API Tests](https://github.com/yourusername/AIProject2/actions/workflows/api-tests.yml/badge.svg)](https://github.com/yourusername/AIProject2/actions/workflows/api-tests.yml)
 
 ---
 
@@ -22,12 +23,14 @@ For a news analysis platform, independence from major tech companies ensures unb
 
 ## 🎯 What It Does
 
-NewsAnalyzer analyzes news articles, blog posts, and social media to detect:
+NewsAnalyzer extracts and analyzes entities from news articles with Schema.org support:
 
-- **✅ Factual Accuracy** - Cross-reference claims against authoritative sources
-- **🧠 Logical Fallacies** - Identify errors in reasoning using Prolog
-- **🎭 Cognitive Biases** - Detect emotional manipulation and framing
-- **📊 Source Reliability** - Track historical accuracy of news outlets
+- **👤 Entity Extraction** - People, organizations, locations, events from text (Phase 1 ✅)
+- **🏛️ Schema.org Integration** - Full JSON-LD structured data for all entities (Phase 1 ✅)
+- **📊 Smart Classification** - 9 entity types with automatic government detection (Phase 1 ✅)
+- **🎨 Interactive Visualization** - Real-time entity display with filtering (Phase 1 ✅)
+- **🧠 OWL Reasoning** - Semantic inference and entity classification (Phase 3 ✅)
+- **🔗 External Linking** - Wikidata, DBpedia integration (Phase 2 - Coming Soon)
 
 ---
 
@@ -192,18 +195,32 @@ We welcome contributions! Here's how:
 
 ## 📊 Project Status
 
-**Current Phase:** Project Scaffolding ✅
+**Current Phase:** Phase 3 Complete - OWL Reasoning ✅
 
-- ✅ Architecture document completed
-- ✅ V1 brownfield analysis completed
-- ✅ Git repository initialized
-- ✅ Backend scaffolding (Spring Boot)
-- ✅ Frontend scaffolding (Next.js)
-- ✅ Python service scaffolding (FastAPI)
-- ✅ Docker Compose configurations
-- ✅ Nginx reverse proxy configuration
-- ✅ GitHub Actions CI/CD pipelines
-- ⏳ Implementation (next)
+### ✅ Phase 1: Schema.org Foundation (COMPLETE)
+- ✅ PostgreSQL schema with JSONB support
+- ✅ Java backend with Entity CRUD (61/65 tests passing)
+- ✅ Python entity extraction service (spaCy + Schema.org)
+- ✅ Frontend with entity visualization
+- ✅ Full Schema.org JSON-LD integration
+- ✅ 9 entity types supported
+- ✅ Interactive UI with type filtering
+
+### ✅ Phase 3: OWL Reasoning (COMPLETE)
+- ✅ Custom NewsAnalyzer ontology (7 classes, 10 properties)
+- ✅ RDFLib + OWL-RL reasoner integration
+- ✅ Automated entity classification via inference rules
+- ✅ Consistency validation with cardinality constraints
+- ✅ SPARQL query support for complex relationships
+- ✅ API endpoints: /entities/reason, /ontology/stats, /query/sparql
+- ✅ Comprehensive unit tests
+
+### 🚧 Phase 2: Schema.org Enrichment (NEXT)
+- Entity library and persistence
+- External entity linking (Wikidata, DBpedia)
+- Property expansion and enrichment
+- Entity relationships
+- Export functionality
 
 ---
 

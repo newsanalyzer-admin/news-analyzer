@@ -103,10 +103,11 @@ public interface EntityRepository extends JpaRepository<Entity, UUID> {
 
     /**
      * Advanced JSONB query: Find entities where Schema.org data contains a field
+     * TODO: Fix parameter binding issue with JSONB ? operator
      */
-    @Query(value = """
-        SELECT * FROM entities
-        WHERE schema_org_data ? :fieldName
-        """, nativeQuery = true)
-    List<Entity> findBySchemaOrgDataContainingField(@Param("fieldName") String fieldName);
+    // @Query(value = """
+    //     SELECT * FROM entities
+    //     WHERE schema_org_data ? :fieldName
+    //     """, nativeQuery = true)
+    // List<Entity> findBySchemaOrgDataContainingField(@Param("fieldName") String fieldName);
 }

@@ -94,6 +94,22 @@ public class Entity {
     private Map<String, Object> schemaOrgData = new HashMap<>();
 
     /**
+     * Link to authoritative government organization record (Master Data Management).
+     * Only populated for entities where entity_type = GOVERNMENT_ORG.
+     *
+     * This enables:
+     * - Validation of extracted entities against official records
+     * - Enrichment with authoritative data (mission, website, hierarchy)
+     * - Deduplication ("EPA" vs "Environmental Protection Agency" → same org)
+     * - Analytics queries joining transient entities with master data
+     *
+     * Reference: docs/architecture/entity-vs-government-org-design.md
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "government_org_id", foreignKey = @ForeignKey(name = "fk_entities_government_org"))
+    private GovernmentOrganization governmentOrganization;
+
+    /**
      * Source of the entity (e.g., "article:123", "manual_entry", "wikidata")
      */
     @Column(length = 100)

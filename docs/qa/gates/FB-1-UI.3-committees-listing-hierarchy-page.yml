@@ -1,0 +1,129 @@
+# Quality Gate: FB-1-UI.3 - Committees Listing & Hierarchy Page
+schema: 1
+story: "FB-1-UI.3"
+story_title: "Committees Listing & Hierarchy Page"
+gate: PASS
+status_reason: "All 15 acceptance criteria met. Implementation follows story specifications with proper client-side hierarchy building, URL parameter persistence, and responsive design."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-30T12:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Performance monitoring recommended for large committee datasets (size: 500 fetch)"
+
+# Evidence
+evidence:
+  tests_reviewed: 8
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    ac_gaps: []
+
+# Requirements Traceability (Given-When-Then)
+requirements_traceability:
+  - ac: 1
+    given: "User is on any page"
+    when: "User clicks Committees navigation link"
+    then: "/committees page loads"
+    evidence: "page.tsx created, nav link added to app/page.tsx"
+
+  - ac: 2
+    given: "Committees page loads"
+    when: "Data is fetched"
+    then: "Committees grouped by Senate, House, Joint chambers"
+    evidence: "CommitteeHierarchy.tsx:121 - chambersToDisplay loop"
+
+  - ac: 3
+    given: "Committee is displayed"
+    when: "User views committee card"
+    then: "Name, Type badge, Members button shown"
+    evidence: "CommitteeCard component lines 185-241"
+
+  - ac: 4
+    given: "Parent committee has subcommittees"
+    when: "User expands committee"
+    then: "Subcommittees displayed with indentation"
+    evidence: "CommitteeHierarchy.tsx:227-239"
+
+  - ac: 5
+    given: "Committees page loads"
+    when: "User clicks chamber header"
+    then: "Chamber section expands/collapses"
+    evidence: "toggleChamber function, expandedChambers Set state"
+
+  - ac: 6
+    given: "User views filters"
+    when: "User selects chamber filter"
+    then: "Committees filtered by chamber"
+    evidence: "CommitteeFilters.tsx:96-110"
+
+  - ac: 7
+    given: "User views filters"
+    when: "User selects type filter"
+    then: "Committees filtered by type"
+    evidence: "CommitteeFilters.tsx:113-127"
+
+  - ac: 8
+    given: "User views filters"
+    when: "User types in search input"
+    then: "Search triggers after 300ms debounce"
+    evidence: "CommitteeFilters.tsx:46 - useDebounce(searchInput, 300)"
+
+  - ac: 9
+    given: "User applies filters"
+    when: "URL params updated"
+    then: "Filters persist on refresh"
+    evidence: "updateParams uses router.push with URLSearchParams"
+
+  - ac: 10
+    given: "User views committee"
+    when: "User clicks View Members button"
+    then: "CommitteeMembersDialog opens with member list"
+    evidence: "CommitteeMembersDialog.tsx with useCommitteeMembers hook"
+
+  - ac: 11
+    given: "Committees load"
+    when: "Stats computed client-side"
+    then: "Total count, type/chamber distribution badges displayed"
+    evidence: "CommitteeStats.tsx with computeCommitteeStats"
+
+  - ac: 12
+    given: "Page is loading"
+    when: "Data fetching in progress"
+    then: "Skeleton components displayed"
+    evidence: "loading.tsx, CommitteeHierarchySkeleton, MembersSkeleton"
+
+  - ac: 13
+    given: "API error occurs"
+    when: "Error state triggered"
+    then: "Error message with retry button shown"
+    evidence: "error.tsx, CommitteeHierarchy error state lines 64-72"
+
+  - ac: 14
+    given: "User on mobile device"
+    when: "Page renders"
+    then: "Layout responsive with flex-wrap, sm: breakpoints"
+    evidence: "Tailwind responsive classes throughout components"
+
+  - ac: 15
+    given: "Story is complete"
+    when: "TypeScript compilation runs"
+    then: "No new errors introduced"
+    evidence: "Dev Agent Record: TypeScript compilation: No errors"
+
+# NFR Assessment
+nfr_validation:
+  security: { status: PASS, notes: "Read-only UI, no sensitive data handling" }
+  performance: { status: PASS, notes: "Client-side filtering efficient, on-demand member fetching avoids N+1" }
+  reliability: { status: PASS, notes: "Error boundaries, retry mechanisms, empty states implemented" }
+  maintainability: { status: PASS, notes: "Clean component separation, typed utilities, reuses existing hooks" }
+
+# Quality Score
+quality_score: 95

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.dto.CreateEntityRequest;
 import org.newsanalyzer.dto.EntityDTO;
+import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.Entity;
 import org.newsanalyzer.model.EntityType;
 import org.newsanalyzer.repository.EntityRepository;
@@ -32,6 +33,7 @@ public class EntityService {
 
     private final EntityRepository entityRepository;
     private final SchemaOrgMapper schemaOrgMapper;
+    private final GovernmentOrganizationService governmentOrganizationService;
 
     /**
      * Create a new entity with automatic Schema.org mapping
@@ -78,13 +80,180 @@ public class EntityService {
     }
 
     /**
+     * Create and validate entity - with automatic government organization linking.
+     *
+     * This method implements the Master Data Management pattern:
+     * 1. Create entity (fast write to entities table)
+     * 2. If GOVERNMENT_ORG type, validate against government_organizations table
+     * 3. If valid match found, link and enrich entity with authoritative data
+     *
+     * Reference: docs/architecture/entity-vs-government-org-design.md (lines 187-275)
+     */
+    @Transactional
+    public EntityDTO createAndValidateEntity(CreateEntityRequest request) {
+        log.info("Creating and validating entity: type={}, name={}", request.getEntityType(), request.getName());
+
+        // Step 1: Create entity (standard flow)
+        EntityDTO createdEntity = createEntity(request);
+
+        // Step 2: If government org, attempt validation and enrichment
+        if (request.getEntityType() == EntityType.GOVERNMENT_ORG) {
+            log.debug("Entity is GOVERNMENT_ORG type, attempting validation against master data");
+
+            GovernmentOrganizationService.EntityValidationResult validation =
+                governmentOrganizationService.validateEntity(request.getName(), "government_org");
+
+            if (validation.isValid()) {
+                log.info("Validation successful: matched={}, confidence={}, matchType={}",
+                    validation.getMatchedOrganization().getOfficialName(),
+                    validation.getConfidence(),
+                    validation.getMatchType());
+
+                // Step 3: Enrich entity with official government org data
+                Entity entity = entityRepository.findById(createdEntity.getId())
+                    .orElseThrow(() -> new RuntimeException("Entity not found after creation: " + createdEntity.getId()));
+
+                enrichEntityWithGovernmentOrg(entity, validation);
+
+                Entity enriched = entityRepository.save(entity);
+                log.info("Entity enriched and linked to government org: entity_id={}, gov_org_id={}",
+                    enriched.getId(),
+                    enriched.getGovernmentOrganization().getId());
+
+                return toDTO(enriched);
+            } else {
+                log.warn("Validation failed for entity '{}'. Suggestions: {}",
+                    request.getName(),
+                    validation.getSuggestions());
+            }
+        }
+
+        return createdEntity;
+    }
+
+    /**
+     * Validate existing entity against government organizations.
+     *
+     * This can be used to:
+     * - Validate entities created before linking was implemented
+     * - Re-validate entities after government org data updates
+     * - Manually trigger validation for specific entities
+     */
+    @Transactional
+    public EntityDTO validateEntity(UUID entityId) {
+        log.info("Validating entity: id={}", entityId);
+
+        Entity entity = entityRepository.findById(entityId)
+            .orElseThrow(() -> new ResourceNotFoundException("Entity", entityId));
+
+        // Only validate government org entities
+        if (entity.getEntityType() != EntityType.GOVERNMENT_ORG) {
+            log.debug("Entity is not GOVERNMENT_ORG type, skipping validation");
+            return toDTO(entity);
+        }
+
+        // Already linked and verified?
+        if (entity.getGovernmentOrganization() != null && entity.getVerified()) {
+            log.debug("Entity already linked and verified, skipping re-validation");
+            return toDTO(entity);
+        }
+
+        // Attempt validation
+        GovernmentOrganizationService.EntityValidationResult validation =
+            governmentOrganizationService.validateEntity(entity.getName(), "government_org");
+
+        if (validation.isValid()) {
+            enrichEntityWithGovernmentOrg(entity, validation);
+            Entity saved = entityRepository.save(entity);
+            log.info("Entity validated and enriched: entity_id={}, gov_org_id={}",
+                saved.getId(),
+                saved.getGovernmentOrganization().getId());
+            return toDTO(saved);
+        } else {
+            log.warn("Validation failed for entity '{}'. Suggestions: {}",
+                entity.getName(),
+                validation.getSuggestions());
+            return toDTO(entity);
+        }
+    }
+
+    /**
+     * Enrich entity with government organization data.
+     *
+     * This helper method populates:
+     * - government_org_id foreign key (linking)
+     * - name standardization (official name)
+     * - verified flag
+     * - confidence score (from validation)
+     * - properties enrichment (acronym, website, jurisdiction, etc.)
+     * - schema_org_data enrichment
+     */
+    private void enrichEntityWithGovernmentOrg(
+        Entity entity,
+        GovernmentOrganizationService.EntityValidationResult validation
+    ) {
+        var govOrg = validation.getMatchedOrganization();
+
+        // Link to government organization (Master Data Management)
+        entity.setGovernmentOrganization(govOrg);
+
+        // Standardize name to official name
+        entity.setName(govOrg.getOfficialName());
+
+        // Mark as verified
+        entity.setVerified(true);
+
+        // Update confidence score (validation confidence)
+        if (validation.getConfidence() > entity.getConfidenceScore()) {
+            entity.setConfidenceScore((float) validation.getConfidence());
+        }
+
+        // Enrich properties with government org data
+        if (govOrg.getAcronym() != null) {
+            entity.addProperty("acronym", govOrg.getAcronym());
+        }
+        if (govOrg.getWebsiteUrl() != null) {
+            entity.addProperty("website", govOrg.getWebsiteUrl());
+        }
+        if (govOrg.getOrgType() != null) {
+            entity.addProperty("orgType", govOrg.getOrgType().getValue());
+        }
+        if (govOrg.getBranch() != null) {
+            entity.addProperty("branch", govOrg.getBranch().getValue());
+        }
+        if (govOrg.getJurisdictionAreas() != null && !govOrg.getJurisdictionAreas().isEmpty()) {
+            entity.addProperty("jurisdictionAreas", govOrg.getJurisdictionAreas());
+        }
+        if (govOrg.getMissionStatement() != null) {
+            entity.addProperty("missionStatement", govOrg.getMissionStatement());
+        }
+
+        // Enrich Schema.org data
+        if (govOrg.getSchemaOrgData() != null) {
+            // Merge government org Schema.org data with entity's existing data
+            Map<String, Object> enrichedSchemaOrg = new java.util.HashMap<>(entity.getSchemaOrgData());
+            enrichedSchemaOrg.putAll(
+                com.fasterxml.jackson.databind.ObjectMapper.class.cast(
+                    govOrg.getSchemaOrgData()
+                ).convertValue(govOrg.getSchemaOrgData(), Map.class)
+            );
+            entity.setSchemaOrgData(enrichedSchemaOrg);
+        }
+
+        log.debug("Entity enriched with government org data: name={}, acronym={}, website={}",
+            govOrg.getOfficialName(),
+            govOrg.getAcronym(),
+            govOrg.getWebsiteUrl());
+    }
+
+    /**
      * Get entity by ID
      */
     @Transactional(readOnly = true)
     public EntityDTO getEntityById(UUID id) {
         log.debug("Fetching entity by id: {}", id);
         Entity entity = entityRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Entity not found: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Entity", id));
         return toDTO(entity);
     }
 
@@ -163,7 +332,7 @@ public class EntityService {
         log.info("Updating entity: id={}", id);
 
         Entity entity = entityRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Entity not found: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Entity", id));
 
         // Update fields
         if (request.getName() != null) {
@@ -179,6 +348,12 @@ public class EntityService {
         }
         if (request.getVerified() != null) {
             entity.setVerified(request.getVerified());
+        }
+        if (request.getConfidenceScore() != null) {
+            entity.setConfidenceScore(request.getConfidenceScore());
+        }
+        if (request.getSource() != null) {
+            entity.setSource(request.getSource());
         }
 
         // Regenerate Schema.org JSON-LD
@@ -197,6 +372,9 @@ public class EntityService {
     @Transactional
     public void deleteEntity(UUID id) {
         log.info("Deleting entity: id={}", id);
+        if (!entityRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Entity", id);
+        }
         entityRepository.deleteById(id);
     }
 
@@ -207,7 +385,7 @@ public class EntityService {
     public EntityDTO verifyEntity(UUID id) {
         log.info("Verifying entity: id={}", id);
         Entity entity = entityRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Entity not found: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Entity", id));
 
         entity.setVerified(true);
         Entity saved = entityRepository.save(entity);
@@ -231,6 +409,13 @@ public class EntityService {
         dto.setVerified(entity.getVerified());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
+
+        // Include government organization link if present
+        if (entity.getGovernmentOrganization() != null) {
+            dto.setGovernmentOrganizationId(entity.getGovernmentOrganization().getId());
+            dto.setGovernmentOrganizationName(entity.getGovernmentOrganization().getOfficialName());
+        }
+
         return dto;
     }
 }

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.newsanalyzer.apitests.backend.EntityCrudTest
+-------------------------------------------------------------------------------
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.663 s -- in org.newsanalyzer.apitests.backend.EntityCrudTest

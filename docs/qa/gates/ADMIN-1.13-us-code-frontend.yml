@@ -1,0 +1,173 @@
+# Quality Gate: ADMIN-1.13
+schema: 1
+story: "ADMIN-1.13"
+story_title: "US Code Frontend - Hierarchical Display & File Upload"
+gate: PASS
+status_reason: "All 11 acceptance criteria met. 18 new tests pass (12 StatuteImportController + 6 hierarchy). Pre-existing test failure (getByCitation) unrelated to this story."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-11T02:50:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+# Evidence summary
+evidence:
+  tests_reviewed: 18
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+# Risk summary
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Pre-existing URL encoding issue in getByCitation_found_returnsDTO test should be tracked for future fix"
+
+# NFR validation
+nfr_validation:
+  security:
+    status: PASS
+    notes: "File validation includes extension check and XML content prefix verification. Admin endpoints require auth."
+  performance:
+    status: PASS
+    notes: "100MB file size limit appropriate for US Code XML. 5-minute timeout configured for large files."
+  reliability:
+    status: PASS
+    notes: "Concurrent import protection (409 Conflict). Proper error handling with detailed results."
+  maintainability:
+    status: PASS
+    notes: "Follows established GOVMAN import pattern. Reuses existing UslmXmlParser and UsCodeImportService."
+
+# Acceptance criteria traceability
+traceability:
+  - ac: 1
+    description: "Route /admin/factbase/regulations/us-code displays US Code management page"
+    status: PASS
+    evidence: "page.tsx at frontend/src/app/admin/factbase/regulations/us-code/page.tsx"
+
+  - ac: 2
+    description: "Page includes file upload component accepting .xml files"
+    status: PASS
+    evidence: "UsCodeImportButton.tsx with file input accepting .xml, application/xml, text/xml"
+
+  - ac: 3
+    description: "Upload triggers single-title import with progress indicator"
+    status: PASS
+    evidence: "Stage 'importing' shows Loader2 spinner during upload"
+
+  - ac: 4
+    description: "Import results display: sections parsed, inserted, updated, errors"
+    status: PASS
+    evidence: "renderSuccessResult() shows grid with Total, Inserted, Updated, Errors counts"
+
+  - ac: 5
+    description: "Imported titles display in collapsible tree: Title → Chapter → Section"
+    status: PASS
+    evidence: "UsCodeTreeView.tsx with chapters.map() and sections.map() rendering"
+
+  - ac: 6
+    description: "Tree view matches uscode.house.gov hierarchy structure"
+    status: PASS
+    evidence: "Hierarchy API groups by chapter_number, sorts sections by section_number"
+
+  - ac: 7
+    description: "Section nodes show: section number, heading, truncated content preview"
+    status: PASS
+    evidence: "SectionSummaryDTO with contentPreview (200 chars), heading, sectionNumber"
+
+  - ac: 8
+    description: "Clicking section expands to show full content text"
+    status: PASS
+    evidence: "expandedSection state toggles contentPreview visibility in UsCodeTreeView"
+
+  - ac: 9
+    description: "Title cards show: title number, name, section count, import date, import source"
+    status: PASS
+    evidence: "Title row displays titleNumber, titleName, sectionCount. Stats card shows latestReleasePoint"
+
+  - ac: 10
+    description: "Admin can import additional titles incrementally"
+    status: PASS
+    evidence: "Upload button always available, each import processes one file"
+
+  - ac: 11
+    description: "Backend endpoint POST /api/admin/import/statutes/upload accepts XML file upload"
+    status: PASS
+    evidence: "StatuteImportController.uploadAndImport() with multipart/form-data"
+
+# Test coverage summary
+test_coverage:
+  backend:
+    StatuteImportControllerTest:
+      total: 12
+      passed: 12
+      tests:
+        - "uploadAndImport_validXml_returns200WithResult"
+        - "uploadAndImport_emptyFile_returns400"
+        - "uploadAndImport_nonXmlExtension_returns400"
+        - "uploadAndImport_invalidXmlContent_returns400"
+        - "uploadAndImport_htmlInsteadOfXml_returns400"
+        - "getStatus_noImport_returnsBasicStatus"
+        - "getStatus_afterImport_includesLastImportInfo"
+        - "getLastResult_noPreviousImport_returns404"
+        - "getLastResult_afterImport_returnsResult"
+        - "importResult_includesAllFields"
+        - "uploadAndImport_acceptsMultipartFormData"
+        - "uploadAndImport_uslmRootElement_isValid"
+    StatuteControllerTest_hierarchy:
+      total: 6
+      passed: 6
+      tests:
+        - "getTitleHierarchy_found_returnsStructure"
+        - "getTitleHierarchy_notFound_returns404"
+        - "getTitleHierarchy_groupsChaptersCorrectly"
+        - "getTitleHierarchy_sortsSectionsWithinChapter"
+        - "getTitleHierarchy_truncatesContentPreview"
+        - "getTitleHierarchy_handlesAlphanumericSectionNumbers"
+  frontend:
+    note: "Manual testing per project standard"
+
+# Files reviewed
+files_reviewed:
+  backend_new:
+    - "backend/src/main/java/org/newsanalyzer/controller/StatuteImportController.java"
+    - "backend/src/main/java/org/newsanalyzer/dto/UsCodeHierarchyDTO.java"
+    - "backend/src/test/java/org/newsanalyzer/controller/StatuteImportControllerTest.java"
+  backend_modified:
+    - "backend/src/main/java/org/newsanalyzer/controller/StatuteController.java"
+    - "backend/src/test/java/org/newsanalyzer/controller/StatuteControllerTest.java"
+  frontend_new:
+    - "frontend/src/components/admin/UsCodeImportButton.tsx"
+    - "frontend/src/components/admin/UsCodeTreeView.tsx"
+    - "frontend/src/hooks/useUsCodeImport.ts"
+  frontend_modified:
+    - "frontend/src/app/admin/factbase/regulations/us-code/page.tsx"
+
+# Quality observations
+quality_observations:
+  strengths:
+    - "Clean separation of concerns: controller handles HTTP, service handles business logic"
+    - "Follows established GOVMAN import pattern for consistency"
+    - "Comprehensive file validation (extension, content, size)"
+    - "Good error handling with user-friendly messages"
+    - "Reuses existing UslmXmlParser and UsCodeImportService - no duplication"
+    - "Multi-stage upload flow (select → preview → confirm → import → result)"
+    - "React Query for proper cache invalidation after imports"
+
+  patterns_followed:
+    - "GovmanImportController file upload pattern"
+    - "WebMvcTest for controller unit tests"
+    - "React Query hooks for data fetching and mutations"
+    - "Swagger/OpenAPI annotations for documentation"
+
+# Pre-existing issue (not caused by this story)
+pre_existing_issues:
+  - id: "PRE-001"
+    test: "StatuteControllerTest.getByCitation_found_returnsDTO"
+    description: "URL encoding issue with path variable containing slashes"
+    note: "This test was already failing before ADMIN-1.13 implementation"
+    recommendation: "Track for future fix in StatuteController or test setup"

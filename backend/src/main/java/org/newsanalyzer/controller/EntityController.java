@@ -21,14 +21,16 @@ import java.util.UUID;
  * REST API Controller for Entity operations.
  *
  * Endpoints:
- * - POST   /api/entities           - Create entity
- * - GET    /api/entities           - List all entities
- * - GET    /api/entities/{id}      - Get entity by ID
- * - PUT    /api/entities/{id}      - Update entity
- * - DELETE /api/entities/{id}      - Delete entity
- * - GET    /api/entities/type/{type} - Get entities by type
- * - GET    /api/entities/search    - Search entities
- * - POST   /api/entities/{id}/verify - Verify entity
+ * - POST   /api/entities                - Create entity
+ * - POST   /api/entities/validate       - Create and validate entity (with gov org linking)
+ * - GET    /api/entities                - List all entities
+ * - GET    /api/entities/{id}           - Get entity by ID
+ * - PUT    /api/entities/{id}           - Update entity
+ * - DELETE /api/entities/{id}           - Delete entity
+ * - POST   /api/entities/{id}/validate  - Validate existing entity
+ * - POST   /api/entities/{id}/verify    - Verify entity
+ * - GET    /api/entities/type/{type}    - Get entities by type
+ * - GET    /api/entities/search         - Search entities
  */
 @Slf4j
 @RestController
@@ -178,5 +180,35 @@ public class EntityController {
         log.info("POST /api/entities/{}/verify - Verifying entity", id);
         EntityDTO verified = entityService.verifyEntity(id);
         return ResponseEntity.ok(verified);
+    }
+
+    /**
+     * Create and validate entity (with automatic government org linking)
+     */
+    @PostMapping("/validate")
+    @Operation(
+        summary = "Create and validate entity",
+        description = "Create a new entity with automatic validation and linking to government organizations (Master Data Management pattern)"
+    )
+    public ResponseEntity<EntityDTO> createAndValidateEntity(@Valid @RequestBody CreateEntityRequest request) {
+        log.info("POST /api/entities/validate - Creating and validating entity: {}", request.getName());
+        EntityDTO created = entityService.createAndValidateEntity(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    /**
+     * Validate existing entity
+     */
+    @PostMapping("/{id}/validate")
+    @Operation(
+        summary = "Validate existing entity",
+        description = "Validate an existing entity against government organizations and link if match found"
+    )
+    public ResponseEntity<EntityDTO> validateExistingEntity(
+        @Parameter(description = "Entity UUID") @PathVariable UUID id
+    ) {
+        log.info("POST /api/entities/{}/validate - Validating entity", id);
+        EntityDTO validated = entityService.validateEntity(id);
+        return ResponseEntity.ok(validated);
     }
 }

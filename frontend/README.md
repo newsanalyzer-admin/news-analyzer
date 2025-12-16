@@ -21,15 +21,21 @@ frontend/
 │   ├── app/              # Next.js App Router pages
 │   │   ├── layout.tsx    # Root layout
 │   │   ├── page.tsx      # Home page
-│   │   └── globals.css   # Global styles
+│   │   ├── globals.css   # Global styles
+│   │   ├── members/      # Congressional members pages
+│   │   ├── committees/   # Committees pages
+│   │   └── admin/        # Admin dashboard
 │   ├── components/       # React components
-│   │   ├── ui/          # Shadcn UI components
-│   │   └── ...          # Feature components
-│   ├── lib/             # Utilities and helpers
-│   ├── hooks/           # Custom React hooks
-│   ├── stores/          # Zustand stores
-│   └── types/           # TypeScript types
-├── public/              # Static assets
+│   │   ├── ui/           # Shadcn UI components
+│   │   ├── congressional/ # Member/committee components
+│   │   └── admin/        # Admin sync components
+│   ├── lib/              # Utilities and helpers
+│   │   ├── api/          # API client functions
+│   │   ├── utils/        # Helper utilities
+│   │   └── constants/    # Constants (states, etc.)
+│   ├── hooks/            # Custom React hooks
+│   └── types/            # TypeScript types
+├── public/               # Static assets
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
@@ -123,9 +129,8 @@ docker build -t newsanalyzer-frontend:latest .
 
 ## Environment Variables
 
-- `NEXT_PUBLIC_API_URL` - Backend API URL
-- `NEXT_PUBLIC_APP_URL` - Frontend application URL
-- `NEXT_PUBLIC_ENABLE_ANALYTICS` - Enable analytics (true/false)
+- `NEXT_PUBLIC_BACKEND_URL` - Java Spring Boot backend URL (default: `http://localhost:8080`)
+- `NEXT_PUBLIC_REASONING_SERVICE_URL` - Python FastAPI reasoning service URL (default: `http://localhost:8000`)
 
 ## License
 

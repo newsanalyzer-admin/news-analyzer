@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GovernmentManual>
+  <Entity>
+    <EntityId>TEST-1</EntityId>
+    <ParentId></ParentId>
+    <SortOrder>1</SortOrder>
+    <EntityType>Branch</EntityType>
+    <Category>Legislative Branch</Category>
+    <AgencyName>Test Congress</AgencyName>
+    <MissionStatement>
+      <Para>Test mission statement for Congress.</Para>
+    </MissionStatement>
+    <WebAddress>https://test.congress.gov</WebAddress>
+  </Entity>
+  <Entity>
+    <EntityId>TEST-2</EntityId>
+    <ParentId>TEST-1</ParentId>
+    <SortOrder>1</SortOrder>
+    <EntityType>Agency</EntityType>
+    <Category>Legislative Branch</Category>
+    <AgencyName>Test Senate</AgencyName>
+    <MissionStatement>
+      <Para>The Test Senate is the upper chamber.</Para>
+    </MissionStatement>
+    <WebAddress>https://test.senate.gov</WebAddress>
+  </Entity>
+  <Entity>
+    <EntityId>TEST-3</EntityId>
+    <ParentId>TEST-1</ParentId>
+    <SortOrder>2</SortOrder>
+    <EntityType>Agency</EntityType>
+    <Category>Legislative Branch</Category>
+    <AgencyName>Test House of Representatives</AgencyName>
+    <MissionStatement>
+      <Para>The Test House is the lower chamber.</Para>
+      <Para>It represents the people directly.</Para>
+    </MissionStatement>
+    <WebAddress>https://test.house.gov</WebAddress>
+  </Entity>
+  <Entity>
+    <EntityId>TEST-4</EntityId>
+    <ParentId></ParentId>
+    <SortOrder>2</SortOrder>
+    <EntityType>Branch</EntityType>
+    <Category>Executive Branch</Category>
+    <AgencyName>Test Executive</AgencyName>
+    <MissionStatement>
+      <Para>The Test Executive Branch.</Para>
+    </MissionStatement>
+  </Entity>
+  <Entity>
+    <EntityId>TEST-5</EntityId>
+    <ParentId>TEST-4</ParentId>
+    <SortOrder>1</SortOrder>
+    <EntityType>Department</EntityType>
+    <Category>Executive Branch</Category>
+    <AgencyName>Test Department of State</AgencyName>
+    <MissionStatement>
+      <Para>Test foreign policy department.</Para>
+    </MissionStatement>
+    <WebAddress>https://test.state.gov</WebAddress>
+  </Entity>
+</GovernmentManual>

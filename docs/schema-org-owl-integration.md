@@ -327,23 +327,62 @@ for row in results:
 
 ### Phase 1: Schema.org Foundation (MVP)
 1. ✅ Database schema with `schema_org_type` and `schema_org_data` columns (DONE)
-2. ⏳ Java Entity model with Schema.org fields
-3. ⏳ Python service: Entity extraction → Schema.org mapping
-4. ⏳ Backend service: Store and retrieve JSON-LD
-5. ⏳ Frontend: Display Schema.org entities
+2. ✅ Java Entity model with Schema.org fields (DONE)
+   - Entity.java with JSONB support for properties and schema_org_data
+   - SchemaOrgMapper service for auto-generating JSON-LD
+   - EntityService with Schema.org integration
+   - Full CRUD REST API endpoints
+3. ✅ JUnit Test Suite (DONE - 61/65 tests passing)
+   - EntityTest: 17/17 tests passed (model validation)
+   - EntityServiceTest: 16/16 tests passed (service layer with mocks)
+   - EntityControllerTest: 15/16 tests passed (REST API)
+   - EntityRepositoryTest: 13/16 tests passed (3 H2/PostgreSQL compatibility issues)
+   - H2 in-memory database for testing configured
+4. ✅ Python service: Entity extraction → Schema.org mapping (DONE - Phase 1.4)
+   - SchemaMapper service: Maps internal entity types to Schema.org types
+   - EntityExtractor service: spaCy-based NER with automatic Schema.org mapping
+   - Entity extraction API: POST /entities/extract returns schema_org_type and schema_org_data
+   - Comprehensive test coverage for both services
+   - Government keyword detection for automatic government_org classification
+5. ✅ Frontend: Display Schema.org entities (DONE - Phase 1.5)
+   - Complete TypeScript type system for entities
+   - API client for Python reasoning service and Java backend
+   - EntityCard component with Schema.org visualization
+   - Entity extraction page with text input and results display
+   - Type-based filtering with entity counts
+   - Expandable JSON-LD viewer for each entity
+   - Confidence threshold control
+   - Responsive UI with TailwindCSS
 
-### Phase 2: Schema.org Enrichment
+### Phase 2: Schema.org Enrichment (NEXT)
 1. External entity linking (Wikidata, DBpedia)
 2. Schema.org property expansion
 3. JSON-LD publishing for SEO
 4. Schema.org validation
 
-### Phase 3: OWL Reasoning (Advanced)
-1. Define NewsAnalyzer custom ontology (.ttl file)
-2. Python service: RDFLib + OWL-RL reasoner
-3. Inference rules for entity classification
-4. Consistency checking
-5. Relationship inference
+### Phase 3: OWL Reasoning (✅ COMPLETE)
+1. ✅ Define NewsAnalyzer custom ontology (.ttl file)
+   - `reasoning-service/ontology/newsanalyzer.ttl`
+   - 7 custom classes extending Schema.org
+   - 10 custom properties
+   - OWL inference rules
+2. ✅ Python service: RDFLib + OWL-RL reasoner
+   - `app/services/owl_reasoner.py`
+   - Singleton reasoner pattern
+   - Entity enrichment with inference
+3. ✅ Inference rules for entity classification
+   - Legislator by membership
+   - Government by jurisdiction
+   - Legislative body by action
+   - Executive agency by regulation
+4. ✅ Consistency checking
+   - Cardinality constraints
+   - Type validation
+5. ✅ Relationship inference
+   - SPARQL query support
+   - Graph export (Turtle, N-Triples, JSON-LD)
+
+**See:** `docs/PHASE_3_OWL_REASONING.md` for complete documentation
 
 ---
 
