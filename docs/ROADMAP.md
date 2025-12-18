@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 2.8
+**Document Version:** 2.9
 **Created:** 2025-11-25
-**Last Updated:** 2025-12-12
+**Last Updated:** 2025-12-17
 **Status:** Active
 
 ---
@@ -48,6 +48,12 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **QA-1** | Complete | 100% | API Integration Testing Framework |
 | **QA-2** | Planned | 0% | Test Infrastructure Improvements (Post-MVP) |
 
+### User Experience Track
+
+| Epic | Status | Progress | Description |
+|------|--------|----------|-------------|
+| **UI-1** | Ready | 0% | Public Navigation & User Experience |
+
 ### Overall MVP Status
 
 | Milestone | Status | Notes |
@@ -69,11 +75,12 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 ### Parallel Tracks
 7. [Factbase Expansion Track](#factbase-expansion-track)
 8. [Quality Assurance Track](#quality-assurance-track)
+9. [User Experience Track](#user-experience-track)
 
 ### Reference
-9. [Future Vision](#future-vision)
-10. [Architecture Overview](#architecture-overview)
-11. [Documentation Index](#documentation-index)
+10. [Future Vision](#future-vision)
+11. [Architecture Overview](#architecture-overview)
+12. [Documentation Index](#documentation-index)
 
 ---
 
@@ -651,6 +658,55 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
+## User Experience Track
+
+**Status:** IN PROGRESS
+**Priority:** HIGH
+**Description:** Create public-facing user interfaces that make the factbase accessible to users unfamiliar with government structure.
+
+### UI-1: Public Navigation & User Experience
+
+**Status:** READY FOR DEVELOPMENT
+**Approved:** 2025-12-15
+**Documentation:** [`docs/stories/UI-1/UI-1.epic-public-navigation-ux.md`](stories/UI-1/UI-1.epic-public-navigation-ux.md)
+
+**Business Value:**
+- Improved discoverability for users unfamiliar with government domain
+- Educational context on each page explaining data categories
+- Scalable navigation structure for future expansion
+- Seamless admin access via gear icon
+
+**Deliverables:**
+- Collapsible sidebar navigation at `/factbase`
+- Hero landing page with "Explore Factbase" CTA
+- People pages: Congressional Members, Executive Appointees, Federal Judges
+- Organization pages: Executive, Legislative, Judicial branches
+- Shared sidebar components (extracted from admin)
+- Educational content headers for each page
+- Legislative branch org data (~15 orgs via CSV)
+- Judicial branch org data (~120 orgs via CSV)
+- Federal judges data (pending FJC API research)
+
+**Stories (12 total, 47 points):**
+- UI-1.1: Shared Sidebar Components (5 pts) - Ready
+- UI-1.2: Factbase Layout & Landing Update (5 pts) - Ready
+- UI-1.3: Menu Configuration System (3 pts) - Ready
+- UI-1.4: Content Page Template (3 pts) - Ready
+- UI-1.5: Congressional Members Page (3 pts) - Ready
+- UI-1.6: Executive Appointees Page (3 pts) - Ready
+- UI-1.7: Federal Judges Page (5 pts) - **BLOCKED by UI-1.11**
+- UI-1.8: Federal Government Org Pages (5 pts) - Ready
+- UI-1.9: Populate Legislative Branch Orgs (3 pts) - Ready
+- UI-1.10: Populate Judicial Branch Orgs (3 pts) - Ready
+- UI-1.11: Federal Judges Data Research & Import (8 pts) - Ready (Critical Path)
+- UI-1.12: Admin Access Link (1 pt) - Ready
+
+**Critical Path:** UI-1.11 (Federal Judges Research) must complete before UI-1.7 can begin.
+
+**Recommended Sprint 1:** UI-1.1, UI-1.9, UI-1.10, UI-1.11 (parallel data/infrastructure work)
+
+---
+
 ## Future Vision
 
 ### Long-Term Goals (Year 2-3)
@@ -757,6 +813,12 @@ Based on business requirements document objectives:
 | QA-1 | `docs/stories/QA-1/QA-1.epic-api-testing-framework.md` | ✅ Complete |
 | QA-2 | `docs/stories/QA-2.epic-test-infrastructure.md` | Planned |
 
+### User Experience Epics
+
+| Epic | Document | Status |
+|------|----------|--------|
+| UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | Ready for Development |
+
 ### Phase Completion Summaries
 
 | Phase | Document | Status |
@@ -806,6 +868,7 @@ Based on business requirements document objectives:
 | 2025-12-01 | 2.6 | **FB-3 Architect Review Complete**: Approved with modifications (migration versions V17-V19, added missing repo methods); Ready for development |
 | 2025-12-02 | 2.7 | **FB-3 Epic COMPLETE**: All 4 stories done - Federal Register API integration, Regulation data model & storage, Agency linkage service (5-level matching, >95% match rate), Regulation lookup API (8 endpoints); All QA gates passed (scores 95-100); MVP updated to ~95% |
 | 2025-12-12 | 2.8 | **ADMIN-1 Epic COMPLETE**: All 13 stories done - Admin dashboard redesign, GOVMAN/US Code import, API search/import UI (Congress.gov, Federal Register, Legislators repo); Supersedes FB-4, FB-5, FB-6 draft epics; **MVP 100% COMPLETE** |
+| 2025-12-17 | 2.9 | Added **User Experience Track** with **UI-1 Epic** (Public Navigation & User Experience) - 12 stories, 47 points, ready for development |
 
 ---
 

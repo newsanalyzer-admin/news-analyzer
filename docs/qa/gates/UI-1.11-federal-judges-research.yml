@@ -1,0 +1,79 @@
+# Quality Gate: UI-1.11 - Federal Judges Data Research & Import
+schema: 1
+story: "UI-1.11"
+story_title: "Federal Judges Data Research & Import"
+gate: PASS
+status_reason: "All 8 ACs met. Research identified FJC bulk CSV as viable data source. Backend implementation complete with 25 passing tests. 9 PO observations documented as non-blocking for MVP."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-18T14:30:00-08:00"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "OBS-001"
+    severity: low
+    finding: "In-memory filtering instead of database-level queries"
+    suggested_action: "Add repository query methods with filter parameters in future sprint"
+  - id: "OBS-002"
+    severity: low
+    finding: "Only imports first court appointment (6 available in CSV)"
+    suggested_action: "Loop through all court columns during import in future sprint"
+  - id: "OBS-003"
+    severity: low
+    finding: "Person matching by name only (no FJC NID index)"
+    suggested_action: "Add external_ids JSONB index for FJC NID lookup in future sprint"
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 3 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Performance impact when judge count exceeds 5,000"
+      - "Potential duplicate persons with common names"
+
+quality_score: 85
+expires: "2026-01-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 25
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "CSV import is admin-only; no sensitive data exposure"
+  performance:
+    status: CONCERNS
+    notes: "In-memory filtering acceptable for ~1,000 records; may need optimization for larger datasets"
+  reliability:
+    status: PASS
+    notes: "Transaction-per-record ensures data consistency; errors logged and counted"
+  maintainability:
+    status: PASS
+    notes: "Clean service separation; well-documented code; comprehensive tests"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add database-level filtering to JudgeService for better scalability"
+      refs: ["backend/src/main/java/org/newsanalyzer/service/JudgeService.java"]
+    - action: "Add FJC NID indexing in external_ids for reliable deduplication"
+      refs: ["backend/src/main/java/org/newsanalyzer/service/FjcCsvImportService.java"]
+    - action: "Parse Senior Status Date to distinguish ACTIVE vs SENIOR judges"
+      refs: ["backend/src/main/java/org/newsanalyzer/service/FjcCsvImportService.java"]
+    - action: "Import all 6 court appointments from FJC CSV"
+      refs: ["backend/src/main/java/org/newsanalyzer/service/FjcCsvImportService.java"]
+
+dependencies:
+  - story: "UI-1.10"
+    status: "PASS"
+    impact: "Judicial orgs must be imported before judge import for court cache"
+
+notes:
+  - "CRITICAL PATH: This story unblocks UI-1.7 (Federal Judges Page)"
+  - "Research phase complete: FJC bulk CSV is viable data source"
+  - "25 unit tests pass: 12 for JudgeService, 13 for JudgeController"
+  - "PO observations documented - acceptable for MVP, tech debt for future"

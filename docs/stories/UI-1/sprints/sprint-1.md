@@ -32,6 +32,14 @@
 | 7 | UI-1.12 | Admin Access Link | 1 | P3 | TBD | Ready |
 | | **Total** | | **28** | | | |
 
+### ⚠️ Internal Dependencies (Updated 2025-12-18)
+
+| Upstream Story | Downstream Story | Dependency Type | Notes |
+|----------------|------------------|-----------------|-------|
+| **UI-1.10** | **UI-1.11** (AC 6 only) | Data Dependency | Judicial orgs must be imported before FJC judge import can link courts |
+
+**Impact:** UI-1.11 research (AC 1-5) can run in parallel with UI-1.10, but the judge import step (AC 6) must wait for UI-1.10 to complete.
+
 ---
 
 ## Capacity Planning
@@ -43,23 +51,28 @@
 | Committed Points | 28 | ~70% of typical capacity |
 | Buffer | ~20% | For unknowns in UI-1.11 research |
 
-### Parallelization Plan
+### Parallelization Plan (Updated 2025-12-18)
 
 ```
 Day 1-3: Parallel Start
-├── UI-1.11 (Research spike - critical path)
+├── UI-1.11 Research (AC 1-5) ─── Research spike, critical path
 ├── UI-1.1 (Sidebar components)
-├── UI-1.9 (Legislative orgs CSV)
-└── UI-1.10 (Judicial orgs CSV)
+├── UI-1.9 (Legislative orgs CSV import)
+└── UI-1.10 (Judicial orgs CSV import) ◄── MUST COMPLETE before UI-1.11 AC 6
 
-Day 4-7: Infrastructure
+Day 4-7: Infrastructure + Judge Import
 ├── UI-1.2 (Factbase layout) - after UI-1.1
-└── UI-1.3 (Menu config) - after UI-1.2
+├── UI-1.3 (Menu config) - after UI-1.2
+└── UI-1.11 Import (AC 6) ─── after UI-1.10 completes
+                           └── Verify: GET /api/government-organizations?branch=JUDICIAL returns 120+ orgs
 
 Day 8-10: Completion
 ├── UI-1.12 (Admin link) - trivial
-└── UI-1.11 continuation if needed
+└── UI-1.11 verification & cleanup
 ```
+
+**⚠️ Critical Sequencing:**
+- UI-1.10 → UI-1.11 (AC 6): FJC import needs judicial orgs in DB for court cache
 
 ---
 
@@ -129,8 +142,10 @@ Day 8-10: Completion
 
 | Risk | Likelihood | Impact | Mitigation | Status |
 |------|------------|--------|------------|--------|
-| UI-1.11 FJC API not viable | Medium | High | Fallback to "Coming Soon" for Federal Judges | Monitoring |
+| UI-1.11 FJC API not viable | Medium | High | Fallback to "Coming Soon" for Federal Judges | Resolved ✅ |
 | Sidebar refactor breaks admin | Low | Medium | Test admin sidebar after UI-1.1 changes | Open |
+| UI-1.10 delayed blocks UI-1.11 import | Low | Medium | Prioritize UI-1.10 completion by Day 3; import is trivial | Open |
+| FJC import produces null court links | Medium | Medium | Verify UI-1.10 complete before running FJC import | Open |
 
 ---
 
@@ -140,6 +155,8 @@ Day 8-10: Completion
 |------|----------|-----------|---------|
 | 2025-12-15 | Start UI-1.11 Day 1 | Critical path - blocks UI-1.7 in Sprint 2 | Bob (SM) |
 | 2025-12-15 | Include UI-1.12 (1pt) | Quick win, trivial effort | Bob (SM) |
+| 2025-12-18 | UI-1.10 must complete before UI-1.11 AC 6 | FJC import needs judicial orgs in DB for court cache | Sarah (PO) |
+| 2025-12-18 | Split UI-1.11 execution: Research (Day 1-3) / Import (Day 4+) | Allows parallel work while respecting dependency | Sarah (PO) |
 
 ---
 
@@ -226,6 +243,10 @@ Stories not in Sprint 1 (planned for Sprint 2):
 | Date | Change | Author |
 |------|--------|--------|
 | 2025-12-15 | Sprint 1 planning document created | Bob (SM Agent) |
+| 2025-12-18 | Added internal dependency: UI-1.10 → UI-1.11 (AC 6) | Sarah (PO Agent) |
+| 2025-12-18 | Updated parallelization plan to reflect dependency sequencing | Sarah (PO Agent) |
+| 2025-12-18 | Added 2 new risks related to dependency | Sarah (PO Agent) |
+| 2025-12-18 | Marked FJC API risk as Resolved (research confirmed CSV available) | Sarah (PO Agent) |
 
 ---
 

@@ -365,6 +365,93 @@ class GovOrgCsvImportServiceTest {
     }
 
     @Nested
+    @DisplayName("Actual CSV File Validation Tests")
+    class ActualCsvFileTests {
+
+        @Test
+        @DisplayName("Should parse legislative-branch-orgs.csv without validation errors")
+        void parseLegislativeBranchCsv() throws Exception {
+            // Given - read actual CSV file from data directory
+            InputStream csvStream = getClass().getClassLoader()
+                    .getResourceAsStream("csv/legislative-branch-orgs.csv");
+
+            // Skip test if file not available in test resources
+            if (csvStream == null) {
+                // Try relative path from project root
+                java.nio.file.Path csvPath = java.nio.file.Paths.get("../data/legislative-branch-orgs.csv");
+                if (java.nio.file.Files.exists(csvPath)) {
+                    csvStream = java.nio.file.Files.newInputStream(csvPath);
+                } else {
+                    // File not available, skip test
+                    org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                            "Legislative branch CSV file not available in test resources");
+                    return;
+                }
+            }
+
+            when(repository.findAll()).thenReturn(Collections.emptyList());
+            when(repository.findByAcronymIgnoreCase(anyString())).thenReturn(Optional.empty());
+            when(repository.findByOfficialNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+            when(repository.save(any(GovernmentOrganization.class)))
+                    .thenAnswer(invocation -> {
+                        GovernmentOrganization org = invocation.getArgument(0);
+                        org.setId(UUID.randomUUID());
+                        return org;
+                    });
+
+            // When
+            CsvImportResult result = importService.importFromCsv(csvStream);
+
+            // Then
+            assertThat(result.hasValidationErrors())
+                    .withFailMessage("CSV validation errors: %s", result.getValidationErrors())
+                    .isFalse();
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(result.getAdded()).isGreaterThanOrEqualTo(15); // AC: at least 15 orgs
+        }
+
+        @Test
+        @DisplayName("Should parse judicial-branch-orgs.csv without validation errors")
+        void parseJudicialBranchCsv() throws Exception {
+            // Given - read actual CSV file from data directory
+            InputStream csvStream = getClass().getClassLoader()
+                    .getResourceAsStream("csv/judicial-branch-orgs.csv");
+
+            // Skip test if file not available in test resources
+            if (csvStream == null) {
+                java.nio.file.Path csvPath = java.nio.file.Paths.get("../data/judicial-branch-orgs.csv");
+                if (java.nio.file.Files.exists(csvPath)) {
+                    csvStream = java.nio.file.Files.newInputStream(csvPath);
+                } else {
+                    org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                            "Judicial branch CSV file not available in test resources");
+                    return;
+                }
+            }
+
+            when(repository.findAll()).thenReturn(Collections.emptyList());
+            when(repository.findByAcronymIgnoreCase(anyString())).thenReturn(Optional.empty());
+            when(repository.findByOfficialNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+            when(repository.save(any(GovernmentOrganization.class)))
+                    .thenAnswer(invocation -> {
+                        GovernmentOrganization org = invocation.getArgument(0);
+                        org.setId(UUID.randomUUID());
+                        return org;
+                    });
+
+            // When
+            CsvImportResult result = importService.importFromCsv(csvStream);
+
+            // Then
+            assertThat(result.hasValidationErrors())
+                    .withFailMessage("CSV validation errors: %s", result.getValidationErrors())
+                    .isFalse();
+            assertThat(result.isSuccess()).isTrue();
+            assertThat(result.getAdded()).isGreaterThanOrEqualTo(120); // AC: at least 120 orgs
+        }
+    }
+
+    @Nested
     @DisplayName("Edge Case Tests")
     class EdgeCaseTests {
 
