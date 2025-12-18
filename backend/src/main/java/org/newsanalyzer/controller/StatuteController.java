@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,7 +118,7 @@ public class StatuteController {
     // Get by USC Citation
     // =====================================================================
 
-    @GetMapping("/by-citation/{uscIdentifier}")
+    @GetMapping("/by-citation/**")
     @Operation(
             summary = "Get statute by USC identifier",
             description = "Returns a statute by its USC identifier path (e.g., /us/usc/t5/s101)"
@@ -127,9 +128,11 @@ public class StatuteController {
             @ApiResponse(responseCode = "404", description = "Statute not found",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    public ResponseEntity<StatuteDTO> getByCitation(
-            @Parameter(description = "USC identifier", example = "/us/usc/t5/s101")
-            @PathVariable String uscIdentifier) {
+    public ResponseEntity<StatuteDTO> getByCitation(HttpServletRequest request) {
+
+        // Extract the path after /by-citation/
+        String fullPath = request.getRequestURI();
+        String uscIdentifier = fullPath.substring(fullPath.indexOf("/by-citation/") + "/by-citation/".length());
 
         // Handle URL encoding - the path may have slashes encoded
         String normalizedId = uscIdentifier.startsWith("/") ? uscIdentifier : "/" + uscIdentifier;

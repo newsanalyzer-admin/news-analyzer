@@ -64,15 +64,14 @@ class MemberSyncServiceTest {
     @Test
     @DisplayName("Should sync new member correctly")
     void syncMember_newMember_createsRecord() throws Exception {
-        // Given
+        // Given - API returns "name" in "LastName, FirstName" format, "partyName", and terms.item array
         String memberJson = """
             {
               "bioguideId": "S000033",
-              "firstName": "Bernard",
-              "lastName": "Sanders",
-              "party": "Independent",
+              "name": "Sanders, Bernard",
+              "partyName": "Independent",
               "state": "VT",
-              "terms": [{"chamber": "Senate"}]
+              "terms": {"item": [{"chamber": "Senate"}]}
             }
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
@@ -102,13 +101,12 @@ class MemberSyncServiceTest {
     @Test
     @DisplayName("Should update existing member")
     void syncMember_existingMember_updatesRecord() throws Exception {
-        // Given
+        // Given - API returns "name" in "LastName, FirstName" format
         String memberJson = """
             {
               "bioguideId": "S000033",
-              "firstName": "Bernard",
-              "lastName": "Sanders",
-              "party": "Independent",
+              "name": "Sanders, Bernard",
+              "partyName": "Independent",
               "state": "VT"
             }
             """;
@@ -151,13 +149,12 @@ class MemberSyncServiceTest {
     @Test
     @DisplayName("Should map HOUSE chamber correctly")
     void syncMember_houseMember_mapsChamberCorrectly() throws Exception {
-        // Given
+        // Given - API returns terms.item array structure
         String memberJson = """
             {
               "bioguideId": "P000197",
-              "firstName": "Nancy",
-              "lastName": "Pelosi",
-              "terms": [{"chamber": "House of Representatives"}]
+              "name": "Pelosi, Nancy",
+              "terms": {"item": [{"chamber": "House of Representatives"}]}
             }
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
@@ -181,8 +178,7 @@ class MemberSyncServiceTest {
         String memberJson = """
             {
               "bioguideId": "S000033",
-              "firstName": "Bernard",
-              "lastName": "Sanders",
+              "name": "Sanders, Bernard",
               "birthYear": "1941"
             }
             """;
@@ -207,8 +203,7 @@ class MemberSyncServiceTest {
         String memberJson = """
             {
               "bioguideId": "S000033",
-              "firstName": "Bernard",
-              "lastName": "Sanders",
+              "name": "Sanders, Bernard",
               "depiction": {
                 "imageUrl": "https://example.com/sanders.jpg"
               }

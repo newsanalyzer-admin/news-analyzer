@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-NewsAnalyzer API Tests,org.newsanalyzer.apitests.config,RestAssuredConfiguration,15,47,3,1,9,21,5,3,3,3
+NewsAnalyzer API Tests,org.newsanalyzer.apitests.config,RestAssuredConfiguration,11,51,2,2,7,23,4,4,2,4
 NewsAnalyzer API Tests,org.newsanalyzer.apitests.config,DatabaseConfig,246,0,18,0,56,0,25,0,16,0
 NewsAnalyzer API Tests,org.newsanalyzer.apitests.config,TestConfig,40,46,1,1,12,14,5,6,4,6
 NewsAnalyzer API Tests,org.newsanalyzer.apitests.util,DatabaseConnectionManager,277,0,32,0,85,0,33,0,17,0

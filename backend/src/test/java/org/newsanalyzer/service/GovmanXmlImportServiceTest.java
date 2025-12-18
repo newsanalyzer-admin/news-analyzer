@@ -63,34 +63,31 @@ class GovmanXmlImportServiceTest {
         @Test
         @DisplayName("Should parse valid XML document with entities")
         void testParseXml_validDocument_returnsEntities() throws JAXBException {
-            // Given
+            // Given - entityId, parentId, sortOrder are XML attributes per JAXB mapping
             String xml = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <GovernmentManual>
-                  <Entity>
-                    <EntityId>TEST-1</EntityId>
-                    <ParentId></ParentId>
-                    <SortOrder>1</SortOrder>
+                  <Entity EntityId="TEST-1" ParentId="" SortOrder="1">
                     <EntityType>Branch</EntityType>
                     <Category>Legislative Branch</Category>
                     <AgencyName>Test Congress</AgencyName>
                     <MissionStatement>
-                      <Para>Test mission statement.</Para>
+                      <Record><Paragraph>Test mission statement.</Paragraph></Record>
                     </MissionStatement>
-                    <WebAddress>https://test.gov</WebAddress>
+                    <Addresses>
+                      <Address>
+                        <FooterDetails>
+                          <WebAddress>https://test.gov</WebAddress>
+                        </FooterDetails>
+                      </Address>
+                    </Addresses>
                   </Entity>
-                  <Entity>
-                    <EntityId>TEST-2</EntityId>
-                    <ParentId>TEST-1</ParentId>
-                    <SortOrder>1</SortOrder>
+                  <Entity EntityId="TEST-2" ParentId="TEST-1" SortOrder="1">
                     <EntityType>Agency</EntityType>
                     <Category>Legislative Branch</Category>
                     <AgencyName>Test Senate</AgencyName>
                   </Entity>
-                  <Entity>
-                    <EntityId>TEST-3</EntityId>
-                    <ParentId>TEST-1</ParentId>
-                    <SortOrder>2</SortOrder>
+                  <Entity EntityId="TEST-3" ParentId="TEST-1" SortOrder="2">
                     <EntityType>Agency</EntityType>
                     <Category>Legislative Branch</Category>
                     <AgencyName>Test House</AgencyName>
@@ -106,7 +103,7 @@ class GovmanXmlImportServiceTest {
             assertThat(entities.get(0).getEntityId()).isEqualTo("TEST-1");
             assertThat(entities.get(0).getAgencyName()).isEqualTo("Test Congress");
             assertThat(entities.get(0).getCategory()).isEqualTo("Legislative Branch");
-            assertThat(entities.get(0).getMissionStatement()).isEqualTo("Test mission statement.");
+            assertThat(entities.get(0).getMissionStatementText()).isEqualTo("Test mission statement.");
             assertThat(entities.get(0).getWebAddress()).isEqualTo("https://test.gov");
             assertThat(entities.get(1).getParentId()).isEqualTo("TEST-1");
         }
@@ -131,17 +128,16 @@ class GovmanXmlImportServiceTest {
         @Test
         @DisplayName("Should concatenate multiple mission statement paragraphs")
         void testParseXml_multipleParagraphs_concatenatesMissionStatement() throws JAXBException {
-            // Given
+            // Given - MissionStatement uses Record/Paragraph structure per JAXB mapping
             String xml = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <GovernmentManual>
-                  <Entity>
-                    <EntityId>TEST-1</EntityId>
+                  <Entity EntityId="TEST-1">
                     <AgencyName>Test Agency</AgencyName>
                     <MissionStatement>
-                      <Para>First paragraph.</Para>
-                      <Para>Second paragraph.</Para>
-                      <Para>Third paragraph.</Para>
+                      <Record><Paragraph>First paragraph.</Paragraph></Record>
+                      <Record><Paragraph>Second paragraph.</Paragraph></Record>
+                      <Record><Paragraph>Third paragraph.</Paragraph></Record>
                     </MissionStatement>
                   </Entity>
                 </GovernmentManual>
@@ -152,7 +148,7 @@ class GovmanXmlImportServiceTest {
 
             // Then
             assertThat(entities).hasSize(1);
-            assertThat(entities.get(0).getMissionStatement())
+            assertThat(entities.get(0).getMissionStatementText())
                     .isEqualTo("First paragraph.\n\nSecond paragraph.\n\nThird paragraph.");
         }
     }
@@ -414,30 +410,25 @@ class GovmanXmlImportServiceTest {
         @Test
         @DisplayName("Should count imported, updated, skipped, and errors correctly")
         void testImportEntities_mixedResults_returnsAccurateCounts() {
-            // Given
+            // Given - EntityId is an XML attribute per JAXB mapping
             String xml = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <GovernmentManual>
-                  <Entity>
-                    <EntityId>NEW-1</EntityId>
+                  <Entity EntityId="NEW-1">
                     <AgencyName>New Agency</AgencyName>
                     <Category>Executive Branch</Category>
                   </Entity>
-                  <Entity>
-                    <EntityId>EXISTING-1</EntityId>
+                  <Entity EntityId="EXISTING-1">
                     <AgencyName>Existing Agency</AgencyName>
                     <Category>Executive Branch</Category>
                   </Entity>
-                  <Entity>
-                    <EntityId></EntityId>
+                  <Entity EntityId="">
                     <AgencyName>Invalid - No ID</AgencyName>
                   </Entity>
-                  <Entity>
-                    <EntityId>INVALID-2</EntityId>
+                  <Entity EntityId="INVALID-2">
                     <AgencyName></AgencyName>
                   </Entity>
-                  <Entity>
-                    <EntityId>MANUAL-1</EntityId>
+                  <Entity EntityId="MANUAL-1">
                     <AgencyName>Manual Entry</AgencyName>
                     <Category>Executive Branch</Category>
                   </Entity>
@@ -488,19 +479,24 @@ class GovmanXmlImportServiceTest {
         @Test
         @DisplayName("Should successfully import valid organization")
         void testImport_validEntity_createsOrganization() {
-            // Given
+            // Given - Use correct JAXB structure with attributes and nested elements
             String xml = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <GovernmentManual>
-                  <Entity>
-                    <EntityId>TEST-1</EntityId>
+                  <Entity EntityId="TEST-1">
                     <EntityType>Department</EntityType>
                     <Category>Executive Branch</Category>
                     <AgencyName>Test Department</AgencyName>
                     <MissionStatement>
-                      <Para>Test mission.</Para>
+                      <Record><Paragraph>Test mission.</Paragraph></Record>
                     </MissionStatement>
-                    <WebAddress>https://test.gov</WebAddress>
+                    <Addresses>
+                      <Address>
+                        <FooterDetails>
+                          <WebAddress>https://test.gov</WebAddress>
+                        </FooterDetails>
+                      </Address>
+                    </Addresses>
                   </Entity>
                 </GovernmentManual>
                 """;

@@ -148,8 +148,8 @@ class StatuteControllerTest {
         when(statuteRepository.findByUscIdentifier("/us/usc/t5/s101"))
                 .thenReturn(Optional.of(testStatute));
 
-        // When/Then - URL-encoded slashes
-        mockMvc.perform(get("/api/statutes/by-citation/%2Fus%2Fusc%2Ft5%2Fs101"))
+        // When/Then - use raw path (controller pattern {uscIdentifier:.*} allows slashes)
+        mockMvc.perform(get("/api/statutes/by-citation/us/usc/t5/s101"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uscIdentifier", is("/us/usc/t5/s101")));
     }
@@ -161,7 +161,7 @@ class StatuteControllerTest {
                 .thenReturn(Optional.empty());
 
         // When/Then
-        mockMvc.perform(get("/api/statutes/by-citation/%2Fus%2Fusc%2Ft99%2Fs999"))
+        mockMvc.perform(get("/api/statutes/by-citation/us/usc/t99/s999"))
                 .andExpect(status().isNotFound());
     }
 

@@ -8,6 +8,10 @@ import org.newsanalyzer.dto.CongressMemberImportRequest;
 import org.newsanalyzer.model.Person;
 import org.newsanalyzer.model.Person.Chamber;
 import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.repository.RegulationRepository;
+import org.newsanalyzer.service.FederalRegisterImportService;
+import org.newsanalyzer.service.LegislatorEnrichmentImportService;
+import org.newsanalyzer.service.LegislatorsSearchService;
 import org.newsanalyzer.service.MemberSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -52,6 +56,18 @@ class AdminImportControllerTest {
 
     @MockBean
     private PersonRepository personRepository;
+
+    @MockBean
+    private FederalRegisterImportService federalRegisterImportService;
+
+    @MockBean
+    private RegulationRepository regulationRepository;
+
+    @MockBean
+    private LegislatorEnrichmentImportService legislatorEnrichmentImportService;
+
+    @MockBean
+    private LegislatorsSearchService legislatorsSearchService;
 
     private Person testPerson;
     private UUID testPersonId;

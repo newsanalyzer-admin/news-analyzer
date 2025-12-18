@@ -1,6 +1,6 @@
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\DatabaseConfig.java
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\Endpoints.java
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\RestAssuredConfiguration.java
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\TestConfig.java
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\util\DatabaseConnectionManager.java
-D:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\util\FlywayMigrationRunner.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\DatabaseConfig.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\Endpoints.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\RestAssuredConfiguration.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\config\TestConfig.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\util\DatabaseConnectionManager.java
+d:\VSCProjects\AIProject2\api-tests\src\main\java\org\newsanalyzer\apitests\util\FlywayMigrationRunner.java

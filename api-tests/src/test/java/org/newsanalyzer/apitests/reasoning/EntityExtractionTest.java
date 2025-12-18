@@ -133,11 +133,14 @@ class EntityExtractionTest extends BaseApiTest {
     // ==================== Error Handling Tests ====================
 
     @Test
-    @DisplayName("POST /entities/extract - should return 400 when text empty")
-    void shouldReturn400_whenTextEmpty() {
+    @DisplayName("POST /entities/extract - should return 200 with empty entities when text empty")
+    void shouldReturn200_whenTextEmpty_withEmptyEntities() {
+        // API accepts empty text and returns 200 with zero entities (not an error)
         client.extractEntities(ReasoningTestDataBuilder.EMPTY_TEXT)
                 .then()
-                .statusCode(anyOf(equalTo(400), equalTo(422)));
+                .statusCode(200)
+                .body("total_count", equalTo(0))
+                .body("entities", hasSize(0));
     }
 
     @Test

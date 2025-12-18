@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 /**
  * Unit tests for UsCodeImportService.
@@ -55,7 +56,7 @@ class UsCodeImportServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(downloadService.getDefaultReleasePoint()).thenReturn(RELEASE_POINT);
+        lenient().when(downloadService.getDefaultReleasePoint()).thenReturn(RELEASE_POINT);
     }
 
     // =====================================================================
@@ -77,7 +78,7 @@ class UsCodeImportServiceTest {
         }).when(xmlParser).parseStream(any(), any());
 
         when(statuteRepository.findByUscIdentifier("/us/usc/t5/s101")).thenReturn(Optional.empty());
-        when(statuteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(statuteRepository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
         UsCodeImportResult result = importService.importTitle(titleNumber, null);
@@ -152,7 +153,7 @@ class UsCodeImportServiceTest {
 
         when(statuteRepository.findByUscIdentifier("/us/usc/t5/s101"))
                 .thenReturn(Optional.of(existingStatute));
-        when(statuteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(statuteRepository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
         UsCodeImportResult result = importService.importTitle(titleNumber, null);
@@ -162,7 +163,7 @@ class UsCodeImportServiceTest {
         assertEquals(0, result.getSectionsInserted());
         assertEquals(1, result.getSectionsUpdated());
 
-        verify(statuteRepository).save(statuteCaptor.capture());
+        verify(statuteRepository).saveAndFlush(statuteCaptor.capture());
         Statute saved = statuteCaptor.getValue();
         assertEquals("New heading", saved.getHeading());
     }
@@ -182,7 +183,7 @@ class UsCodeImportServiceTest {
 
         when(statuteRepository.findByUscIdentifier("/us/usc/t5/s999"))
                 .thenReturn(Optional.empty());
-        when(statuteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(statuteRepository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
         UsCodeImportResult result = importService.importTitle(titleNumber, null);
@@ -192,7 +193,7 @@ class UsCodeImportServiceTest {
         assertEquals(1, result.getSectionsInserted());
         assertEquals(0, result.getSectionsUpdated());
 
-        verify(statuteRepository).save(statuteCaptor.capture());
+        verify(statuteRepository).saveAndFlush(statuteCaptor.capture());
         Statute saved = statuteCaptor.getValue();
         assertEquals("/us/usc/t5/s999", saved.getUscIdentifier());
         assertEquals("USCODE", saved.getImportSource());
@@ -218,7 +219,7 @@ class UsCodeImportServiceTest {
         }).when(xmlParser).parseStream(any(), any());
 
         when(statuteRepository.findByUscIdentifier(any())).thenReturn(Optional.empty());
-        when(statuteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(statuteRepository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
         UsCodeImportResult result = importService.importTitle(titleNumber, null);
@@ -227,7 +228,7 @@ class UsCodeImportServiceTest {
         assertTrue(result.isSuccess());
         assertEquals(3, result.getSectionsInserted());
         assertEquals(3, result.getTotalProcessed());
-        verify(statuteRepository, times(3)).save(any(Statute.class));
+        verify(statuteRepository, times(3)).saveAndFlush(any(Statute.class));
     }
 
     // =====================================================================
@@ -276,7 +277,7 @@ class UsCodeImportServiceTest {
         }).when(xmlParser).parseStream(any(), any());
 
         when(statuteRepository.findByUscIdentifier(any())).thenReturn(Optional.empty());
-        when(statuteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(statuteRepository.saveAndFlush(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
         UsCodeImportResult result = importService.importTitle(5, customRelease);

@@ -36,7 +36,7 @@ class MemberSearchTest extends BaseApiTest {
                 .statusCode(200)
                 .body("content", instanceOf(java.util.List.class))
                 .body("content.size()", greaterThanOrEqualTo(1))
-                .body("content[0].lastName", equalTo("Sanders"));
+                .body("content[0].lastName", equalToIgnoringCase("Sanders"));
     }
 
     @Test

@@ -104,8 +104,16 @@ class GovOrgCrudTest extends BaseApiTest {
                 .withMission("Test agency mission")
                 .build();
 
-        govOrgClient.create(orgRequest)
-                .then()
+        var response = govOrgClient.create(orgRequest);
+        int statusCode = response.getStatusCode();
+        if (statusCode != 201) {
+            System.err.println("=== CREATE FAILED ===");
+            System.err.println("Request: " + orgRequest);
+            System.err.println("Status: " + statusCode);
+            System.err.println("Response: " + response.getBody().asString());
+            System.err.println("=====================");
+        }
+        response.then()
                 .statusCode(201)
                 .body("id", notNullValue())
                 .body("officialName", equalTo(orgRequest.get("officialName")))

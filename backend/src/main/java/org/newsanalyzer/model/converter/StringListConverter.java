@@ -28,7 +28,8 @@ public class StringListConverter implements AttributeConverter<List<String>, Obj
     @Override
     public Object convertToDatabaseColumn(List<String> attribute) {
         if (attribute == null || attribute.isEmpty()) {
-            return null;
+            // Return empty array instead of null to help PostgreSQL with type binding
+            return new String[0];
         }
         return attribute.toArray(new String[0]);
     }

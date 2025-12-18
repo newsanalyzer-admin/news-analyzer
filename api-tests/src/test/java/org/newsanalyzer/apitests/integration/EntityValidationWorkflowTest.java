@@ -258,7 +258,8 @@ class EntityValidationWorkflowTest extends IntegrationTestBase {
         Instant start = startTiming();
 
         Map<String, Object> entityRequest = new HashMap<>();
-        String testName = "Test Agency " + UUID.randomUUID().toString().substring(0, 8);
+        // Use a unique name that won't match any existing government organization
+        String testName = "XYZNONEXISTENT-" + UUID.randomUUID().toString().substring(0, 8);
         entityRequest.put("name", testName);
         entityRequest.put("entityType", "GOVERNMENT_ORG");
         entityRequest.put("confidenceScore", 0.85);

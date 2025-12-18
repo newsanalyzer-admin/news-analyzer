@@ -64,10 +64,10 @@ import io.restassured.specification.RequestSpecification;
      * Returns the request specification for reasoning service API calls.
      */
     public static RequestSpecification getReasoningSpec() {
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (reasoningSpec == null) {</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (reasoningSpec == null) {</span>
 <span class="nc" id="L68">            initialize();</span>
         }
-<span class="nc" id="L70">        return reasoningSpec;</span>
+<span class="fc" id="L70">        return reasoningSpec;</span>
     }
 
     /**
