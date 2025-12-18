@@ -1,0 +1,309 @@
+# NewsAnalyzer v2 - Production Environment
+
+**Last Updated:** 2025-12-16
+**Status:** Live
+
+---
+
+## Overview
+
+NewsAnalyzer v2 is deployed on Hetzner Cloud in Germany, ensuring data sovereignty and independence from major US tech providers.
+
+---
+
+## Production URLs
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | http://newsanalyzer.org |
+| **API** | http://newsanalyzer.org/api |
+| **Health Check** | http://newsanalyzer.org/api/actuator/health |
+| **Direct IP** | http://5.78.71.195 |
+
+> **Note:** HTTPS will be enabled after SSL certificate setup via Let's Encrypt.
+
+---
+
+## Infrastructure
+
+### Server Specifications
+
+| Property | Value |
+|----------|-------|
+| **Provider** | Hetzner Cloud |
+| **Location** | Germany (EU) |
+| **Plan** | CPX31 |
+| **CPU** | 4 AMD vCPUs |
+| **RAM** | 8 GB |
+| **Storage** | 160 GB SSD |
+| **OS** | Ubuntu 24.04.3 LTS |
+| **IP Address** | 5.78.71.195 |
+
+### Domain & DNS
+
+| Property | Value |
+|----------|-------|
+| **Domain** | newsanalyzer.org |
+| **Registrar** | Cloudflare |
+| **DNS Provider** | Cloudflare |
+| **A Record** | @ -> 5.78.71.195 |
+| **A Record** | www -> 5.78.71.195 |
+
+---
+
+## Services Architecture
+
+All services run via Docker Compose (`docker-compose.deploy.yml`):
+
+```
+                    ┌─────────────────┐
+                    │    Cloudflare   │
+                    │      DNS        │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     Nginx       │
+                    │  (ports 80/443) │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+┌───────▼───────┐   ┌───────▼───────┐   ┌───────▼───────┐
+│   Frontend    │   │    Backend    │   │   Reasoning   │
+│  (Next.js)    │   │ (Spring Boot) │   │   (FastAPI)   │
+│   port 3000   │   │   port 8080   │   │   port 8000   │
+└───────────────┘   └───────┬───────┘   └───────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              │             │             │
+      ┌───────▼───────┐ ┌───▼───┐        │
+      │   PostgreSQL  │ │ Redis │        │
+      │   port 5432   │ │ 6379  │        │
+      └───────────────┘ └───────┘        │
+```
+
+### Container Status
+
+| Container | Image | Purpose |
+|-----------|-------|---------|
+| `newsanalyzer-nginx` | nginx:alpine | Reverse proxy |
+| `newsanalyzer-frontend` | newsanalyzer-frontend | Next.js UI |
+| `newsanalyzer-backend` | newsanalyzer-backend | Spring Boot API |
+| `newsanalyzer-postgres` | postgres:15-alpine | Database |
+| `newsanalyzer-redis` | redis:7-alpine | Cache/Sessions |
+| `newsanalyzer-reasoning-service` | newsanalyzer-reasoning-service | NLP/Entity extraction |
+
+---
+
+## Server Access
+
+### SSH Connection
+
+```bash
+# Using deployment key (no passphrase)
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195
+
+# Windows (Git Bash)
+ssh -i /c/Users/sowoo/.ssh/id_ed25519_deploy root@5.78.71.195
+```
+
+### SSH Key Location
+
+| Key | Path |
+|-----|------|
+| **Private Key** | `~/.ssh/id_ed25519_deploy` |
+| **Public Key** | `~/.ssh/id_ed25519_deploy.pub` |
+
+> **Note:** This key has no passphrase for automated deployments.
+
+---
+
+## File Locations
+
+| Path | Contents |
+|------|----------|
+| `/opt/newsanalyzer` | Application root |
+| `/opt/newsanalyzer/.env` | Environment variables |
+| `/opt/newsanalyzer/docker-compose.deploy.yml` | Docker Compose config |
+| `/opt/newsanalyzer/nginx/` | Nginx configuration |
+
+---
+
+## Common Operations
+
+### Check Service Status
+
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "docker ps --format 'table {{.Names}}\t{{.Status}}'"
+```
+
+### View Logs
+
+```bash
+# All services
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "cd /opt/newsanalyzer && docker compose -f docker-compose.deploy.yml logs --tail=50"
+
+# Specific service
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "docker logs newsanalyzer-backend --tail=100"
+```
+
+### Restart Services
+
+```bash
+# Restart all
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "cd /opt/newsanalyzer && docker compose -f docker-compose.deploy.yml restart"
+
+# Restart specific service
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "docker restart newsanalyzer-backend"
+```
+
+### Deploy Updates
+
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 << 'EOF'
+cd /opt/newsanalyzer
+git pull origin master
+docker compose -f docker-compose.deploy.yml build
+docker compose -f docker-compose.deploy.yml up -d
+EOF
+```
+
+### Database Backup
+
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "docker exec newsanalyzer-postgres pg_dump -U newsanalyzer newsanalyzer > /opt/newsanalyzer/backup-$(date +%Y%m%d).sql"
+```
+
+---
+
+## Environment Variables
+
+The `.env` file on the server contains:
+
+```bash
+# Database
+DB_NAME=newsanalyzer
+DB_USERNAME=newsanalyzer
+DB_PASSWORD=<auto-generated-secure-password>
+
+# API Keys (optional)
+CONGRESS_API_KEY=
+```
+
+---
+
+## GitHub Integration
+
+### Repository
+
+- **URL:** https://github.com/newsanalyzer-admin/news-analyzer
+- **Branch:** master
+
+### Deploy Key
+
+A read-only deploy key is configured on the server for pulling updates:
+
+```bash
+# Server deploy key location
+/root/.ssh/id_ed25519  # GitHub deploy key
+```
+
+This key is added to GitHub repository settings under "Deploy keys".
+
+---
+
+## SSL/HTTPS Setup (TODO)
+
+SSL certificates will be obtained via Let's Encrypt using certbot:
+
+```bash
+# Install certbot (on server)
+apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+certbot certonly --webroot -w /var/www/certbot \
+  -d newsanalyzer.org -d www.newsanalyzer.org
+
+# The nginx config already has SSL configuration prepared
+# Uncomment HTTPS server block in /opt/newsanalyzer/nginx/conf.d/newsanalyzer.conf
+```
+
+---
+
+## Monitoring
+
+### Health Checks
+
+| Service | Endpoint | Expected |
+|---------|----------|----------|
+| Frontend | http://newsanalyzer.org | 200 OK |
+| Backend | http://newsanalyzer.org/api/actuator/health | `{"status":"UP"}` |
+| Reasoning | Internal only (via backend) | Healthy |
+
+### Docker Health Status
+
+All containers have health checks configured:
+
+```bash
+# Check health status
+docker ps --format "table {{.Names}}\t{{.Status}}"
+```
+
+---
+
+## Troubleshooting
+
+### Service Not Starting
+
+```bash
+# Check logs
+docker logs newsanalyzer-backend 2>&1 | tail -50
+
+# Check if port is in use
+netstat -tulpn | grep :8080
+```
+
+### Database Connection Issues
+
+```bash
+# Verify postgres is running
+docker exec newsanalyzer-postgres pg_isready -U newsanalyzer
+
+# Check connection from backend
+docker logs newsanalyzer-backend 2>&1 | grep -i "datasource\|postgres"
+```
+
+### Out of Disk Space
+
+```bash
+# Check disk usage
+df -h
+
+# Clean Docker
+docker system prune -a
+```
+
+---
+
+## Security Notes
+
+1. **SSH Access:** Only via deploy key (no password auth)
+2. **Firewall:** Hetzner firewall allows only ports 22, 80, 443
+3. **Database:** Not exposed externally (internal Docker network only)
+4. **Redis:** Not exposed externally (internal Docker network only)
+5. **Secrets:** Environment variables, not in code
+
+---
+
+## Version History
+
+| Date | Change |
+|------|--------|
+| 2025-12-16 | Initial production deployment |
+

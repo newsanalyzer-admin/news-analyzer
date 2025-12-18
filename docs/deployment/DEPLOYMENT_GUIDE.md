@@ -479,7 +479,105 @@ leader called for stronger environmental protections.
 
 ## Production Deployment
 
-### Frontend (Vercel/Netlify)
+> **Current Production:** http://newsanalyzer.org (Hetzner Cloud, Germany)
+>
+> For detailed production environment documentation, see **[PRODUCTION_ENVIRONMENT.md](PRODUCTION_ENVIRONMENT.md)**
+
+### Hetzner Cloud Deployment (Current)
+
+NewsAnalyzer is deployed on Hetzner Cloud for data sovereignty and independence.
+
+**Server Details:**
+- **Provider:** Hetzner Cloud (Germany)
+- **Plan:** CPX31 (4 CPU, 8GB RAM, 160GB SSD)
+- **OS:** Ubuntu 24.04.3 LTS
+- **IP:** 5.78.71.195
+- **Domain:** newsanalyzer.org
+
+**Connect to Server:**
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195
+```
+
+**Deploy Updates:**
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 << 'EOF'
+cd /opt/newsanalyzer
+git pull origin master
+docker compose -f docker-compose.deploy.yml build
+docker compose -f docker-compose.deploy.yml up -d
+EOF
+```
+
+**Check Status:**
+```bash
+ssh -i ~/.ssh/id_ed25519_deploy root@5.78.71.195 \
+  "docker ps --format 'table {{.Names}}\t{{.Status}}'"
+```
+
+---
+
+### Production Docker Compose
+
+The production deployment uses `docker-compose.deploy.yml`:
+
+```yaml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/newsanalyzer
+      - SPRING_DATA_REDIS_HOST=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+
+  reasoning-service:
+    build:
+      context: ./reasoning-service
+      dockerfile: Dockerfile
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: newsanalyzer
+      POSTGRES_USER: newsanalyzer
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+```
+
+---
+
+### Alternative: Vercel/Netlify (Frontend Only)
+
+For frontend-only deployment:
 
 **Build:**
 ```bash
@@ -489,111 +587,13 @@ npm run build
 
 **Environment Variables:**
 ```
-NEXT_PUBLIC_REASONING_SERVICE_URL=https://reasoning-api.yourdomain.com
+NEXT_PUBLIC_REASONING_SERVICE_URL=https://api.yourdomain.com/reasoning
 NEXT_PUBLIC_BACKEND_URL=https://api.yourdomain.com
 ```
 
 **Deploy:**
 - Vercel: `vercel --prod`
 - Netlify: `netlify deploy --prod`
-
----
-
-### Python Service (Docker)
-
-**Dockerfile:**
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m spacy download en_core_web_sm
-
-COPY app/ ./app/
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-**Build and Run:**
-```bash
-docker build -t newsanalyzer-reasoning .
-docker run -p 8000:8000 newsanalyzer-reasoning
-```
-
----
-
-### Java Backend (Docker)
-
-**Dockerfile:**
-```dockerfile
-FROM eclipse-temurin:17-jdk-alpine
-
-WORKDIR /app
-
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
-
-RUN ./mvnw package -DskipTests
-
-CMD ["java", "-jar", "target/newsanalyzer-backend-2.0.0-SNAPSHOT.jar"]
-```
-
----
-
-### PostgreSQL (Docker Compose)
-
-**docker-compose.yml:**
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:14
-    environment:
-      POSTGRES_DB: newsanalyzer
-      POSTGRES_USER: newsanalyzer
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/newsanalyzer
-      SPRING_DATASOURCE_USERNAME: newsanalyzer
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-
-  reasoning:
-    build: ./reasoning-service
-    ports:
-      - "8000:8000"
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      NEXT_PUBLIC_REASONING_SERVICE_URL: http://reasoning:8000
-      NEXT_PUBLIC_BACKEND_URL: http://backend:8080
-
-volumes:
-  postgres_data:
-```
-
-**Start:**
-```bash
-docker-compose up -d
-```
 
 ---
 
@@ -736,6 +736,12 @@ psql -U newsanalyzer newsanalyzer < backup.sql
 
 ## Version History
 
+**v2.0.0 - Production Live (2025-12-16)**
+- ✅ Production deployment on Hetzner Cloud (Germany)
+- ✅ Docker Compose deployment with nginx, Redis
+- ✅ Domain: newsanalyzer.org
+- ✅ PostgreSQL 15, Redis 7
+
 **v2.0.0 - Phase 1 Complete (2025-11-21)**
 - ✅ Database schema with Schema.org support
 - ✅ Java backend with Entity CRUD
@@ -747,6 +753,7 @@ psql -U newsanalyzer newsanalyzer < backup.sql
 - Entity library and storage
 - External entity linking
 - Advanced Schema.org features
+- HTTPS/SSL with Let's Encrypt
 
 ---
 
