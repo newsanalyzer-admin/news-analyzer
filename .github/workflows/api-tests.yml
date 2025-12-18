@@ -19,6 +19,8 @@ on:
         required: false
         default: 'false'
         type: boolean
+  workflow_call:
+    # Allows this workflow to be called from other workflows (e.g., deploy-production.yml)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
