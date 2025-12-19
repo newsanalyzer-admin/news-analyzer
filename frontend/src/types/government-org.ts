@@ -1,8 +1,33 @@
 /**
  * Government Organization Types
  *
- * Type definitions for government organization sync status and results.
+ * Type definitions for government organizations and sync operations.
  */
+
+/**
+ * Government branch enum
+ */
+export type GovernmentBranch = 'executive' | 'legislative' | 'judicial';
+
+/**
+ * Government organization entity
+ */
+export interface GovernmentOrganization {
+  id: string;
+  officialName: string;
+  acronym: string | null;
+  orgType: string;
+  branch: GovernmentBranch;
+  parentId: string | null;
+  orgLevel: number;
+  establishedDate: string | null;
+  dissolvedDate: string | null;
+  websiteUrl: string | null;
+  jurisdictionAreas: string[] | null;
+  active: boolean;
+  description?: string | null;
+  mission?: string | null;
+}
 
 /**
  * Government organization sync status from the backend API

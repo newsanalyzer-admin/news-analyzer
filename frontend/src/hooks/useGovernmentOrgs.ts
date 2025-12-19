@@ -1,11 +1,17 @@
 /**
  * Government Organizations React Query Hooks
  *
- * React Query hooks for government organization sync operations.
+ * React Query hooks for government organization queries and sync operations.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { GovOrgSyncStatus, GovOrgSyncResult, CsvImportResult } from '@/types/government-org';
+import type {
+  GovOrgSyncStatus,
+  GovOrgSyncResult,
+  CsvImportResult,
+  GovernmentOrganization,
+  GovernmentBranch,
+} from '@/types/government-org';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -14,8 +20,66 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
  */
 export const govOrgKeys = {
   all: ['government-organizations'] as const,
+  lists: () => [...govOrgKeys.all, 'list'] as const,
+  byBranch: (branch: GovernmentBranch) => [...govOrgKeys.lists(), 'by-branch', branch] as const,
+  search: (query: string) => [...govOrgKeys.all, 'search', query] as const,
   syncStatus: () => [...govOrgKeys.all, 'sync-status'] as const,
 };
+
+// =====================================================================
+// Organization Fetch Functions
+// =====================================================================
+
+/**
+ * Fetch government organizations by branch
+ */
+async function fetchGovernmentOrgsByBranch(branch: GovernmentBranch): Promise<GovernmentOrganization[]> {
+  const response = await fetch(`${API_BASE}/api/government-organizations/by-branch?branch=${branch}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${branch} branch organizations`);
+  }
+  return response.json();
+}
+
+/**
+ * Search government organizations by name
+ */
+async function searchGovernmentOrgs(query: string): Promise<GovernmentOrganization[]> {
+  const response = await fetch(`${API_BASE}/api/government-organizations/search?q=${encodeURIComponent(query)}`);
+  if (!response.ok) {
+    throw new Error('Failed to search government organizations');
+  }
+  return response.json();
+}
+
+// =====================================================================
+// Organization Query Hooks
+// =====================================================================
+
+/**
+ * Hook to fetch government organizations by branch
+ */
+export function useGovernmentOrgsByBranch(branch: GovernmentBranch) {
+  return useQuery({
+    queryKey: govOrgKeys.byBranch(branch),
+    queryFn: () => fetchGovernmentOrgsByBranch(branch),
+  });
+}
+
+/**
+ * Hook to search government organizations
+ */
+export function useGovernmentOrgsSearch(query: string) {
+  return useQuery({
+    queryKey: govOrgKeys.search(query),
+    queryFn: () => searchGovernmentOrgs(query),
+    enabled: !!query && query.length >= 2,
+  });
+}
+
+// =====================================================================
+// Sync Functions
+// =====================================================================
 
 /**
  * Fetch government organization sync status from the API

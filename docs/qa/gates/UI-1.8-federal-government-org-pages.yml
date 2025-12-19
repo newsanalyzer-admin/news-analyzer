@@ -1,0 +1,76 @@
+# Quality Gate: UI-1.8 - Federal Government Organization Pages
+schema: 1
+story: "UI-1.8"
+story_title: "Federal Government Organization Pages"
+gate: PASS
+status_reason: "All 11 ACs met. Hub page + 3 branch pages with hierarchical tree, search, and detail panel."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-19T12:00:00-08:00"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "OBS-001"
+    severity: low
+    finding: "No unit tests for page components"
+    suggested_action: "Add Vitest tests in future sprint"
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 1 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Add unit tests when test coverage initiative begins"
+
+quality_score: 96
+expires: "2026-01-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  files_reviewed: 8
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Read-only display; no sensitive operations"
+  performance:
+    status: PASS
+    notes: "Client-side filtering; expandable tree reduces initial render"
+  reliability:
+    status: PASS
+    notes: "Graceful error handling with retry button; loading skeleton"
+  maintainability:
+    status: PASS
+    notes: "Shared BranchOrgsPage component eliminates duplication"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add Vitest unit tests for page components"
+      refs: ["frontend/src/app/factbase/organizations/__tests__/"]
+
+dependencies:
+  - story: "UI-1.4"
+    status: "COMPLETE"
+    impact: "ContentPageHeader component used"
+  - story: "UI-1.9"
+    status: "COMPLETE"
+    impact: "Legislative branch data available"
+  - story: "UI-1.10"
+    status: "COMPLETE"
+    impact: "Judicial branch data available"
+
+notes:
+  - "Organizations hub page at /factbase/organizations with links to 3 branches"
+  - "Shared BranchOrgsPage component for all 3 branch pages"
+  - "OrgDetailPanel slide-out shows website, jurisdiction, dates, mission"
+  - "Hierarchical tree with expand/collapse functionality"
+  - "Search by name with debounce"
+  - "GovernmentOrganization and GovernmentBranch types added"
+  - "useGovernmentOrgsByBranch hook fetches branch-specific data"
+  - "Branch filter bug fixed - uses lowercase values matching backend"
+  - "TypeScript compiles with no errors"
