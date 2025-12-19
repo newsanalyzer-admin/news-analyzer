@@ -23,7 +23,7 @@
 
 | # | Story | Title | Points | Priority | Assignee | Status | Gate |
 |---|-------|-------|--------|----------|----------|--------|------|
-| 1 | UI-1.4 | Content Page Template | 3 | P0 - Critical Path | TBD | Ready | - |
+| 1 | UI-1.4 | Content Page Template | 3 | P0 - Critical Path | James | **Done** | PASS |
 | 2 | UI-1.5 | Congressional Members Page | 3 | P1 | TBD | Ready | - |
 | 3 | UI-1.6 | Executive Appointees Page | 3 | P1 | TBD | Ready | - |
 | 4 | UI-1.8 | Federal Government Org Pages | 5 | P1 | TBD | Ready | - |
@@ -135,7 +135,7 @@ Three public pages for government organizations by branch.
 ### Day 1 (2025-12-19)
 | Story | Progress | Notes |
 |-------|----------|-------|
-| | | |
+| UI-1.4 | **Done** | ContentPageHeader component, page-descriptions.ts, QA PASS |
 
 ### Day 2
 | Story | Progress | Notes |
@@ -203,9 +203,9 @@ Three public pages for government organizations by branch.
 
 | Status | Count | Points |
 |--------|-------|--------|
-| Done | 0 | 0 |
+| Done | 1 | 3 |
 | In Progress | 0 | 0 |
-| Ready | 4 | 14 |
+| Ready | 3 | 11 |
 | Blocked | 0 | 0 |
 | **Total** | **4** | **14** |
 
@@ -215,8 +215,8 @@ Three public pages for government organizations by branch.
 
 By end of sprint, the following should be complete:
 
-- [ ] ContentPageHeader component created
-- [ ] Page descriptions configuration file
+- [x] ContentPageHeader component created **UI-1.4**
+- [x] Page descriptions configuration file **UI-1.4**
 - [ ] Congressional Members page at `/factbase/people/congressional-members`
 - [ ] Executive Appointees page at `/factbase/people/executive-appointees`
 - [ ] Executive Branch orgs page at `/factbase/organizations/executive`
@@ -262,6 +262,7 @@ After Sprint 2, Epic UI-1 will be **complete**:
 | Date | Change | Author |
 |------|--------|--------|
 | 2025-12-19 | Sprint 2 planning document created | Bob (SM Agent) |
+| 2025-12-19 | UI-1.4 completed, QA PASS - Critical path blocker resolved | James (Dev Agent) |
 
 ---
 
