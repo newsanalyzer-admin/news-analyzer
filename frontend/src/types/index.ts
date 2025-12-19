@@ -22,6 +22,9 @@ export * from './government-org';
 // PLUM (Executive Branch Appointees) types
 export * from './plum';
 
+// Appointee types
+export * from './appointee';
+
 // Search Import types (generic components)
 export * from './search-import';
 
