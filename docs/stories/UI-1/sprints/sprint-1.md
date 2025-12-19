@@ -27,9 +27,9 @@
 | 2 | UI-1.1 | Shared Sidebar Components | 5 | P1 | James | **Done** | PASS |
 | 3 | UI-1.9 | Populate Legislative Branch Orgs | 3 | P1 | James | **Done** | PASS |
 | 4 | UI-1.10 | Populate Judicial Branch Orgs | 3 | P1 | James | **Done** | PASS |
-| 5 | UI-1.2 | Factbase Layout & Landing Update | 5 | P2 | TBD | Ready | - |
-| 6 | UI-1.3 | Menu Configuration System | 3 | P2 | TBD | Ready | - |
-| 7 | UI-1.12 | Admin Access Link | 1 | P3 | TBD | Ready | - |
+| 5 | UI-1.2 | Factbase Layout & Landing Update | 5 | P2 | James | **Done** | PASS |
+| 6 | UI-1.3 | Menu Configuration System | 3 | P2 | James | **Done** | PASS |
+| 7 | UI-1.12 | Admin Access Link | 1 | P3 | James | **Done** | PASS |
 | | **Total** | | **28** | | | |
 
 ### Bonus: Pulled Forward from Sprint 2
@@ -94,6 +94,9 @@ Day 8-10: Completion
 | UI-1.11 | **Done** | FJC CSV research complete, 25 backend tests pass, QA PASS |
 | UI-1.7 | **Done** | Frontend page complete, pulled from Sprint 2, QA PASS |
 | UI-1.1 | **Done** | Shared sidebar components (from prior session), QA PASS |
+| UI-1.2 | **Done** | Factbase layout (from prior session), QA PASS |
+| UI-1.3 | **Done** | Menu configuration (from prior session), QA PASS |
+| UI-1.12 | **Done** | Admin link in PublicSidebar footer, QA PASS |
 
 ### Day 2
 | Story | Progress | Notes |
@@ -194,13 +197,13 @@ Day 8-10: Completion
 
 | Status | Count | Points |
 |--------|-------|--------|
-| Done | 5 | 24 |
+| Done | 8 | 33 |
 | In Progress | 0 | 0 |
-| Ready | 3 | 9 |
+| Ready | 0 | 0 |
 | Blocked | 0 | 0 |
 | **Total** | **8** | **33** |
 
-*Note: Includes UI-1.7 (5 pts) pulled forward from Sprint 2*
+*Note: Includes UI-1.7 (5 pts) pulled forward from Sprint 2. Sprint 1 complete!*
 
 ---
 
@@ -210,13 +213,13 @@ By end of sprint, the following should be complete:
 
 - [x] Shared sidebar components extracted and working (`components/sidebar/`) **UI-1.1**
 - [x] Admin sidebar still functional after refactor **UI-1.1**
-- [ ] Factbase layout created at `/factbase`
-- [ ] Hero page has "Explore Factbase" CTA
-- [ ] Public sidebar menu configuration defined
-- [x] Legislative branch orgs imported (≥15 orgs) ✅ **22 orgs**
-- [x] Judicial branch orgs imported (≥120 orgs) ✅ **124 orgs**
-- [x] Federal Judges data source decision made (UI-1.11) ✅ **FJC CSV**
-- [ ] Admin gear icon in sidebar footer
+- [x] Factbase layout created at `/factbase` **UI-1.2**
+- [x] Hero page has "Explore Factbase" CTA **UI-1.2**
+- [x] Public sidebar menu configuration defined **UI-1.3**
+- [x] Legislative branch orgs imported (≥15 orgs) **22 orgs**
+- [x] Judicial branch orgs imported (≥120 orgs) **124 orgs**
+- [x] Federal Judges data source decision made (UI-1.11) **FJC CSV**
+- [x] Admin gear icon in sidebar footer **UI-1.12**
 
 ### Bonus Deliverables (Pulled Forward)
 
@@ -269,6 +272,8 @@ Stories not in Sprint 1 (planned for Sprint 2):
 | 2025-12-18 | UI-1.7 pulled forward from Sprint 2, completed and QA passed | James (Dev Agent) |
 | 2025-12-18 | Updated story completion metrics (4 done, 19 pts) | James (Dev Agent) |
 | 2025-12-18 | UI-1.1 QA review complete, PASS gate created (5 done, 24 pts) | Quinn (Test Architect) |
+| 2025-12-18 | UI-1.2, UI-1.3, UI-1.12 QA reviews complete, PASS gates created | Quinn (Test Architect) |
+| 2025-12-18 | **Sprint 1 Complete!** All 8 stories done (33 pts) | James (Dev Agent) |
 
 ---
 

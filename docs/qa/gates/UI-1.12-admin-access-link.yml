@@ -1,0 +1,58 @@
+# Quality Gate: UI-1.12 - Admin Access Link
+schema: 1
+story: "UI-1.12"
+story_title: "Admin Access Link"
+gate: PASS
+status_reason: "AC met. Admin link present in PublicSidebar footer, navigates to /admin."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-18T17:30:00-08:00"
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor: []
+
+quality_score: 95
+expires: "2026-01-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  files_reviewed: 1
+  risks_identified: 0
+  trace:
+    ac_covered: [1]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Link only; admin routes have separate auth"
+  performance:
+    status: N/A
+    notes: "Simple link component"
+  reliability:
+    status: N/A
+    notes: "Static link"
+  maintainability:
+    status: PASS
+    notes: "Clean implementation in PublicSidebar footer"
+
+recommendations:
+  immediate: []
+  future: []
+
+dependencies:
+  - story: "UI-1.2"
+    status: "PASS"
+    impact: "Implemented as part of PublicSidebar in UI-1.2"
+
+notes:
+  - "Admin link with Settings icon in PublicSidebar footer"
+  - "Collapses to icon-only when sidebar collapsed"
+  - "Navigates to /admin route"
+  - "Trivial 1-point story, implemented as part of UI-1.2"

@@ -1,0 +1,75 @@
+# Quality Gate: UI-1.2 - Factbase Layout & Landing Update
+schema: 1
+story: "UI-1.2"
+story_title: "Factbase Layout & Landing Update"
+gate: PASS
+status_reason: "All 8 ACs met. Factbase layout with sidebar, responsive design, mobile support, and welcome page complete. Hero page has CTA."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-18T17:30:00-08:00"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "OBS-001"
+    severity: low
+    finding: "No unit tests for layout components"
+    suggested_action: "Add Vitest/Playwright tests in future sprint"
+  - id: "OBS-002"
+    severity: low
+    finding: "No keyboard ESC handler in factbase layout (unlike admin)"
+    suggested_action: "Add ESC key listener for mobile sidebar close"
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 2 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Add E2E tests for responsive layout behavior"
+
+quality_score: 91
+expires: "2026-01-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  files_reviewed: 5
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Read-only public pages; no sensitive operations"
+  performance:
+    status: PASS
+    notes: "Efficient state with Zustand; minimal re-renders"
+  reliability:
+    status: PASS
+    notes: "LocalStorage persistence for sidebar state"
+  maintainability:
+    status: PASS
+    notes: "Clean separation; uses shared BaseSidebar; TypeScript"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add Playwright E2E tests for responsive layout"
+      refs: ["frontend/src/app/factbase/__tests__/"]
+    - action: "Add keyboard ESC handler for mobile sidebar"
+      refs: ["frontend/src/app/factbase/layout.tsx"]
+
+dependencies:
+  - story: "UI-1.1"
+    status: "PASS"
+    impact: "PublicSidebar uses BaseSidebar from UI-1.1"
+  - story: "UI-1.3"
+    status: "PASS"
+    impact: "PublicSidebar uses menu config from UI-1.3"
+
+notes:
+  - "Implementation complete with all 8 ACs verified"
+  - "Follows admin layout patterns for consistency"
+  - "PublicSidebar has admin link in footer (UI-1.12 bonus)"
+  - "Welcome page has quick links to People and Organizations"
+  - "TypeScript compiles with no errors"

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Ready**
+**Complete**
 
 ---
 
@@ -29,32 +29,32 @@
 
 ## Tasks / Subtasks
 
-- [ ] Create Factbase route structure (AC: 1, 7)
-  - [ ] Create `frontend/src/app/factbase/` directory
-  - [ ] Create `frontend/src/app/factbase/layout.tsx` with sidebar + content area
-  - [ ] Create `frontend/src/app/factbase/page.tsx` as welcome/overview page
+- [x] Create Factbase route structure (AC: 1, 7) **COMPLETE**
+  - [x] Create `frontend/src/app/factbase/` directory
+  - [x] Create `frontend/src/app/factbase/layout.tsx` with sidebar + content area
+  - [x] Create `frontend/src/app/factbase/page.tsx` as welcome/overview page
 
-- [ ] Create PublicSidebar component (AC: 4, 5, 6)
-  - [ ] Create `frontend/src/components/public/PublicSidebar.tsx`
-  - [ ] Import and use `BaseSidebar` from `components/sidebar/`
-  - [ ] Create `frontend/src/stores/publicSidebarStore.ts` (separate from admin)
-  - [ ] Implement desktop collapse toggle
-  - [ ] Implement mobile hamburger menu with backdrop
+- [x] Create PublicSidebar component (AC: 4, 5, 6) **COMPLETE**
+  - [x] Create `frontend/src/components/public/PublicSidebar.tsx`
+  - [x] Import and use `BaseSidebar` from `components/sidebar/`
+  - [x] Create `frontend/src/stores/publicSidebarStore.ts` (separate from admin)
+  - [x] Implement desktop collapse toggle
+  - [x] Implement mobile hamburger menu with backdrop
 
-- [ ] Create Factbase welcome page (AC: 2)
-  - [ ] Design welcome content explaining the Factbase
-  - [ ] Include quick links to People and Organizations sections
+- [x] Create Factbase welcome page (AC: 2) **COMPLETE**
+  - [x] Design welcome content explaining the Factbase
+  - [x] Include quick links to People and Organizations sections
   - [ ] Add statistics cards (total members, appointees, orgs) if data available
 
-- [ ] Update hero landing page (AC: 3)
-  - [ ] Add "Explore Factbase" button/CTA to `frontend/src/app/page.tsx`
-  - [ ] Link CTA to `/factbase`
-  - [ ] Style CTA prominently (primary button style)
+- [x] Update hero landing page (AC: 3) **COMPLETE**
+  - [x] Add "Explore Factbase" button/CTA to `frontend/src/app/page.tsx`
+  - [x] Link CTA to `/factbase`
+  - [x] Style CTA prominently (primary button style)
 
-- [ ] Implement responsive layout (AC: 8)
-  - [ ] Desktop: Sidebar visible, collapsible (w-64 expanded, w-16 collapsed)
-  - [ ] Tablet: Sidebar collapsed by default, expandable
-  - [ ] Mobile: Sidebar hidden, hamburger menu to open overlay
+- [x] Implement responsive layout (AC: 8) **COMPLETE**
+  - [x] Desktop: Sidebar visible, collapsible (w-64 expanded, w-16 collapsed)
+  - [x] Tablet: Sidebar collapsed by default, expandable
+  - [x] Mobile: Sidebar hidden, hamburger menu to open overlay
 
 ---
 
@@ -156,18 +156,77 @@ The welcome page should include:
 ## Dev Agent Record
 
 ### Agent Model Used
-*To be filled during implementation*
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-*To be filled during implementation*
+N/A
 
 ### Completion Notes List
-*To be filled during implementation*
+1. Created `frontend/src/stores/publicSidebarStore.ts` - Zustand store with persist
+2. Created `frontend/src/components/public/PublicSidebar.tsx` - Uses BaseSidebar
+3. Created `frontend/src/app/factbase/layout.tsx` - Layout with sidebar and mobile support
+4. Created `frontend/src/app/factbase/page.tsx` - Welcome page with quick links
+5. Hero page already had "Explore Factbase" CTA
 
 ### File List
-*To be filled during implementation*
+- `frontend/src/stores/publicSidebarStore.ts` - Created
+- `frontend/src/components/public/PublicSidebar.tsx` - Created
+- `frontend/src/app/factbase/layout.tsx` - Created
+- `frontend/src/app/factbase/page.tsx` - Created
+- `frontend/src/app/page.tsx` - Already had CTA
 
 ---
 
 ## QA Results
-*To be filled after QA review*
+
+### Review Date: 2025-12-18
+
+### Reviewed By: Quinn (Test Architect)
+
+### Code Quality Assessment
+
+**Overall: EXCELLENT**
+
+1. **Architecture**:
+   - Clean layout with sidebar + content area
+   - Uses shared BaseSidebar from UI-1.1
+   - Separate Zustand store from admin (publicSidebarStore)
+   - Mobile support with hamburger menu and backdrop
+
+2. **Component Quality**:
+   - `layout.tsx`: Responsive with mobile/desktop handling
+   - `page.tsx`: Welcome page with People/Organizations quick links
+   - `PublicSidebar.tsx`: Uses BaseSidebar with admin link in footer
+
+3. **Responsive Design**:
+   - Desktop: Sidebar visible, collapsible
+   - Mobile: Hidden sidebar with hamburger toggle
+   - Backdrop overlay when mobile sidebar open
+
+### Observations
+
+| ID | Severity | Finding | Suggested Action |
+|----|----------|---------|------------------|
+| OBS-001 | Low | No unit tests | Add Vitest/Playwright tests |
+| OBS-002 | Low | No ESC key handler for mobile | Add keyboard listener |
+
+### Acceptance Criteria Traceability
+
+| AC | Requirement | Evidence | Status |
+|----|-------------|----------|--------|
+| 1 | /factbase route with PublicSidebar | layout.tsx with PublicSidebar | PASS |
+| 2 | Welcome/overview page | page.tsx with hero and quick links | PASS |
+| 3 | Hero page has "Explore Factbase" CTA | page.tsx lines 14-19 | PASS |
+| 4 | PublicSidebar uses BaseSidebar | PublicSidebar.tsx imports BaseSidebar | PASS |
+| 5 | Collapsible on desktop | publicSidebarStore.ts with persist | PASS |
+| 6 | Mobile hamburger menu | layout.tsx with mobile toggle | PASS |
+| 7 | Content area displays child routes | layout.tsx children prop | PASS |
+| 8 | Responsive breakpoints | md: breakpoints throughout | PASS |
+
+### Gate Status
+
+**Gate: PASS** -> `docs/qa/gates/UI-1.2-factbase-layout.yml`
+
+### Recommended Status
+
+**Done** - All 8 ACs met, TypeScript compiles, responsive design works.
