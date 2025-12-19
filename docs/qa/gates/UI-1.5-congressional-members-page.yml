@@ -1,0 +1,69 @@
+# Quality Gate: UI-1.5 - Congressional Members Page
+schema: 1
+story: "UI-1.5"
+story_title: "Congressional Members Page"
+gate: PASS
+status_reason: "All 10 ACs met. Public page with ContentPageHeader, member filters, clickable table with detail panel."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-12-19T10:00:00-08:00"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "OBS-001"
+    severity: low
+    finding: "No unit tests for page components"
+    suggested_action: "Add Vitest tests in future sprint"
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 1 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Add unit tests when test coverage initiative begins"
+
+quality_score: 95
+expires: "2026-01-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 0
+  files_reviewed: 3
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Read-only display; no sensitive operations"
+  performance:
+    status: PASS
+    notes: "Uses existing optimized useMembers hook with pagination"
+  reliability:
+    status: PASS
+    notes: "Graceful error handling with retry button; loading skeleton"
+  maintainability:
+    status: PASS
+    notes: "Reuses existing components; follows established patterns"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Add Vitest unit tests for page components"
+      refs: ["frontend/src/app/factbase/people/congressional-members/__tests__/"]
+
+dependencies:
+  - story: "UI-1.4"
+    status: "COMPLETE"
+    impact: "ContentPageHeader component used"
+
+notes:
+  - "Page route created at /factbase/people/congressional-members"
+  - "People hub page created at /factbase/people with links to member categories"
+  - "MemberDetailPanel slide-out component follows JudgeDetailPanel pattern"
+  - "Reuses MemberFilters component for filtering (chamber, state, party, search)"
+  - "Reuses MemberPhoto component for member photos"
+  - "Table rows clickable to open detail panel"
+  - "Responsive design with mobile card view"
+  - "TypeScript compiles with no errors"

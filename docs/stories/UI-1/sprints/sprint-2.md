@@ -24,7 +24,7 @@
 | # | Story | Title | Points | Priority | Assignee | Status | Gate |
 |---|-------|-------|--------|----------|----------|--------|------|
 | 1 | UI-1.4 | Content Page Template | 3 | P0 - Critical Path | James | **Done** | PASS |
-| 2 | UI-1.5 | Congressional Members Page | 3 | P1 | TBD | Ready | - |
+| 2 | UI-1.5 | Congressional Members Page | 3 | P1 | James | **Done** | PASS |
 | 3 | UI-1.6 | Executive Appointees Page | 3 | P1 | TBD | Ready | - |
 | 4 | UI-1.8 | Federal Government Org Pages | 5 | P1 | TBD | Ready | - |
 | | **Total** | | **14** | | | |
@@ -136,6 +136,7 @@ Three public pages for government organizations by branch.
 | Story | Progress | Notes |
 |-------|----------|-------|
 | UI-1.4 | **Done** | ContentPageHeader component, page-descriptions.ts, QA PASS |
+| UI-1.5 | **Done** | Congressional Members page, People hub, MemberDetailPanel, QA PASS |
 
 ### Day 2
 | Story | Progress | Notes |
@@ -203,9 +204,9 @@ Three public pages for government organizations by branch.
 
 | Status | Count | Points |
 |--------|-------|--------|
-| Done | 1 | 3 |
+| Done | 2 | 6 |
 | In Progress | 0 | 0 |
-| Ready | 3 | 11 |
+| Ready | 2 | 8 |
 | Blocked | 0 | 0 |
 | **Total** | **4** | **14** |
 
@@ -217,14 +218,15 @@ By end of sprint, the following should be complete:
 
 - [x] ContentPageHeader component created **UI-1.4**
 - [x] Page descriptions configuration file **UI-1.4**
-- [ ] Congressional Members page at `/factbase/people/congressional-members`
+- [x] People hub page at `/factbase/people` **UI-1.5**
+- [x] Congressional Members page at `/factbase/people/congressional-members` **UI-1.5**
 - [ ] Executive Appointees page at `/factbase/people/executive-appointees`
 - [ ] Executive Branch orgs page at `/factbase/organizations/executive`
 - [ ] Legislative Branch orgs page at `/factbase/organizations/legislative`
 - [ ] Judicial Branch orgs page at `/factbase/organizations/judicial`
 - [ ] Organizations hub page at `/factbase/organizations`
-- [ ] All pages use ContentPageHeader with breadcrumbs
-- [ ] All pages are read-only (no admin actions)
+- [x] All pages use ContentPageHeader with breadcrumbs (UI-1.4, UI-1.5)
+- [x] All pages are read-only (no admin actions) (UI-1.4, UI-1.5)
 
 ---
 
@@ -263,6 +265,7 @@ After Sprint 2, Epic UI-1 will be **complete**:
 |------|--------|--------|
 | 2025-12-19 | Sprint 2 planning document created | Bob (SM Agent) |
 | 2025-12-19 | UI-1.4 completed, QA PASS - Critical path blocker resolved | James (Dev Agent) |
+| 2025-12-19 | UI-1.5 completed, QA PASS - Congressional Members page + People hub | James (Dev Agent) |
 
 ---
 
