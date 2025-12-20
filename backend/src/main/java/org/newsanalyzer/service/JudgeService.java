@@ -55,16 +55,71 @@ public class JudgeService {
      */
     public Page<JudgeDTO> findJudges(String courtLevel, String circuit, String status,
                                       String search, Pageable pageable) {
-        // Get all FJC holdings
-        Page<PositionHolding> holdings = holdingRepository.findByDataSource(DataSource.FJC, pageable);
+        // Get all FJC holdings - use unpaged query to avoid sorting on PositionHolding
+        // Sorting is applied after mapping to JudgeDTO since lastName is on Person, not PositionHolding
+        List<PositionHolding> allHoldings = holdingRepository.findByDataSource(DataSource.FJC);
 
-        List<JudgeDTO> judges = holdings.getContent().stream()
+        List<JudgeDTO> allJudges = allHoldings.stream()
                 .map(this::toJudgeDTO)
                 .filter(Objects::nonNull)
                 .filter(j -> matchesFilters(j, courtLevel, circuit, status, search))
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(judges, pageable, holdings.getTotalElements());
+        // Apply sorting based on pageable sort
+        Comparator<JudgeDTO> comparator = getComparator(pageable.getSort());
+        if (comparator != null) {
+            allJudges.sort(comparator);
+        }
+
+        // Apply pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allJudges.size());
+
+        List<JudgeDTO> pageContent = start < allJudges.size()
+                ? allJudges.subList(start, end)
+                : Collections.emptyList();
+
+        return new PageImpl<>(pageContent, pageable, allJudges.size());
+    }
+
+    /**
+     * Build comparator from Sort specification.
+     */
+    private Comparator<JudgeDTO> getComparator(org.springframework.data.domain.Sort sort) {
+        if (sort.isUnsorted()) {
+            return Comparator.comparing(JudgeDTO::getLastName, Comparator.nullsLast(String::compareToIgnoreCase));
+        }
+
+        Comparator<JudgeDTO> comparator = null;
+
+        for (org.springframework.data.domain.Sort.Order order : sort) {
+            Comparator<JudgeDTO> fieldComparator = getFieldComparator(order.getProperty());
+            if (fieldComparator != null) {
+                if (order.isDescending()) {
+                    fieldComparator = fieldComparator.reversed();
+                }
+                comparator = comparator == null ? fieldComparator : comparator.thenComparing(fieldComparator);
+            }
+        }
+
+        return comparator;
+    }
+
+    private Comparator<JudgeDTO> getFieldComparator(String field) {
+        switch (field) {
+            case "lastName":
+                return Comparator.comparing(JudgeDTO::getLastName, Comparator.nullsLast(String::compareToIgnoreCase));
+            case "firstName":
+                return Comparator.comparing(JudgeDTO::getFirstName, Comparator.nullsLast(String::compareToIgnoreCase));
+            case "fullName":
+                return Comparator.comparing(JudgeDTO::getFullName, Comparator.nullsLast(String::compareToIgnoreCase));
+            case "courtName":
+                return Comparator.comparing(JudgeDTO::getCourtName, Comparator.nullsLast(String::compareToIgnoreCase));
+            case "commissionDate":
+                return Comparator.comparing(JudgeDTO::getCommissionDate, Comparator.nullsLast(LocalDate::compareTo));
+            default:
+                return Comparator.comparing(JudgeDTO::getLastName, Comparator.nullsLast(String::compareToIgnoreCase));
+        }
     }
 
     /**

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Gavel, Scale, Building } from 'lucide-react';
+import { Gavel, Scale, Building, Users, Download } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
@@ -93,6 +93,28 @@ export default function JudicialBranchPage() {
                 <li>• Supreme Court of the United States</li>
                 <li>• Federal appellate courts</li>
                 <li>• District courts and specialized courts</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Judges Import Card */}
+        <Link href="/admin/factbase/judicial/judges">
+          <Card className="h-full hover:border-primary transition-colors cursor-pointer">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Users className="h-6 w-6 text-primary" />
+                <CardTitle>Judges</CardTitle>
+              </div>
+              <CardDescription>
+                Import and manage federal judge data from FJC
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Import from Federal Judicial Center</li>
+                <li>• Article III federal judges</li>
+                <li>• Appointment and commission history</li>
               </ul>
             </CardContent>
           </Card>

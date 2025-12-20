@@ -144,9 +144,9 @@ class JudgeServiceTest {
         void findJudges_filterByCourtLevel_filtersCorrectly() {
             // Given
             Pageable pageable = PageRequest.of(0, 20);
-            Page<PositionHolding> holdingPage = new PageImpl<>(List.of(sampleHolding), pageable, 1);
-            when(holdingRepository.findByDataSource(eq(DataSource.FJC), any(Pageable.class)))
-                    .thenReturn(holdingPage);
+            // findJudges now uses unpaged query and applies sorting/pagination in-memory
+            when(holdingRepository.findByDataSource(DataSource.FJC))
+                    .thenReturn(List.of(sampleHolding));
             when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
@@ -163,9 +163,8 @@ class JudgeServiceTest {
         void findJudges_filterByCourtLevel_excludesNonMatching() {
             // Given
             Pageable pageable = PageRequest.of(0, 20);
-            Page<PositionHolding> holdingPage = new PageImpl<>(List.of(sampleHolding), pageable, 1);
-            when(holdingRepository.findByDataSource(eq(DataSource.FJC), any(Pageable.class)))
-                    .thenReturn(holdingPage);
+            when(holdingRepository.findByDataSource(DataSource.FJC))
+                    .thenReturn(List.of(sampleHolding));
             when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
@@ -182,9 +181,8 @@ class JudgeServiceTest {
         void findJudges_filterBySearch_findsMatches() {
             // Given
             Pageable pageable = PageRequest.of(0, 20);
-            Page<PositionHolding> holdingPage = new PageImpl<>(List.of(sampleHolding), pageable, 1);
-            when(holdingRepository.findByDataSource(eq(DataSource.FJC), any(Pageable.class)))
-                    .thenReturn(holdingPage);
+            when(holdingRepository.findByDataSource(DataSource.FJC))
+                    .thenReturn(List.of(sampleHolding));
             when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
