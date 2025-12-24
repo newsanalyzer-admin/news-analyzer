@@ -49,9 +49,6 @@ public class FjcCsvImportService {
     @Value("${fjc.import.batch-size:100}")
     private int batchSize;
 
-    // Date format from FJC CSV (MM/DD/YYYY)
-    private static final DateTimeFormatter FJC_DATE_FORMAT = DateTimeFormatter.ofPattern("M/d/yyyy");
-
     // Cache for court organization lookups
     private final Map<String, UUID> courtCache = new ConcurrentHashMap<>();
 
@@ -411,6 +408,7 @@ public class FjcCsvImportService {
                                       FjcJudgeCsvRecord record, ImportStats stats) {
         LocalDate commissionDate = parseDate(record.getCommissionDate1());
         LocalDate terminationDate = parseDate(record.getTerminationDate1());
+        LocalDate seniorStatusDate = parseDate(record.getSeniorStatusDate1());
 
         if (commissionDate == null) {
             // Try confirmation date as fallback
@@ -428,9 +426,18 @@ public class FjcCsvImportService {
 
         if (existing.isPresent()) {
             PositionHolding holding = existing.get();
+            boolean updated = false;
             // Update end date if changed
             if (terminationDate != null && holding.getEndDate() == null) {
                 holding.setEndDate(terminationDate);
+                updated = true;
+            }
+            // Update senior status date if changed
+            if (seniorStatusDate != null && holding.getSeniorStatusDate() == null) {
+                holding.setSeniorStatusDate(seniorStatusDate);
+                updated = true;
+            }
+            if (updated) {
                 holdingRepository.save(holding);
                 stats.holdingsUpdated++;
             }
@@ -443,6 +450,7 @@ public class FjcCsvImportService {
         holding.setPositionId(position.getId());
         holding.setStartDate(commissionDate);
         holding.setEndDate(terminationDate);
+        holding.setSeniorStatusDate(seniorStatusDate);
         holding.setDataSource(DataSource.FJC);
         holding.setSourceReference("FJC NID: " + record.getNid());
         holdingRepository.save(holding);
@@ -453,11 +461,18 @@ public class FjcCsvImportService {
         if (dateStr == null || dateStr.isBlank()) {
             return null;
         }
+        String trimmed = dateStr.trim();
+        // Try ISO format first (YYYY-MM-DD from CSV columns)
         try {
-            return LocalDate.parse(dateStr.trim(), FJC_DATE_FORMAT);
+            return LocalDate.parse(trimmed, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-            log.trace("Could not parse date: {}", dateStr);
-            return null;
+            // Fall back to M/d/yyyy format (for constructed birth dates)
+            try {
+                return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("M/d/yyyy"));
+            } catch (DateTimeParseException e2) {
+                log.trace("Could not parse date: {}", dateStr);
+                return null;
+            }
         }
     }
 
