@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: org.newsanalyzer.apitests.integration.PerformanceTest
--------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.73 s -- in org.newsanalyzer.apitests.integration.PerformanceTest
