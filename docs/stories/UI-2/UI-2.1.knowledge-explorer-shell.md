@@ -2,7 +2,7 @@
 
 ## Status
 
-**Draft**
+**Complete**
 
 ---
 
@@ -30,41 +30,41 @@
 
 ## Tasks / Subtasks
 
-- [ ] Create Knowledge Base route structure (AC: 4)
-  - [ ] Create `frontend/src/app/knowledge-base/` directory
-  - [ ] Create `frontend/src/app/knowledge-base/page.tsx` (main entry)
-  - [ ] Create `frontend/src/app/knowledge-base/[entityType]/page.tsx`
-  - [ ] Create `frontend/src/app/knowledge-base/layout.tsx`
+- [x] Create Knowledge Base route structure (AC: 4)
+  - [x] Create `frontend/src/app/knowledge-base/` directory
+  - [x] Create `frontend/src/app/knowledge-base/page.tsx` (main entry)
+  - [x] Create `frontend/src/app/knowledge-base/[entityType]/page.tsx`
+  - [x] Create `frontend/src/app/knowledge-base/layout.tsx`
 
-- [ ] Create KnowledgeExplorer layout component (AC: 2, 3, 8)
-  - [ ] Create `frontend/src/components/knowledge-base/KnowledgeExplorer.tsx`
-  - [ ] Implement header with EntityTypeSelector and ViewModeSelector
-  - [ ] Implement responsive layout with content area placeholder
-  - [ ] Create `frontend/src/components/knowledge-base/index.ts` barrel export
+- [x] Create KnowledgeExplorer layout component (AC: 2, 3, 8)
+  - [x] Create `frontend/src/components/knowledge-base/KnowledgeExplorer.tsx`
+  - [x] Implement header with EntityTypeSelector and ViewModeSelector
+  - [x] Implement responsive layout with content area placeholder
+  - [x] Create `frontend/src/components/knowledge-base/index.ts` barrel export
 
-- [ ] Create EntityTypeSelector component (AC: 2, 5, 9)
-  - [ ] Create `frontend/src/components/knowledge-base/EntityTypeSelector.tsx`
-  - [ ] Define entity type configuration structure
-  - [ ] Implement tab/button group for type selection
-  - [ ] Wire to URL params via Next.js router
-  - [ ] Add keyboard navigation support
+- [x] Create EntityTypeSelector component (AC: 2, 5, 9)
+  - [x] Create `frontend/src/components/knowledge-base/EntityTypeSelector.tsx`
+  - [x] Define entity type configuration structure
+  - [x] Implement tab/button group for type selection
+  - [x] Wire to URL params via Next.js router
+  - [x] Add keyboard navigation support
 
-- [ ] Create ViewModeSelector component (AC: 3, 6, 9)
-  - [ ] Create `frontend/src/components/knowledge-base/ViewModeSelector.tsx`
-  - [ ] Show only views supported by current entity type
-  - [ ] Wire to URL query params
-  - [ ] Add keyboard navigation support
+- [x] Create ViewModeSelector component (AC: 3, 6, 9)
+  - [x] Create `frontend/src/components/knowledge-base/ViewModeSelector.tsx`
+  - [x] Show only views supported by current entity type
+  - [x] Wire to URL query params
+  - [x] Add keyboard navigation support
 
-- [ ] Update hero page navigation (AC: 1)
-  - [ ] Add single "Knowledge Base" link to hero page
-  - [ ] Remove "Explore Factbase" link
-  - [ ] Remove "View Government Orgs" link (if separate)
+- [x] Update hero page navigation (AC: 1)
+  - [x] Add single "Knowledge Base" link to hero page
+  - [x] Remove "Explore Factbase" link
+  - [x] Remove "View Government Orgs" link (if separate)
 
-- [ ] Implement redirects (AC: 7)
-  - [ ] Create redirect from `/factbase` → `/knowledge-base`
-  - [ ] Create redirect from `/factbase/government-orgs` → `/knowledge-base/organizations`
-  - [ ] Create redirect from `/factbase/people/*` → `/knowledge-base/people`
-  - [ ] Test all redirects work correctly
+- [x] Implement redirects (AC: 7)
+  - [x] Create redirect from `/factbase` → `/knowledge-base`
+  - [x] Create redirect from `/factbase/government-orgs` → `/knowledge-base/organizations`
+  - [x] Create redirect from `/factbase/people/*` → `/knowledge-base/people`
+  - [x] Test all redirects work correctly
 
 ---
 
@@ -73,33 +73,35 @@
 ### Relevant Source Tree
 
 ```
-frontend/src/
-├── app/
-│   ├── page.tsx                          # Hero page (update navigation)
-│   ├── factbase/                         # Current structure (to be replaced)
-│   │   ├── layout.tsx                    # Uses PublicSidebar - reference pattern
-│   │   ├── page.tsx                      # Current factbase landing
-│   │   ├── organizations/                # Gov orgs pages
-│   │   └── people/                       # People pages (judges, members, etc.)
-│   └── knowledge-base/                   # NEW - create this
-│       ├── layout.tsx                    # KnowledgeExplorer layout
-│       ├── page.tsx                      # Landing/redirect to default entity type
-│       └── [entityType]/
-│           └── page.tsx                  # EntityBrowser placeholder
-├── components/
-│   ├── public/
-│   │   └── PublicSidebar.tsx             # Existing - may reuse or replace
-│   ├── sidebar/                          # Shared sidebar components (UI-1.1)
-│   └── knowledge-base/                   # NEW - create this
-│       ├── KnowledgeExplorer.tsx         # Main layout component
-│       ├── EntityTypeSelector.tsx        # Tab/button selector
-│       ├── ViewModeSelector.tsx          # View toggle
-│       └── index.ts                      # Barrel export
-├── stores/
-│   └── publicSidebarStore.ts             # Existing store - reference
-└── lib/
-    └── config/
-        └── entityTypes.ts                # NEW - entity type configuration
+frontend/
+├── next.config.js                        # EXISTS - add redirects here
+└── src/
+    ├── app/
+    │   ├── page.tsx                      # Hero page (update navigation)
+    │   ├── factbase/                     # Current structure (to be replaced)
+    │   │   ├── layout.tsx                # Uses PublicSidebar - reference pattern
+    │   │   ├── page.tsx                  # Current factbase landing
+    │   │   ├── organizations/            # Gov orgs pages
+    │   │   └── people/                   # People pages (judges, members, etc.)
+    │   └── knowledge-base/               # NEW - create this
+    │       ├── layout.tsx                # KnowledgeExplorer layout
+    │       ├── page.tsx                  # Landing/redirect to default entity type
+    │       └── [entityType]/
+    │           └── page.tsx              # EntityBrowser placeholder
+    ├── components/
+    │   ├── public/
+    │   │   └── PublicSidebar.tsx         # Existing - reference for mobile menu pattern
+    │   ├── sidebar/                      # Shared sidebar components (UI-1.1)
+    │   └── knowledge-base/               # NEW - create this
+    │       ├── KnowledgeExplorer.tsx     # Main layout component
+    │       ├── EntityTypeSelector.tsx    # Tab/button selector
+    │       ├── ViewModeSelector.tsx      # View toggle
+    │       └── index.ts                  # Barrel export
+    ├── stores/
+    │   └── publicSidebarStore.ts         # Existing Zustand store - reference
+    └── lib/
+        └── config/
+            └── entityTypes.ts            # NEW - entity type configuration
 ```
 
 ### Key Implementation Details
@@ -161,6 +163,30 @@ redirects: async () => [
 - Test URL/routing behavior with Next.js router mocks
 - Test keyboard accessibility
 
+### Next.js Router Mocking Pattern
+```typescript
+// Mock Next.js navigation hooks
+import { vi } from 'vitest';
+
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+  }),
+  usePathname: () => '/knowledge-base/organizations',
+  useSearchParams: () => new URLSearchParams('view=list'),
+}));
+
+// Reset mocks between tests
+beforeEach(() => {
+  mockPush.mockClear();
+  mockReplace.mockClear();
+});
+```
+
 ### Test Cases
 
 1. **KnowledgeExplorer Layout**
@@ -197,22 +223,53 @@ redirects: async () => [
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2025-12-22 | 1.0 | Initial story creation | Sarah (PO) |
+| 2025-12-26 | 1.1 | Validation: updated source tree paths, added router mocking pattern, status → Approved | James (Dev) |
+| 2025-12-26 | 1.2 | Implementation complete: all tasks done, 22 tests passing, status → Complete | James (Dev) |
 
 ---
 
 ## Dev Agent Record
 
 ### Agent Model Used
-_To be filled by Dev Agent_
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-_To be filled by Dev Agent_
+- Fixed React Hooks rules violation in ViewModeSelector (hooks called after early return)
+- Added Suspense boundary in layout for SSR compatibility with useSearchParams
+- Added testing infrastructure (vitest.config.ts, test setup with Next.js router mocks)
+- Added testing dependencies (@testing-library/react, @testing-library/jest-dom, jsdom)
 
 ### Completion Notes List
-_To be filled by Dev Agent_
+1. Created Knowledge Base route structure with dynamic [entityType] routing
+2. Implemented EntityTypeSelector with full keyboard navigation (Arrow keys, Home, End)
+3. Implemented ViewModeSelector that conditionally renders based on supported views
+4. Created entity type configuration system in `lib/config/entityTypes.ts`
+5. Updated hero page: replaced "Explore Factbase" with "Knowledge Base", removed "View Government Orgs"
+6. Added comprehensive redirects for all old /factbase/* routes to /knowledge-base/*
+7. Created 22 unit tests covering all components with 100% pass rate
+8. All acceptance criteria verified: AC 1-9 satisfied
 
 ### File List
-_To be filled by Dev Agent_
+
+**New Files Created:**
+- `frontend/src/app/knowledge-base/page.tsx` - Landing page with redirect to default entity type
+- `frontend/src/app/knowledge-base/layout.tsx` - Layout with Suspense boundary and mobile menu
+- `frontend/src/app/knowledge-base/[entityType]/page.tsx` - Dynamic entity browser page
+- `frontend/src/components/knowledge-base/KnowledgeExplorer.tsx` - Main layout shell component
+- `frontend/src/components/knowledge-base/EntityTypeSelector.tsx` - Entity type tab selector
+- `frontend/src/components/knowledge-base/ViewModeSelector.tsx` - View mode toggle (List/Hierarchy)
+- `frontend/src/components/knowledge-base/index.ts` - Barrel export
+- `frontend/src/lib/config/entityTypes.ts` - Entity type configuration with TypeScript interfaces
+- `frontend/vitest.config.ts` - Vitest test runner configuration
+- `frontend/src/test/setup.ts` - Test setup with Next.js router mocks
+- `frontend/src/components/knowledge-base/__tests__/EntityTypeSelector.test.tsx` - 8 unit tests
+- `frontend/src/components/knowledge-base/__tests__/ViewModeSelector.test.tsx` - 8 unit tests
+- `frontend/src/components/knowledge-base/__tests__/KnowledgeExplorer.test.tsx` - 6 unit tests
+
+**Modified Files:**
+- `frontend/src/app/page.tsx` - Updated hero page navigation links
+- `frontend/next.config.js` - Added redirects configuration for /factbase/* routes
+- `frontend/package.json` - Added testing dependencies
 
 ---
 

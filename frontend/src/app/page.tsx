@@ -12,10 +12,10 @@ export default function Home() {
         </p>
         <div className="flex justify-center mb-6">
           <Link
-            href="/factbase"
+            href="/knowledge-base"
             className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl"
           >
-            Explore Factbase →
+            Explore Knowledge Base →
           </Link>
         </div>
         <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -24,12 +24,6 @@ export default function Home() {
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base"
           >
             Try Entity Extraction →
-          </Link>
-          <Link
-            href="/government-orgs"
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-base"
-          >
-            View Government Orgs →
           </Link>
           <Link
             href="/members"
