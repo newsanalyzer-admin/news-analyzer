@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 2.9
+**Document Version:** 3.0
 **Created:** 2025-11-25
-**Last Updated:** 2025-12-17
+**Last Updated:** 2025-12-26
 **Status:** Active
 
 ---
@@ -52,7 +52,8 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 
 | Epic | Status | Progress | Description |
 |------|--------|----------|-------------|
-| **UI-1** | Ready | 0% | Public Navigation & User Experience |
+| **UI-1** | Complete | 100% | Public Navigation & Factbase Pages |
+| **UI-2** | Ready | 0% | Knowledge Explorer UI Refactoring |
 
 ### Overall MVP Status
 
@@ -664,10 +665,10 @@ Core differentiator - cross-reference claims against authoritative sources.
 **Priority:** HIGH
 **Description:** Create public-facing user interfaces that make the factbase accessible to users unfamiliar with government structure.
 
-### UI-1: Public Navigation & User Experience
+### UI-1: Public Navigation & Factbase Pages ✅
 
-**Status:** READY FOR DEVELOPMENT
-**Approved:** 2025-12-15
+**Status:** COMPLETE
+**Completion Date:** 2025-12-26
 **Documentation:** [`docs/stories/UI-1/UI-1.epic-public-navigation-ux.md`](stories/UI-1/UI-1.epic-public-navigation-ux.md)
 
 **Business Value:**
@@ -688,22 +689,58 @@ Core differentiator - cross-reference claims against authoritative sources.
 - Federal judges data (pending FJC API research)
 
 **Stories (12 total, 47 points):**
-- UI-1.1: Shared Sidebar Components (5 pts) - Ready
-- UI-1.2: Factbase Layout & Landing Update (5 pts) - Ready
-- UI-1.3: Menu Configuration System (3 pts) - Ready
-- UI-1.4: Content Page Template (3 pts) - Ready
-- UI-1.5: Congressional Members Page (3 pts) - Ready
-- UI-1.6: Executive Appointees Page (3 pts) - Ready
-- UI-1.7: Federal Judges Page (5 pts) - **BLOCKED by UI-1.11**
-- UI-1.8: Federal Government Org Pages (5 pts) - Ready
-- UI-1.9: Populate Legislative Branch Orgs (3 pts) - Ready
-- UI-1.10: Populate Judicial Branch Orgs (3 pts) - Ready
-- UI-1.11: Federal Judges Data Research & Import (8 pts) - Ready (Critical Path)
-- UI-1.12: Admin Access Link (1 pt) - Ready
+- UI-1.1: Shared Sidebar Components (5 pts) ✅
+- UI-1.2: Factbase Layout & Landing Update (5 pts) ✅
+- UI-1.3: Menu Configuration System (3 pts) ✅
+- UI-1.4: Content Page Template (3 pts) ✅
+- UI-1.5: Congressional Members Page (3 pts) ✅
+- UI-1.6: Executive Appointees Page (3 pts) ✅
+- UI-1.7: Federal Judges Page (5 pts) ✅
+- UI-1.8: Federal Government Org Pages (5 pts) ✅
+- UI-1.9: Populate Legislative Branch Orgs (3 pts) ✅
+- UI-1.10: Populate Judicial Branch Orgs (3 pts) ✅
+- UI-1.11: Federal Judges Data Research & Import (8 pts) ✅
+- UI-1.12: Admin Access Link (1 pt) ✅
 
-**Critical Path:** UI-1.11 (Federal Judges Research) must complete before UI-1.7 can begin.
+**Quality Gates:** All 12 stories passed QA review.
 
-**Recommended Sprint 1:** UI-1.1, UI-1.9, UI-1.10, UI-1.11 (parallel data/infrastructure work)
+---
+
+### UI-2: Knowledge Explorer UI Refactoring
+
+**Status:** READY FOR DEVELOPMENT
+**Documentation:** [`docs/stories/UI-2/UI-2.epic-knowledge-explorer.md`](stories/UI-2/UI-2.epic-knowledge-explorer.md)
+
+**Relationship to UI-1:**
+- **Uses:** Data imports from UI-1.9, UI-1.10, UI-1.11 (Legislative/Judicial orgs, Federal Judges)
+- **Supersedes:** UI-1 page components (replaces bespoke pages with reusable patterns)
+- **Preserves:** User bookmarks via redirects from `/factbase/*` to `/knowledge-base/*`
+
+**Business Value:**
+- Unified Knowledge Explorer entry point eliminates navigation confusion
+- Reusable pattern components reduce time to add new entity types
+- Configuration-driven UI enables rapid extensibility
+- Clean architecture supports future data domains (corporations, universities, etc.)
+
+**Deliverables:**
+- KnowledgeExplorer shell with EntityTypeSelector and ViewModeSelector
+- Reusable EntityBrowser pattern (list/grid with filtering, sorting, pagination)
+- Reusable EntityDetail pattern (configuration-driven detail pages)
+- Reusable HierarchyView pattern (tree visualization)
+- Cross-entity SearchBar component
+- Migration of Government Orgs to new patterns
+- Migration of ALL People types (Judges, Members, Appointees) to new patterns
+- Cleanup of deprecated factbase code
+
+**Stories (8 total):**
+- UI-2.1: Knowledge Explorer Shell & Navigation
+- UI-2.2: EntityBrowser Pattern Component
+- UI-2.3: EntityDetail Pattern Component
+- UI-2.4: HierarchyView Pattern Component
+- UI-2.5: Cross-Entity Search
+- UI-2.6: Migrate Government Organizations
+- UI-2.7: Migrate People (Judges, Members, Appointees)
+- UI-2.8: Cleanup & Documentation
 
 ---
 
@@ -817,7 +854,8 @@ Based on business requirements document objectives:
 
 | Epic | Document | Status |
 |------|----------|--------|
-| UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | Ready for Development |
+| UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | ✅ Complete |
+| UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | Ready for Development |
 
 ### Phase Completion Summaries
 
@@ -869,6 +907,7 @@ Based on business requirements document objectives:
 | 2025-12-02 | 2.7 | **FB-3 Epic COMPLETE**: All 4 stories done - Federal Register API integration, Regulation data model & storage, Agency linkage service (5-level matching, >95% match rate), Regulation lookup API (8 endpoints); All QA gates passed (scores 95-100); MVP updated to ~95% |
 | 2025-12-12 | 2.8 | **ADMIN-1 Epic COMPLETE**: All 13 stories done - Admin dashboard redesign, GOVMAN/US Code import, API search/import UI (Congress.gov, Federal Register, Legislators repo); Supersedes FB-4, FB-5, FB-6 draft epics; **MVP 100% COMPLETE** |
 | 2025-12-17 | 2.9 | Added **User Experience Track** with **UI-1 Epic** (Public Navigation & User Experience) - 12 stories, 47 points, ready for development |
+| 2025-12-26 | 3.0 | **UI-1 Epic COMPLETE**: All 12 stories done - Public sidebar, factbase pages, federal judges import; Added **UI-2 Epic** (Knowledge Explorer UI Refactoring) - 8 stories, replaces bespoke UI-1 pages with reusable pattern components |
 
 ---
 

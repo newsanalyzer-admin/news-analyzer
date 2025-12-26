@@ -8,10 +8,11 @@
 | **Epic Name** | Knowledge Explorer UI Refactoring |
 | **Epic Type** | UI/UX Refactoring |
 | **Priority** | HIGH |
-| **Status** | Draft |
+| **Status** | Ready for Development |
 | **Created** | 2025-12-22 |
 | **Owner** | Sarah (PO) |
-| **Depends On** | UI-1 (existing factbase pages) |
+| **Depends On** | UI-1 Complete (uses data imports from UI-1.9, 1.10, 1.11) |
+| **Supersedes** | UI-1 page components (replaces bespoke pages with reusable patterns) |
 | **Source Brief** | `docs/briefs/knowledge-explorer-ui-brief.md` |
 
 ## Executive Summary
@@ -19,6 +20,20 @@
 Replace the current fragmented factbase UI with a unified **Knowledge Explorer** - a pattern-based, extensible interface for exploring authoritative data across all entity types. This refactoring addresses organic UI growth that created overlapping navigation paths and inconsistent implementations.
 
 The core innovation is establishing **reusable UI patterns** (EntityBrowser, EntityDetail, HierarchyView) that adapt based on entity type configuration rather than requiring new components for each data domain.
+
+## Relationship to UI-1
+
+**UI-1** (Public Navigation & Factbase Pages) delivered the initial `/factbase` implementation with bespoke page components. **UI-2** builds on this foundation:
+
+| Aspect | UI-1 Delivered | UI-2 Action |
+|--------|----------------|-------------|
+| **Data Imports** | Legislative orgs, Judicial orgs, Federal Judges | **Uses** - these data sources are prerequisites |
+| **Page Components** | Congressional Members, Executive Appointees, Federal Judges, Gov Org pages | **Supersedes** - replaces with reusable EntityBrowser/EntityDetail |
+| **Navigation** | PublicSidebar with static menu | **Supersedes** - replaces with KnowledgeExplorer shell |
+| **Routes** | `/factbase/*` pages | **Preserves** - redirects to `/knowledge-base/*` |
+| **Shared Components** | SidebarMenuItem, BaseSidebar | **Keeps** - may reuse for other areas |
+
+**Key Insight:** UI-2 doesn't invalidate UI-1's value - it evolves the UI architecture while preserving all data and user expectations (via redirects).
 
 ## Business Value
 
@@ -118,8 +133,10 @@ interface EntityTypeConfig {
 | Old Route | New Route |
 |-----------|-----------|
 | `/factbase` | `/knowledge-base` |
-| `/factbase/government-orgs` | `/knowledge-base/organizations` |
+| `/factbase/organizations/*` | `/knowledge-base/organizations` |
 | `/factbase/people/federal-judges` | `/knowledge-base/people?type=judges` |
+| `/factbase/people/congressional-members` | `/knowledge-base/people?type=members` |
+| `/factbase/people/executive-appointees` | `/knowledge-base/people?type=appointees` |
 
 ## Stories
 
@@ -235,21 +252,27 @@ interface EntityTypeConfig {
 
 ---
 
-### UI-2.7: Migrate Federal Judges (People)
+### UI-2.7: Migrate People (Judges, Members, Appointees)
 
-**Goal:** Refactor Federal Judges pages to use new patterns
+**Goal:** Refactor ALL People pages to use new patterns
 
 **Scope:**
-- Create entity type configuration for People/Judges
-- Migrate list view to EntityBrowser
-- Migrate detail view to EntityDetail
-- Support filtering by person type (judges, legislators, etc.)
+- Create entity type configuration for People with subtype support
+- Migrate Federal Judges to EntityBrowser/EntityDetail
+- Migrate Congressional Members to EntityBrowser/EntityDetail
+- Migrate Executive Appointees to EntityBrowser/EntityDetail
+- Support filtering by person type via URL param
 
 **Acceptance Criteria:**
 - [ ] Judges accessible via `/knowledge-base/people?type=judges`
-- [ ] All existing functionality preserved
+- [ ] Congressional Members accessible via `/knowledge-base/people?type=members`
+- [ ] Executive Appointees accessible via `/knowledge-base/people?type=appointees`
+- [ ] All existing functionality preserved for each person type
 - [ ] Uses shared pattern components
-- [ ] Old routes redirect correctly
+- [ ] Old routes redirect correctly:
+  - `/factbase/people/federal-judges` → `/knowledge-base/people?type=judges`
+  - `/factbase/people/congressional-members` → `/knowledge-base/people?type=members`
+  - `/factbase/people/executive-appointees` → `/knowledge-base/people?type=appointees`
 
 ---
 
