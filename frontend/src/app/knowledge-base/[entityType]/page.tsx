@@ -7,6 +7,7 @@ import { EntityBrowser, EntityFilters, HierarchyView, ViewModeSelector } from '@
 import {
   useGovernmentOrgsList,
   useGovernmentOrgsHierarchy,
+  useGovernmentOrgsSearch,
   type GovOrgListParams,
 } from '@/hooks/useGovernmentOrgs';
 
@@ -41,6 +42,7 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   const initialPage = parseInt(searchParams.get('page') || '0', 10);
   const initialSort = searchParams.get('sort') || entityConfig.defaultSort?.column || 'id';
   const initialDirection = (searchParams.get('dir') as SortDirection) || entityConfig.defaultSort?.direction || 'asc';
+  const searchQuery = searchParams.get('q') || '';
 
   // State for pagination, sorting, and filtering
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -72,7 +74,30 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   }, [currentPage, sortColumn, sortDirection, filterValues]);
 
   // Data fetching - currently only organizations
-  const { data, isLoading, error, refetch } = useGovernmentOrgsList(queryParams);
+  // Use search endpoint when there's a search query, otherwise use paginated list
+  const isSearching = !!searchQuery;
+
+  // Paginated list query (used when not searching)
+  const {
+    data: listData,
+    isLoading: isListLoading,
+    error: listError,
+    refetch: refetchList,
+  } = useGovernmentOrgsList(queryParams);
+
+  // Search query (used when searching)
+  const {
+    data: searchData,
+    isLoading: isSearchLoading,
+    error: searchError,
+    refetch: refetchSearch,
+  } = useGovernmentOrgsSearch(searchQuery);
+
+  // Combine results based on search state
+  const data = isSearching ? searchData : listData?.content;
+  const isLoading = isSearching ? isSearchLoading : isListLoading;
+  const error = isSearching ? searchError : listError;
+  const refetch = isSearching ? refetchSearch : refetchList;
 
   // Hierarchy data fetching (only when in hierarchy view)
   const {
@@ -85,7 +110,11 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   );
 
   // Extract total count for EntityBrowser
-  const totalCount = data?.totalElements || 0;
+  // When searching, we get all results (no pagination), so count is the array length
+  // When browsing, we get paginated results with totalElements
+  const totalCount = isSearching
+    ? (searchData?.length || 0)
+    : (listData?.totalElements || 0);
 
   // Handle page change
   const handlePageChange = useCallback((page: number) => {
@@ -154,11 +183,11 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
         ) : (
           <EntityBrowser
             config={entityConfig}
-            data={data?.content || []}
+            data={data || []}
             totalCount={totalCount}
             isLoading={isLoading}
             error={error?.message || null}
-            currentPage={currentPage}
+            currentPage={isSearching ? 0 : currentPage}
             pageSize={DEFAULT_PAGE_SIZE}
             sortColumn={sortColumn}
             sortDirection={sortDirection}
@@ -167,6 +196,7 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
             onSortChange={handleSortChange}
             onRowClick={handleRowClick}
             onRetry={() => refetch()}
+            searchQuery={searchQuery}
           />
         )}
       </div>

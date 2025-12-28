@@ -57,6 +57,8 @@ export interface EntityBrowserProps<T extends EntityType> {
   onRowClick: (item: T) => void;
   /** Retry callback for error state */
   onRetry?: () => void;
+  /** Current search query (for empty state messaging) */
+  searchQuery?: string;
 }
 
 /**
@@ -78,6 +80,7 @@ export function EntityBrowser<T extends EntityType>({
   onSortChange,
   onRowClick,
   onRetry,
+  searchQuery,
 }: EntityBrowserProps<T>) {
   const tableRef = useRef<HTMLTableElement>(null);
   const focusedRowIndex = useRef<number>(-1);
@@ -181,16 +184,28 @@ export function EntityBrowser<T extends EntityType>({
 
   // Empty state
   if (data.length === 0) {
+    const isSearchResult = !!searchQuery;
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center border rounded-lg">
         <div className="text-4xl mb-4">🔍</div>
-        <h3 className="text-lg font-semibold mb-2">No {config.label.toLowerCase()} found</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          {isSearchResult
+            ? `No ${config.label.toLowerCase()} found matching "${searchQuery}"`
+            : `No ${config.label.toLowerCase()} found`
+          }
+        </h3>
         <p className="text-muted-foreground">
-          Try adjusting your search or filter criteria.
+          {isSearchResult
+            ? 'Try a different search term or clear your search.'
+            : 'Try adjusting your filter criteria.'
+          }
         </p>
       </div>
     );
   }
+
+  // Hide pagination when searching (all results returned at once)
+  const isSearching = !!searchQuery;
 
   // Grid view
   if (viewMode === 'grid') {
@@ -207,17 +222,23 @@ export function EntityBrowser<T extends EntityType>({
           ))}
         </div>
 
-        {/* Pagination */}
-        <Pagination
-          startItem={startItem}
-          endItem={endItem}
-          totalCount={totalCount}
-          label={config.label.toLowerCase()}
-          isFirstPage={isFirstPage}
-          isLastPage={isLastPage}
-          onPrevious={() => onPageChange(currentPage - 1)}
-          onNext={() => onPageChange(currentPage + 1)}
-        />
+        {/* Pagination - hidden when searching */}
+        {isSearching ? (
+          <div className="mt-4 text-sm text-muted-foreground text-center">
+            Found {totalCount} {config.label.toLowerCase()}
+          </div>
+        ) : (
+          <Pagination
+            startItem={startItem}
+            endItem={endItem}
+            totalCount={totalCount}
+            label={config.label.toLowerCase()}
+            isFirstPage={isFirstPage}
+            isLastPage={isLastPage}
+            onPrevious={() => onPageChange(currentPage - 1)}
+            onNext={() => onPageChange(currentPage + 1)}
+          />
+        )}
       </div>
     );
   }
@@ -295,17 +316,23 @@ export function EntityBrowser<T extends EntityType>({
         ))}
       </div>
 
-      {/* Pagination */}
-      <Pagination
-        startItem={startItem}
-        endItem={endItem}
-        totalCount={totalCount}
-        label={config.label.toLowerCase()}
-        isFirstPage={isFirstPage}
-        isLastPage={isLastPage}
-        onPrevious={() => onPageChange(currentPage - 1)}
-        onNext={() => onPageChange(currentPage + 1)}
-      />
+      {/* Pagination - hidden when searching */}
+      {isSearching ? (
+        <div className="mt-4 text-sm text-muted-foreground text-center">
+          Found {totalCount} {config.label.toLowerCase()}
+        </div>
+      ) : (
+        <Pagination
+          startItem={startItem}
+          endItem={endItem}
+          totalCount={totalCount}
+          label={config.label.toLowerCase()}
+          isFirstPage={isFirstPage}
+          isLastPage={isLastPage}
+          onPrevious={() => onPageChange(currentPage - 1)}
+          onNext={() => onPageChange(currentPage + 1)}
+        />
+      )}
     </div>
   );
 }

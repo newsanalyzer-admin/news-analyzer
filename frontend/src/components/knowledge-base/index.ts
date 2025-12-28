@@ -1,6 +1,8 @@
 export { KnowledgeExplorer } from './KnowledgeExplorer';
 export { EntityTypeSelector } from './EntityTypeSelector';
 export { ViewModeSelector } from './ViewModeSelector';
+export { SearchBar } from './SearchBar';
+export type { SearchBarProps } from './SearchBar';
 export { EntityBrowser } from './EntityBrowser';
 export type { EntityBrowserProps } from './EntityBrowser';
 export { EntityFilters } from './EntityFilters';

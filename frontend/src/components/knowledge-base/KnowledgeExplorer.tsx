@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getEntityTypeConfig } from '@/lib/config/entityTypes';
 import { EntityTypeSelector } from './EntityTypeSelector';
 import { ViewModeSelector } from './ViewModeSelector';
+import { SearchBar } from './SearchBar';
 
 interface KnowledgeExplorerProps {
   children: React.ReactNode;
@@ -24,6 +27,13 @@ export function KnowledgeExplorer({
   onCloseMobileMenu,
   className,
 }: KnowledgeExplorerProps) {
+  const pathname = usePathname();
+
+  // Extract entity type from pathname (e.g., /knowledge-base/organizations -> organizations)
+  const pathParts = pathname.split('/');
+  const entityTypeFromPath = pathParts.length >= 3 ? pathParts[2] : null;
+  const entityConfig = entityTypeFromPath ? getEntityTypeConfig(entityTypeFromPath) : null;
+
   return (
     <div className={cn('flex flex-col min-h-screen', className)}>
       {/* Header */}
@@ -54,10 +64,14 @@ export function KnowledgeExplorer({
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <EntityTypeSelector onNavigate={onCloseMobileMenu} />
             <ViewModeSelector />
-            {/* SearchBar placeholder - will be added in UI-2.5 */}
-            <div className="hidden md:block md:ml-auto">
-              {/* Search bar will go here */}
-            </div>
+            {/* SearchBar - only shown when an entity type is selected */}
+            {entityConfig && (
+              <SearchBar
+                entityType={entityConfig.id}
+                entityLabel={entityConfig.label}
+                className="w-full sm:w-auto sm:ml-auto sm:min-w-[280px] md:min-w-[320px]"
+              />
+            )}
           </div>
         </div>
       </header>
