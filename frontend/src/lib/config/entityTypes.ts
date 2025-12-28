@@ -1,4 +1,7 @@
 import { Building2, Users, LucideIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { createElement, type ReactNode } from 'react';
+import type { GovernmentOrganization, GovernmentBranch } from '@/types/government-org';
 
 /**
  * View modes available for entity browsing
@@ -6,9 +9,87 @@ import { Building2, Users, LucideIcon } from 'lucide-react';
 export type ViewMode = 'list' | 'hierarchy';
 
 /**
+ * Sort direction
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * Column configuration for EntityBrowser table view
+ */
+export interface ColumnConfig<T = unknown> {
+  /** Field name/key in the data object */
+  id: string;
+  /** Display label for column header */
+  label: string;
+  /** Whether this column is sortable */
+  sortable?: boolean;
+  /** Optional fixed width (e.g., '150px', '10rem') */
+  width?: string;
+  /** Custom render function for cell content */
+  render?: (value: unknown, row: T) => ReactNode;
+  /** Hide this column on mobile devices */
+  hideOnMobile?: boolean;
+  /** Accessor function to get value from row (if different from id) */
+  accessor?: (row: T) => unknown;
+}
+
+/**
+ * Filter types supported by EntityBrowser
+ */
+export type FilterType = 'select' | 'multi-select' | 'text';
+
+/**
+ * Filter option for select-type filters
+ */
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * Filter configuration for EntityBrowser
+ */
+export interface FilterConfig {
+  /** Unique identifier for the filter */
+  id: string;
+  /** Display label */
+  label: string;
+  /** Type of filter control */
+  type: FilterType;
+  /** Options for select/multi-select filters */
+  options?: FilterOption[];
+  /** Query parameter name for API requests */
+  apiParam: string;
+  /** Placeholder text for text inputs */
+  placeholder?: string;
+}
+
+/**
+ * Default sort configuration
+ */
+export interface DefaultSort {
+  column: string;
+  direction: SortDirection;
+}
+
+/**
+ * Card configuration for grid view
+ */
+export interface CardConfig<T = unknown> {
+  /** Field to use as card title */
+  titleField: string;
+  /** Field to use as card subtitle */
+  subtitleField?: string;
+  /** Custom render function for card content */
+  renderContent?: (item: T) => ReactNode;
+  /** Custom render function for card badge/status */
+  renderBadge?: (item: T) => ReactNode;
+}
+
+/**
  * Entity type configuration that drives UI behavior
  */
-export interface EntityTypeConfig {
+export interface EntityTypeConfig<T = unknown> {
   /** Unique identifier used in URLs */
   id: string;
   /** Display label */
@@ -23,12 +104,139 @@ export interface EntityTypeConfig {
   defaultView: ViewMode;
   /** Whether this entity type supports subtypes (e.g., people -> judges, members) */
   hasSubtypes?: boolean;
+  /** Column definitions for list/table view */
+  columns?: ColumnConfig<T>[];
+  /** Filter definitions */
+  filters?: FilterConfig[];
+  /** Default sort configuration */
+  defaultSort?: DefaultSort;
+  /** Card configuration for grid view */
+  cardConfig?: CardConfig<T>;
+  /** Field to use as unique identifier (defaults to 'id') */
+  idField?: string;
 }
+
+/**
+ * Helper to create a badge variant based on branch
+ */
+function getBranchVariant(branch: GovernmentBranch): 'default' | 'secondary' | 'outline' {
+  switch (branch) {
+    case 'executive':
+      return 'default';
+    case 'legislative':
+      return 'secondary';
+    case 'judicial':
+      return 'outline';
+    default:
+      return 'secondary';
+  }
+}
+
+/**
+ * Organization-specific column configuration
+ */
+const organizationColumns: ColumnConfig<GovernmentOrganization>[] = [
+  {
+    id: 'officialName',
+    label: 'Name',
+    sortable: true,
+    width: '30%',
+  },
+  {
+    id: 'acronym',
+    label: 'Acronym',
+    sortable: true,
+    width: '100px',
+    render: (value) => (value as string) || '-',
+  },
+  {
+    id: 'branch',
+    label: 'Branch',
+    sortable: true,
+    width: '120px',
+    render: (value) => {
+      const branch = value as GovernmentBranch;
+      return createElement(
+        Badge,
+        { variant: getBranchVariant(branch) },
+        branch.charAt(0).toUpperCase() + branch.slice(1)
+      );
+    },
+  },
+  {
+    id: 'orgType',
+    label: 'Type',
+    sortable: true,
+    width: '150px',
+    hideOnMobile: true,
+    render: (value) => {
+      const type = value as string;
+      return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
+    },
+  },
+  {
+    id: 'active',
+    label: 'Status',
+    sortable: false,
+    width: '100px',
+    hideOnMobile: true,
+    render: (value) => {
+      const active = value as boolean;
+      return createElement(
+        Badge,
+        { variant: active ? 'default' : 'secondary' },
+        active ? 'Active' : 'Inactive'
+      );
+    },
+  },
+];
+
+/**
+ * Organization-specific filter configuration
+ */
+const organizationFilters: FilterConfig[] = [
+  {
+    id: 'branch',
+    label: 'Branch',
+    type: 'select',
+    apiParam: 'branch',
+    options: [
+      { value: 'executive', label: 'Executive' },
+      { value: 'legislative', label: 'Legislative' },
+      { value: 'judicial', label: 'Judicial' },
+    ],
+  },
+  {
+    id: 'orgType',
+    label: 'Type',
+    type: 'select',
+    apiParam: 'type',
+    options: [
+      { value: 'department', label: 'Department' },
+      { value: 'agency', label: 'Agency' },
+      { value: 'bureau', label: 'Bureau' },
+      { value: 'commission', label: 'Commission' },
+      { value: 'office', label: 'Office' },
+      { value: 'council', label: 'Council' },
+    ],
+  },
+  {
+    id: 'active',
+    label: 'Status',
+    type: 'select',
+    apiParam: 'active',
+    options: [
+      { value: 'true', label: 'Active' },
+      { value: 'false', label: 'Inactive' },
+    ],
+  },
+];
 
 /**
  * Configuration for all available entity types in Knowledge Explorer
  */
-export const entityTypes: EntityTypeConfig[] = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const entityTypes: EntityTypeConfig<any>[] = [
   {
     id: 'organizations',
     label: 'Organizations',
@@ -36,6 +244,22 @@ export const entityTypes: EntityTypeConfig[] = [
     apiEndpoint: '/api/government-organizations',
     supportedViews: ['list', 'hierarchy'],
     defaultView: 'list',
+    columns: organizationColumns,
+    filters: organizationFilters,
+    defaultSort: {
+      column: 'officialName',
+      direction: 'asc',
+    },
+    cardConfig: {
+      titleField: 'officialName',
+      subtitleField: 'acronym',
+      renderBadge: (item) =>
+        createElement(
+          Badge,
+          { variant: getBranchVariant(item.branch) },
+          item.branch.charAt(0).toUpperCase() + item.branch.slice(1)
+        ),
+    },
   },
   {
     id: 'people',
@@ -51,14 +275,16 @@ export const entityTypes: EntityTypeConfig[] = [
 /**
  * Get entity type configuration by ID
  */
-export function getEntityTypeConfig(entityTypeId: string): EntityTypeConfig | undefined {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getEntityTypeConfig(entityTypeId: string): EntityTypeConfig<any> | undefined {
   return entityTypes.find((et) => et.id === entityTypeId);
 }
 
 /**
  * Get the default entity type (first in the list)
  */
-export function getDefaultEntityType(): EntityTypeConfig {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getDefaultEntityType(): EntityTypeConfig<any> {
   return entityTypes[0];
 }
 
