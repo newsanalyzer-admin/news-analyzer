@@ -2,7 +2,7 @@
 
 ## Status
 
-**Draft**
+**Done**
 
 ---
 
@@ -733,16 +733,53 @@ interface AppointeeListParams {
 ## Dev Agent Record
 
 ### Agent Model Used
-_To be filled by Dev Agent_
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-_To be filled by Dev Agent_
+- TypeScript compilation passed with no errors
 
 ### Completion Notes List
-_To be filled by Dev Agent_
+1. Created People subtype configuration (`peopleConfig.ts`) with:
+   - `SubtypeConfig` interface for defining person subtypes
+   - `judgesSubtypeConfig` with columns (Name, Court, Circuit, Status, Appointed By, Party), filters (Court Level, Circuit, Status), and detail sections (Court Information, Appointment, Service, Personal, Career)
+   - `membersSubtypeConfig` with columns (Name, Chamber, State, Party), filters (Chamber, Party, State), and detail sections (Position, Personal, Social Media)
+   - `appointeesSubtypeConfig` with columns (Name, Position, Agency, Type, Status), filters (Appointment Type), and detail sections (Position Information, Employment Details, Timeline, Status)
+   - Shared renderers for party badges, status badges, and other common UI elements
+   - Helper functions: `getPeopleSubtypeConfig()`, `getDefaultPeopleSubtype()`
+
+2. Updated `entityTypes.ts` to support subtypes:
+   - Added `subtypes` and `defaultSubtype` properties to `EntityTypeConfig` interface
+   - Updated People entity config to include `subtypes: peopleSubtypes` and `defaultSubtype: 'judges'`
+   - Re-exported `SubtypeConfig` type for convenience
+
+3. Updated entity browser page (`[entityType]/page.tsx`) to handle People with subtypes:
+   - Added `SubtypeSelector` component with button group for switching between Judges/Members/Appointees
+   - Integrated data fetching for all three person types (useJudges, useMembers, useAppointees)
+   - Added search support for all person types (useJudgeSearch, useMemberSearch, useAppointeeSearch)
+   - Displayed Judge Stats component when viewing judges subtype
+   - Filters update dynamically based on selected subtype
+   - URL query param `?type=judges|members|appointees` controls active subtype
+   - State resets (pagination, filters) when switching subtypes
+
+4. Updated entity detail page (`[entityType]/[id]/page.tsx`) for People:
+   - Added `PeopleDetail` component that detects person type from ID or URL hint
+   - Uses all three hooks (useJudge, useMember, useAppointee) and selects the correct one based on response
+   - Dynamically applies the correct detail configuration based on detected subtype
+   - Back button navigates to the correct subtype list
+
+5. Verified redirects already in place in `next.config.js`:
+   - `/factbase/people/federal-judges` → `/knowledge-base/people?type=judges`
+   - `/factbase/people/congressional-members` → `/knowledge-base/people?type=members`
+   - `/factbase/people/executive-appointees` → `/knowledge-base/people?type=appointees`
 
 ### File List
-_To be filled by Dev Agent_
+**New Files:**
+- `frontend/src/lib/config/peopleConfig.ts` - Subtype configurations for Judges, Members, and Appointees with columns, filters, and detail sections
+
+**Modified Files:**
+- `frontend/src/lib/config/entityTypes.ts` - Added subtypes support to EntityTypeConfig, updated People config with subtypes array
+- `frontend/src/app/knowledge-base/[entityType]/page.tsx` - Added SubtypeSelector component, integrated all person type hooks and data fetching
+- `frontend/src/app/knowledge-base/[entityType]/[id]/page.tsx` - Added PeopleDetail component for handling all person types in detail view
 
 ---
 

@@ -2,6 +2,10 @@ import { Building2, Users, LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { createElement, type ReactNode } from 'react';
 import type { GovernmentOrganization, GovernmentBranch } from '@/types/government-org';
+import { peopleSubtypes, type SubtypeConfig } from './peopleConfig';
+
+// Re-export SubtypeConfig for convenience
+export type { SubtypeConfig } from './peopleConfig';
 
 /**
  * View modes available for entity browsing
@@ -242,6 +246,11 @@ export interface EntityTypeConfig<T = unknown> {
   defaultView: ViewMode;
   /** Whether this entity type supports subtypes (e.g., people -> judges, members) */
   hasSubtypes?: boolean;
+  /** Subtype configurations (if hasSubtypes is true) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subtypes?: SubtypeConfig<any>[];
+  /** Default subtype ID (if hasSubtypes is true) */
+  defaultSubtype?: string;
   /** Column definitions for list/table view */
   columns?: ColumnConfig<T>[];
   /** Filter definitions */
@@ -570,10 +579,12 @@ export const entityTypes: EntityTypeConfig<any>[] = [
     id: 'people',
     label: 'People',
     icon: Users,
-    apiEndpoint: '/api/people',
+    apiEndpoint: '/api/judges', // Default to judges, varies by subtype
     supportedViews: ['list'],
     defaultView: 'list',
     hasSubtypes: true,
+    subtypes: peopleSubtypes,
+    defaultSubtype: 'judges',
   },
 ];
 
