@@ -86,6 +86,107 @@ export interface CardConfig<T = unknown> {
   renderBadge?: (item: T) => ReactNode;
 }
 
+// =====================================================================
+// EntityDetail Configuration Types
+// =====================================================================
+
+/**
+ * Source citation information
+ */
+export interface SourceInfo {
+  /** Source name (e.g., "Federal Judicial Center") */
+  name: string;
+  /** Source URL */
+  url?: string;
+  /** Date when data was retrieved */
+  retrievedAt?: string;
+  /** Data source identifier (e.g., "FJC", "CONGRESS_GOV") */
+  dataSource?: string;
+}
+
+/**
+ * Field configuration for detail sections
+ */
+export interface DetailFieldConfig<T = unknown> {
+  /** Field path in data (supports dot notation) */
+  id: string;
+  /** Display label */
+  label: string;
+  /** Custom render function */
+  render?: (value: unknown, entity: T) => ReactNode;
+  /** Field containing source info */
+  sourceField?: string;
+  /** Hide this field if value is empty/null */
+  hideIfEmpty?: boolean;
+}
+
+/**
+ * Layout types for detail sections
+ */
+export type DetailSectionLayout = 'list' | 'grid' | 'key-value';
+
+/**
+ * Section configuration for EntityDetail
+ */
+export interface DetailSectionConfig<T = unknown> {
+  /** Unique identifier */
+  id: string;
+  /** Section label/title */
+  label: string;
+  /** Fields in this section */
+  fields: DetailFieldConfig<T>[];
+  /** Layout type */
+  layout: DetailSectionLayout;
+  /** Whether section can be collapsed */
+  collapsible?: boolean;
+  /** Whether section starts collapsed */
+  defaultCollapsed?: boolean;
+}
+
+/**
+ * Related entity configuration
+ */
+export interface RelatedEntityConfig {
+  /** Entity type (e.g., 'organizations', 'people') */
+  entityType: string;
+  /** Field containing related entity ids or objects */
+  field: string;
+  /** Section label */
+  label: string;
+  /** Field to display as link text */
+  displayField: string;
+  /** Field containing the entity ID (defaults to 'id') */
+  idField?: string;
+}
+
+/**
+ * Header configuration for EntityDetail
+ */
+export interface DetailHeaderConfig {
+  /** Field to use as title */
+  titleField: string;
+  /** Field to use as subtitle */
+  subtitleField?: string;
+  /** Field for type badge */
+  badgeField?: string;
+  /** Custom badge render function */
+  renderBadge?: (value: unknown) => ReactNode;
+  /** Key metadata fields to show in header */
+  metaFields?: string[];
+}
+
+/**
+ * Complete EntityDetail configuration
+ */
+export interface EntityDetailConfig<T = unknown> {
+  /** Header configuration */
+  header: DetailHeaderConfig;
+  /** Section configurations */
+  sections: DetailSectionConfig<T>[];
+  /** Related entities configuration */
+  relatedEntities?: RelatedEntityConfig[];
+}
+
 /**
  * Entity type configuration that drives UI behavior
  */
@@ -114,6 +215,8 @@ export interface EntityTypeConfig<T = unknown> {
   cardConfig?: CardConfig<T>;
   /** Field to use as unique identifier (defaults to 'id') */
   idField?: string;
+  /** Detail view configuration */
+  detailConfig?: EntityDetailConfig<T>;
 }
 
 /**
@@ -192,6 +295,146 @@ const organizationColumns: ColumnConfig<GovernmentOrganization>[] = [
 ];
 
 /**
+ * Organization-specific detail configuration
+ */
+const organizationDetailConfig: EntityDetailConfig<GovernmentOrganization> = {
+  header: {
+    titleField: 'officialName',
+    subtitleField: 'acronym',
+    badgeField: 'branch',
+    renderBadge: (value) => {
+      const branch = value as GovernmentBranch;
+      return createElement(
+        Badge,
+        { variant: getBranchVariant(branch) },
+        branch.charAt(0).toUpperCase() + branch.slice(1)
+      );
+    },
+    metaFields: ['orgType', 'orgLevel'],
+  },
+  sections: [
+    {
+      id: 'overview',
+      label: 'Overview',
+      layout: 'key-value',
+      fields: [
+        {
+          id: 'description',
+          label: 'Description',
+          hideIfEmpty: true,
+        },
+        {
+          id: 'mission',
+          label: 'Mission',
+          hideIfEmpty: true,
+        },
+        {
+          id: 'websiteUrl',
+          label: 'Website',
+          hideIfEmpty: true,
+          render: (value) => {
+            if (!value) return '-';
+            return createElement(
+              'a',
+              {
+                href: value as string,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'text-primary hover:underline',
+              },
+              value as string
+            );
+          },
+        },
+      ],
+    },
+    {
+      id: 'details',
+      label: 'Organization Details',
+      layout: 'grid',
+      fields: [
+        {
+          id: 'orgType',
+          label: 'Organization Type',
+          render: (value) => {
+            if (!value) return '-';
+            const type = value as string;
+            return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
+          },
+        },
+        {
+          id: 'orgLevel',
+          label: 'Organization Level',
+        },
+        {
+          id: 'active',
+          label: 'Status',
+          render: (value) => {
+            const active = value as boolean;
+            return createElement(
+              Badge,
+              { variant: active ? 'default' : 'secondary' },
+              active ? 'Active' : 'Inactive'
+            );
+          },
+        },
+        {
+          id: 'branch',
+          label: 'Branch',
+          render: (value) => {
+            const branch = value as GovernmentBranch;
+            return createElement(
+              Badge,
+              { variant: getBranchVariant(branch) },
+              branch.charAt(0).toUpperCase() + branch.slice(1)
+            );
+          },
+        },
+      ],
+    },
+    {
+      id: 'dates',
+      label: 'Timeline',
+      layout: 'grid',
+      collapsible: true,
+      fields: [
+        {
+          id: 'establishedDate',
+          label: 'Established',
+          hideIfEmpty: true,
+        },
+        {
+          id: 'dissolvedDate',
+          label: 'Dissolved',
+          hideIfEmpty: true,
+        },
+      ],
+    },
+    {
+      id: 'jurisdiction',
+      label: 'Jurisdiction',
+      layout: 'list',
+      collapsible: true,
+      defaultCollapsed: true,
+      fields: [
+        {
+          id: 'jurisdictionAreas',
+          label: 'Jurisdiction Areas',
+          hideIfEmpty: true,
+          render: (value) => {
+            if (!value || !Array.isArray(value) || value.length === 0) return '-';
+            return value.join(', ');
+          },
+        },
+      ],
+    },
+  ],
+  relatedEntities: [
+    // Future: Add related people/positions when available
+  ],
+};
+
+/**
  * Organization-specific filter configuration
  */
 const organizationFilters: FilterConfig[] = [
@@ -260,6 +503,7 @@ export const entityTypes: EntityTypeConfig<any>[] = [
           item.branch.charAt(0).toUpperCase() + item.branch.slice(1)
         ),
     },
+    detailConfig: organizationDetailConfig,
   },
   {
     id: 'people',

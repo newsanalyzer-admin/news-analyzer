@@ -2,7 +2,7 @@
 
 ## Status
 
-**Draft**
+**Done**
 
 ---
 
@@ -31,57 +31,57 @@
 
 ## Tasks / Subtasks
 
-- [ ] Define EntityDetailConfig interface (AC: 1, 8)
-  - [ ] Extend `frontend/src/lib/config/entityTypes.ts`
-  - [ ] Define DetailSectionConfig interface (id, label, fields, layout)
-  - [ ] Define FieldConfig interface (id, label, render, sourceField)
-  - [ ] Define RelatedEntityConfig interface (type, field, label)
-  - [ ] Export TypeScript types
+- [x] Define EntityDetailConfig interface (AC: 1, 8)
+  - [x] Extend `frontend/src/lib/config/entityTypes.ts`
+  - [x] Define DetailSectionConfig interface (id, label, fields, layout)
+  - [x] Define FieldConfig interface (id, label, render, sourceField)
+  - [x] Define RelatedEntityConfig interface (type, field, label)
+  - [x] Export TypeScript types
 
-- [ ] Create EntityDetail component (AC: 1, 9, 10)
-  - [ ] Create `frontend/src/components/knowledge-base/EntityDetail.tsx`
-  - [ ] Accept entity data and config as props
-  - [ ] Implement responsive layout (grid on desktop, stack on mobile)
-  - [ ] Add back button with preserved navigation state
-  - [ ] Handle loading and error states (AC: 7)
+- [x] Create EntityDetail component (AC: 1, 9, 10)
+  - [x] Create `frontend/src/components/knowledge-base/EntityDetail.tsx`
+  - [x] Accept entity data and config as props
+  - [x] Implement responsive layout (grid on desktop, stack on mobile)
+  - [x] Add back button with preserved navigation state
+  - [x] Handle loading and error states (AC: 7)
 
-- [ ] Create EntityDetailHeader subcomponent (AC: 2)
-  - [ ] Create `frontend/src/components/knowledge-base/EntityDetailHeader.tsx`
-  - [ ] Display entity name prominently
-  - [ ] Display entity type badge
-  - [ ] Display key metadata (configurable per entity type)
-  - [ ] Consistent styling across entity types
+- [x] Create EntityDetailHeader subcomponent (AC: 2)
+  - [x] Create `frontend/src/components/knowledge-base/EntityDetailHeader.tsx`
+  - [x] Display entity name prominently
+  - [x] Display entity type badge
+  - [x] Display key metadata (configurable per entity type)
+  - [x] Consistent styling across entity types
 
-- [ ] Create DetailSection subcomponent (AC: 3)
-  - [ ] Create `frontend/src/components/knowledge-base/DetailSection.tsx`
-  - [ ] Accept section config and data
-  - [ ] Render fields based on configuration
-  - [ ] Support different layouts (list, grid, key-value pairs)
-  - [ ] Collapsible sections (optional)
+- [x] Create DetailSection subcomponent (AC: 3)
+  - [x] Create `frontend/src/components/knowledge-base/DetailSection.tsx`
+  - [x] Accept section config and data
+  - [x] Render fields based on configuration
+  - [x] Support different layouts (list, grid, key-value pairs)
+  - [x] Collapsible sections (optional)
 
-- [ ] Create SourceCitation component (AC: 4, 5)
-  - [ ] Create `frontend/src/components/knowledge-base/SourceCitation.tsx`
-  - [ ] Small icon button (info or external-link icon)
-  - [ ] Expandable popover/tooltip on click
-  - [ ] Display: source name, URL (clickable), retrieval date
-  - [ ] Accessible: keyboard operable, proper ARIA
+- [x] Create SourceCitation component (AC: 4, 5)
+  - [x] Create `frontend/src/components/knowledge-base/SourceCitation.tsx`
+  - [x] Small icon button (info or external-link icon)
+  - [x] Expandable popover/tooltip on click
+  - [x] Display: source name, URL (clickable), retrieval date
+  - [x] Accessible: keyboard operable, proper ARIA
 
-- [ ] Create RelatedEntities subcomponent (AC: 6)
-  - [ ] Create `frontend/src/components/knowledge-base/RelatedEntities.tsx`
-  - [ ] Accept list of related entities and their type
-  - [ ] Render as clickable links/chips
-  - [ ] Navigate to `/knowledge-base/:type/:id` on click
-  - [ ] Handle empty state gracefully
+- [x] Create RelatedEntities subcomponent (AC: 6)
+  - [x] Create `frontend/src/components/knowledge-base/RelatedEntities.tsx`
+  - [x] Accept list of related entities and their type
+  - [x] Render as clickable links/chips
+  - [x] Navigate to `/knowledge-base/:type/:id` on click
+  - [x] Handle empty state gracefully
 
-- [ ] Integrate into route structure (AC: 10)
-  - [ ] Create `frontend/src/app/knowledge-base/[entityType]/[id]/page.tsx`
-  - [ ] Fetch entity data based on type and id
-  - [ ] Pass data and config to EntityDetail component
-  - [ ] Handle 404 for invalid entity id
+- [x] Integrate into route structure (AC: 10)
+  - [x] Create `frontend/src/app/knowledge-base/[entityType]/[id]/page.tsx`
+  - [x] Fetch entity data based on type and id
+  - [x] Pass data and config to EntityDetail component
+  - [x] Handle 404 for invalid entity id
 
-- [ ] Create barrel export (AC: 8)
-  - [ ] Update `frontend/src/components/knowledge-base/index.ts`
-  - [ ] Export EntityDetail and all subcomponents
+- [x] Create barrel export (AC: 8)
+  - [x] Update `frontend/src/components/knowledge-base/index.ts`
+  - [x] Export EntityDetail and all subcomponents
 
 ---
 
@@ -284,22 +284,88 @@ const orgDetailConfig: EntityDetailConfig = {
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2025-12-22 | 1.0 | Initial story creation | Sarah (PO) |
+| 2025-12-27 | 1.1 | Validation: reviewed existing OrgDetailPanel and JudgeDetailPanel patterns, status → Approved | James (Dev) |
+| 2025-12-27 | 1.2 | Implementation complete: EntityDetail pattern with all subcomponents, organization detail config, detail page route | Dev Agent |
 
 ---
 
 ## Dev Agent Record
 
 ### Agent Model Used
-_To be filled by Dev Agent_
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-_To be filled by Dev Agent_
+- TypeScript compilation passed after fixing ReactNode type issue in EntityDetailHeader.tsx
 
 ### Completion Notes List
-_To be filled by Dev Agent_
+1. Extended entityTypes.ts with comprehensive EntityDetail configuration types:
+   - SourceInfo for citation metadata
+   - DetailFieldConfig with dot-notation path support and custom render functions
+   - DetailSectionConfig with list/grid/key-value layouts and collapsible support
+   - RelatedEntityConfig for cross-entity navigation
+   - DetailHeaderConfig with badge rendering support
+   - EntityDetailConfig combining all above
+
+2. Created EntityDetail component with:
+   - Loading skeleton with responsive layout
+   - Error state with retry button
+   - Not found state for missing entities
+   - Responsive 3-column grid (2 for content, 1 for sidebar)
+
+3. Created EntityDetailHeader with:
+   - Back navigation button (router.back() or custom backUrl)
+   - Title and subtitle from configured fields
+   - Custom badge rendering support
+   - Meta fields display with automatic date formatting
+
+4. Created DetailSection with:
+   - Three layout modes: list, grid, key-value
+   - Collapsible sections with ChevronDown/ChevronRight icons
+   - hideIfEmpty field support
+   - SourceCitation integration for sourced fields
+   - getNestedValue helper for dot-notation field access
+
+5. Created SourceCitation with Radix UI Popover:
+   - Info icon button
+   - Popover displays source name, URL (clickable), retrieval date, data source
+   - Keyboard accessible
+
+6. Created RelatedEntities with:
+   - Badge-style clickable links
+   - Navigation to /knowledge-base/{entityType}/{id}
+   - Handles arrays and single objects
+   - Empty state handling
+
+7. Created detail page route with:
+   - Dynamic [entityType]/[id] routing
+   - useGovernmentOrg hook for data fetching
+   - Invalid ID and missing config error states
+   - Placeholder for future entity types
+
+8. Added useGovernmentOrg hook to useGovernmentOrgs.ts:
+   - Query key with detail ID
+   - 404 error handling
+
+9. Created organization detail configuration with:
+   - Overview section (description, mission, website)
+   - Organization Details grid (type, level, status, branch)
+   - Timeline section (collapsible, established/dissolved dates)
+   - Jurisdiction section (collapsible, default collapsed)
 
 ### File List
-_To be filled by Dev Agent_
+**New Files:**
+- `frontend/src/components/ui/popover.tsx` - Shadcn-style Popover component using @radix-ui/react-popover
+- `frontend/src/components/knowledge-base/SourceCitation.tsx` - Expandable source citation popover
+- `frontend/src/components/knowledge-base/DetailSection.tsx` - Configurable section renderer
+- `frontend/src/components/knowledge-base/EntityDetailHeader.tsx` - Header with back button, title, badges
+- `frontend/src/components/knowledge-base/RelatedEntities.tsx` - Related entity links
+- `frontend/src/components/knowledge-base/EntityDetail.tsx` - Main detail component
+- `frontend/src/app/knowledge-base/[entityType]/[id]/page.tsx` - Detail page route
+
+**Modified Files:**
+- `frontend/src/lib/config/entityTypes.ts` - Extended with EntityDetail configuration types and organization detail config
+- `frontend/src/components/knowledge-base/index.ts` - Added exports for new components
+- `frontend/src/hooks/useGovernmentOrgs.ts` - Added useGovernmentOrg hook for fetching single organization
 
 ---
 

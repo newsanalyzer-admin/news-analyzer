@@ -37,6 +37,7 @@ export const govOrgKeys = {
   all: ['government-organizations'] as const,
   lists: () => [...govOrgKeys.all, 'list'] as const,
   list: (params: GovOrgListParams) => [...govOrgKeys.lists(), params] as const,
+  detail: (id: number) => [...govOrgKeys.all, 'detail', id] as const,
   byBranch: (branch: GovernmentBranch) => [...govOrgKeys.lists(), 'by-branch', branch] as const,
   search: (query: string) => [...govOrgKeys.all, 'search', query] as const,
   syncStatus: () => [...govOrgKeys.all, 'sync-status'] as const,
@@ -45,6 +46,22 @@ export const govOrgKeys = {
 // =====================================================================
 // Organization Fetch Functions
 // =====================================================================
+
+/**
+ * Fetch a single government organization by ID
+ */
+async function fetchGovernmentOrg(id: number): Promise<GovernmentOrganization> {
+  const response = await fetch(`${API_BASE}/api/government-organizations/${id}`);
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Government organization not found');
+    }
+    throw new Error('Failed to fetch government organization');
+  }
+
+  return response.json();
+}
 
 /**
  * Fetch paginated list of government organizations
@@ -103,6 +120,17 @@ export function useGovernmentOrgsList(params: GovOrgListParams = {}) {
   return useQuery({
     queryKey: govOrgKeys.list(params),
     queryFn: () => fetchGovernmentOrgsList(params),
+  });
+}
+
+/**
+ * Hook to fetch a single government organization by ID
+ */
+export function useGovernmentOrg(id: number | null) {
+  return useQuery({
+    queryKey: govOrgKeys.detail(id!),
+    queryFn: () => fetchGovernmentOrg(id!),
+    enabled: id !== null && id !== undefined,
   });
 }
 
