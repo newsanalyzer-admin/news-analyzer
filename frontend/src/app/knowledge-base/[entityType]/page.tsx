@@ -2,9 +2,13 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
-import { getEntityTypeConfig, type SortDirection } from '@/lib/config/entityTypes';
-import { EntityBrowser, EntityFilters } from '@/components/knowledge-base';
-import { useGovernmentOrgsList, type GovOrgListParams } from '@/hooks/useGovernmentOrgs';
+import { getEntityTypeConfig, type SortDirection, type ViewMode } from '@/lib/config/entityTypes';
+import { EntityBrowser, EntityFilters, HierarchyView, ViewModeSelector } from '@/components/knowledge-base';
+import {
+  useGovernmentOrgsList,
+  useGovernmentOrgsHierarchy,
+  type GovOrgListParams,
+} from '@/hooks/useGovernmentOrgs';
 
 interface EntityBrowserPageProps {
   params: {
@@ -17,6 +21,7 @@ const DEFAULT_PAGE_SIZE = 20;
 /**
  * Entity Browser page - displays entities for a given entity type.
  * Uses the EntityBrowser pattern component for configuration-driven rendering.
+ * Supports list and hierarchy view modes.
  */
 export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   const router = useRouter();
@@ -29,7 +34,10 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   }
 
   // Parse URL search params
-  const viewMode = (searchParams.get('view') as 'list' | 'grid') || 'list';
+  const viewModeParam = searchParams.get('view') as ViewMode | null;
+  const viewMode: ViewMode = viewModeParam && entityConfig.supportedViews.includes(viewModeParam)
+    ? viewModeParam
+    : entityConfig.defaultView;
   const initialPage = parseInt(searchParams.get('page') || '0', 10);
   const initialSort = searchParams.get('sort') || entityConfig.defaultSort?.column || 'id';
   const initialDirection = (searchParams.get('dir') as SortDirection) || entityConfig.defaultSort?.direction || 'asc';
@@ -66,6 +74,16 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   // Data fetching - currently only organizations
   const { data, isLoading, error, refetch } = useGovernmentOrgsList(queryParams);
 
+  // Hierarchy data fetching (only when in hierarchy view)
+  const {
+    data: hierarchyData,
+    isLoading: isHierarchyLoading,
+    error: hierarchyError,
+    refetch: refetchHierarchy,
+  } = useGovernmentOrgsHierarchy(
+    filterValues.branch as 'executive' | 'legislative' | 'judicial' | undefined
+  );
+
   // Extract total count for EntityBrowser
   const totalCount = data?.totalElements || 0;
 
@@ -101,10 +119,17 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   if (params.entityType === 'organizations') {
     return (
       <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <entityConfig.icon className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">{entityConfig.label}</h1>
+        {/* Header with View Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <entityConfig.icon className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold">{entityConfig.label}</h1>
+          </div>
+
+          {/* View Mode Selector */}
+          {entityConfig.supportedViews.length > 1 && (
+            <ViewModeSelector />
+          )}
         </div>
 
         {/* Filters */}
@@ -116,23 +141,34 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
           />
         )}
 
-        {/* Entity Browser */}
-        <EntityBrowser
-          config={entityConfig}
-          data={data?.content || []}
-          totalCount={totalCount}
-          isLoading={isLoading}
-          error={error?.message || null}
-          currentPage={currentPage}
-          pageSize={DEFAULT_PAGE_SIZE}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          viewMode={viewMode}
-          onPageChange={handlePageChange}
-          onSortChange={handleSortChange}
-          onRowClick={handleRowClick}
-          onRetry={() => refetch()}
-        />
+        {/* Content - List or Hierarchy View */}
+        {viewMode === 'hierarchy' ? (
+          <HierarchyView
+            data={hierarchyData || []}
+            config={entityConfig.hierarchyConfig!}
+            entityType={params.entityType}
+            isLoading={isHierarchyLoading}
+            error={hierarchyError?.message || null}
+            onRetry={() => refetchHierarchy()}
+          />
+        ) : (
+          <EntityBrowser
+            config={entityConfig}
+            data={data?.content || []}
+            totalCount={totalCount}
+            isLoading={isLoading}
+            error={error?.message || null}
+            currentPage={currentPage}
+            pageSize={DEFAULT_PAGE_SIZE}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            viewMode={viewMode}
+            onPageChange={handlePageChange}
+            onSortChange={handleSortChange}
+            onRowClick={handleRowClick}
+            onRetry={() => refetch()}
+          />
+        )}
       </div>
     );
   }

@@ -40,6 +40,8 @@ export const govOrgKeys = {
   detail: (id: number) => [...govOrgKeys.all, 'detail', id] as const,
   byBranch: (branch: GovernmentBranch) => [...govOrgKeys.lists(), 'by-branch', branch] as const,
   search: (query: string) => [...govOrgKeys.all, 'search', query] as const,
+  hierarchy: (branch?: GovernmentBranch) => [...govOrgKeys.all, 'hierarchy', branch] as const,
+  topLevel: () => [...govOrgKeys.all, 'top-level'] as const,
   syncStatus: () => [...govOrgKeys.all, 'sync-status'] as const,
 };
 
@@ -109,6 +111,94 @@ async function searchGovernmentOrgs(query: string): Promise<GovernmentOrganizati
   return response.json();
 }
 
+/**
+ * Fetch top-level government organizations (no parent)
+ */
+async function fetchTopLevelOrgs(): Promise<GovernmentOrganization[]> {
+  const response = await fetch(`${API_BASE}/api/government-organizations/top-level`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch top-level organizations');
+  }
+  return response.json();
+}
+
+/**
+ * Organization with nested children for hierarchy view
+ * Includes index signature for compatibility with HierarchyNode
+ */
+export type GovernmentOrgHierarchyNode = GovernmentOrganization & {
+  children?: GovernmentOrgHierarchyNode[];
+  [key: string]: unknown;
+};
+
+/**
+ * Fetch all organizations and build hierarchy tree client-side
+ */
+async function fetchGovernmentOrgsHierarchy(
+  branch?: GovernmentBranch
+): Promise<GovernmentOrgHierarchyNode[]> {
+  // Fetch all organizations (unpaginated)
+  const url = branch
+    ? `${API_BASE}/api/government-organizations/by-branch?branch=${branch}`
+    : `${API_BASE}/api/government-organizations?size=1000`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch organization hierarchy');
+  }
+
+  const data = await response.json();
+  // Handle paginated response or array
+  const orgs: GovernmentOrganization[] = Array.isArray(data) ? data : data.content;
+
+  // Build hierarchy tree
+  return buildHierarchyTree(orgs);
+}
+
+/**
+ * Build a hierarchy tree from flat organization list
+ */
+function buildHierarchyTree(orgs: GovernmentOrganization[]): GovernmentOrgHierarchyNode[] {
+  // Create a map for quick lookup
+  const orgMap = new Map<string, GovernmentOrgHierarchyNode>();
+
+  // Initialize all orgs with empty children arrays
+  for (const org of orgs) {
+    orgMap.set(org.id, { ...org, children: [] });
+  }
+
+  // Build the tree structure
+  const roots: GovernmentOrgHierarchyNode[] = [];
+
+  for (const org of orgs) {
+    const node = orgMap.get(org.id)!;
+
+    if (org.parentId && orgMap.has(org.parentId)) {
+      // Add as child to parent
+      const parent = orgMap.get(org.parentId)!;
+      parent.children = parent.children || [];
+      parent.children.push(node);
+    } else {
+      // No parent or parent not in list - this is a root
+      roots.push(node);
+    }
+  }
+
+  // Sort children by name at each level
+  function sortChildren(nodes: GovernmentOrgHierarchyNode[]) {
+    nodes.sort((a, b) => a.officialName.localeCompare(b.officialName));
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        sortChildren(node.children);
+      }
+    }
+  }
+
+  sortChildren(roots);
+
+  return roots;
+}
+
 // =====================================================================
 // Organization Query Hooks
 // =====================================================================
@@ -152,6 +242,28 @@ export function useGovernmentOrgsSearch(query: string) {
     queryKey: govOrgKeys.search(query),
     queryFn: () => searchGovernmentOrgs(query),
     enabled: !!query && query.length >= 2,
+  });
+}
+
+/**
+ * Hook to fetch top-level government organizations
+ */
+export function useTopLevelGovernmentOrgs() {
+  return useQuery({
+    queryKey: govOrgKeys.topLevel(),
+    queryFn: fetchTopLevelOrgs,
+  });
+}
+
+/**
+ * Hook to fetch government organization hierarchy
+ * Builds a tree structure from flat organization list
+ */
+export function useGovernmentOrgsHierarchy(branch?: GovernmentBranch) {
+  return useQuery({
+    queryKey: govOrgKeys.hierarchy(branch),
+    queryFn: () => fetchGovernmentOrgsHierarchy(branch),
+    staleTime: 5 * 60 * 1000, // 5 minutes - hierarchy data changes infrequently
   });
 }
 

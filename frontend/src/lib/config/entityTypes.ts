@@ -187,6 +187,43 @@ export interface EntityDetailConfig<T = unknown> {
   relatedEntities?: RelatedEntityConfig[];
 }
 
+// =====================================================================
+// HierarchyView Configuration Types
+// =====================================================================
+
+/**
+ * Node in a hierarchy tree
+ * Note: Using Record<string, unknown> to allow for dynamic fields
+ */
+export type HierarchyNode = {
+  /** Unique identifier */
+  id: string;
+  /** Child nodes */
+  children?: HierarchyNode[];
+} & Record<string, unknown>;
+
+/**
+ * Configuration for hierarchy view rendering
+ */
+export interface HierarchyConfig {
+  /** Field to display as node label */
+  labelField: string;
+  /** Optional metadata fields to display */
+  metaFields?: string[];
+  /** Field containing child nodes */
+  childrenField: string;
+  /** Field containing unique identifier (defaults to 'id') */
+  idField?: string;
+  /** How many levels to expand by default (1 = only root) */
+  defaultExpandDepth: number;
+  /** Whether to show child count next to expandable nodes */
+  showChildCount?: boolean;
+  /** Custom render function for node content */
+  renderNode?: (node: HierarchyNode) => ReactNode;
+  /** Custom render function for node badge */
+  renderBadge?: (node: HierarchyNode) => ReactNode;
+}
+
 /**
  * Entity type configuration that drives UI behavior
  */
@@ -217,6 +254,8 @@ export interface EntityTypeConfig<T = unknown> {
   idField?: string;
   /** Detail view configuration */
   detailConfig?: EntityDetailConfig<T>;
+  /** Hierarchy view configuration */
+  hierarchyConfig?: HierarchyConfig;
 }
 
 /**
@@ -435,6 +474,27 @@ const organizationDetailConfig: EntityDetailConfig<GovernmentOrganization> = {
 };
 
 /**
+ * Organization-specific hierarchy configuration
+ */
+const organizationHierarchyConfig: HierarchyConfig = {
+  labelField: 'officialName',
+  metaFields: ['acronym'],
+  childrenField: 'children',
+  idField: 'id',
+  defaultExpandDepth: 1,
+  showChildCount: true,
+  renderBadge: (node) => {
+    const branch = node.branch as GovernmentBranch;
+    if (!branch) return null;
+    return createElement(
+      Badge,
+      { variant: getBranchVariant(branch), className: 'text-xs' },
+      branch.charAt(0).toUpperCase() + branch.slice(1)
+    );
+  },
+};
+
+/**
  * Organization-specific filter configuration
  */
 const organizationFilters: FilterConfig[] = [
@@ -504,6 +564,7 @@ export const entityTypes: EntityTypeConfig<any>[] = [
         ),
     },
     detailConfig: organizationDetailConfig,
+    hierarchyConfig: organizationHierarchyConfig,
   },
   {
     id: 'people',

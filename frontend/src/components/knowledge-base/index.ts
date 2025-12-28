@@ -15,3 +15,7 @@ export { SourceCitation } from './SourceCitation';
 export type { SourceCitationProps } from './SourceCitation';
 export { RelatedEntities } from './RelatedEntities';
 export type { RelatedEntitiesProps } from './RelatedEntities';
+export { HierarchyView } from './HierarchyView';
+export type { HierarchyViewProps } from './HierarchyView';
+export { TreeNode } from './TreeNode';
+export type { TreeNodeProps } from './TreeNode';
