@@ -23,6 +23,23 @@ const nextConfig = {
         destination: '/knowledge-base',
         permanent: true,
       },
+      // Branch-specific organization redirects (must come before generic :path* redirect)
+      {
+        source: '/factbase/organizations/executive',
+        destination: '/knowledge-base/organizations?branch=executive',
+        permanent: true,
+      },
+      {
+        source: '/factbase/organizations/legislative',
+        destination: '/knowledge-base/organizations?branch=legislative',
+        permanent: true,
+      },
+      {
+        source: '/factbase/organizations/judicial',
+        destination: '/knowledge-base/organizations?branch=judicial',
+        permanent: true,
+      },
+      // Generic organization redirect (catches remaining paths)
       {
         source: '/factbase/organizations/:path*',
         destination: '/knowledge-base/organizations',

@@ -104,7 +104,7 @@ async function fetchGovernmentOrgsByBranch(branch: GovernmentBranch): Promise<Go
  * Search government organizations by name
  */
 async function searchGovernmentOrgs(query: string): Promise<GovernmentOrganization[]> {
-  const response = await fetch(`${API_BASE}/api/government-organizations/search?q=${encodeURIComponent(query)}`);
+  const response = await fetch(`${API_BASE}/api/government-organizations/search?query=${encodeURIComponent(query)}`);
   if (!response.ok) {
     throw new Error('Failed to search government organizations');
   }

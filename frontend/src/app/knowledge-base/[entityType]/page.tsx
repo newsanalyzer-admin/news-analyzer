@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { notFound, useRouter, useSearchParams } from 'next/navigation';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { notFound, useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { getEntityTypeConfig, type SortDirection, type ViewMode } from '@/lib/config/entityTypes';
 import { EntityBrowser, EntityFilters, HierarchyView, ViewModeSelector } from '@/components/knowledge-base';
 import {
@@ -27,6 +27,7 @@ const DEFAULT_PAGE_SIZE = 20;
 export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Get entity configuration
   const entityConfig = getEntityTypeConfig(params.entityType);
@@ -44,11 +45,41 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
   const initialDirection = (searchParams.get('dir') as SortDirection) || entityConfig.defaultSort?.direction || 'asc';
   const searchQuery = searchParams.get('q') || '';
 
+  // Parse initial filter values from URL params
+  const initialFilterValues = useMemo(() => {
+    const values: Record<string, string | string[] | undefined> = {};
+    // Read filter values from URL for each configured filter
+    entityConfig.filters?.forEach((filter) => {
+      const paramValue = searchParams.get(filter.id);
+      if (paramValue) {
+        values[filter.id] = paramValue;
+      }
+    });
+    return values;
+  }, [entityConfig.filters, searchParams]);
+
   // State for pagination, sorting, and filtering
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [sortColumn, setSortColumn] = useState(initialSort);
   const [sortDirection, setSortDirection] = useState<SortDirection>(initialDirection);
-  const [filterValues, setFilterValues] = useState<Record<string, string | string[] | undefined>>({});
+  const [filterValues, setFilterValues] = useState<Record<string, string | string[] | undefined>>(initialFilterValues);
+
+  // Sync filter values when URL params change (browser back/forward)
+  useEffect(() => {
+    const currentFilters: Record<string, string | string[] | undefined> = {};
+    entityConfig.filters?.forEach((filter) => {
+      const paramValue = searchParams.get(filter.id);
+      if (paramValue) {
+        currentFilters[filter.id] = paramValue;
+      }
+    });
+    // Only update if filters have actually changed
+    const hasChanged = Object.keys(currentFilters).length !== Object.keys(filterValues).length ||
+      Object.entries(currentFilters).some(([key, value]) => filterValues[key] !== value);
+    if (hasChanged) {
+      setFilterValues(currentFilters);
+    }
+  }, [searchParams, entityConfig.filters, filterValues]);
 
   // Build query params for API call (organizations-specific for now)
   const queryParams = useMemo((): GovOrgListParams => {
@@ -128,11 +159,29 @@ export default function EntityBrowserPage({ params }: EntityBrowserPageProps) {
     setCurrentPage(0); // Reset to first page on sort change
   }, []);
 
-  // Handle filter change
+  // Handle filter change - update state and URL
   const handleFilterChange = useCallback((values: Record<string, string | string[] | undefined>) => {
     setFilterValues(values);
     setCurrentPage(0); // Reset to first page on filter change
-  }, []);
+
+    // Update URL with new filter values
+    const newParams = new URLSearchParams(searchParams.toString());
+    // Remove page param when filters change
+    newParams.delete('page');
+
+    // Update filter params
+    entityConfig.filters?.forEach((filter) => {
+      const value = values[filter.id];
+      if (value !== undefined && value !== '') {
+        newParams.set(filter.id, Array.isArray(value) ? value.join(',') : value);
+      } else {
+        newParams.delete(filter.id);
+      }
+    });
+
+    const queryString = newParams.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname);
+  }, [searchParams, pathname, router, entityConfig.filters]);
 
   // Handle row click - navigate to detail view
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
