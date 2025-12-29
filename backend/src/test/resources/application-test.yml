@@ -1,4 +1,7 @@
 spring:
+  # Default H2 datasource for tests that mock repositories or don't need PostgreSQL features
+  # Tests requiring PostgreSQL features should use @Import(TestcontainersConfiguration.class)
+  # which overrides this datasource via @ServiceConnection
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driver-class-name: org.h2.Driver
@@ -6,18 +9,17 @@ spring:
     password:
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    # Use PostgreSQL dialect for H2 PostgreSQL mode
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      # Disable DDL auto-generation to avoid H2 compatibility errors with PostgreSQL-specific types
+      # Schema will be created by Flyway or Testcontainers for integration tests
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
         format_sql: true
     open-in-view: false
-
-  h2:
-    console:
-      enabled: false
 
   flyway:
     enabled: false

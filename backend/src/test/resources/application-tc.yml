@@ -1,0 +1,33 @@
+# Testcontainers profile for PostgreSQL integration tests
+# Use with @ActiveProfiles("tc") and @Import(TestcontainersConfiguration.class)
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  security:
+    user:
+      name: user
+      password: test
+
+logging:
+  level:
+    org.newsanalyzer: DEBUG
+    org.hibernate.SQL: WARN
+    org.hibernate.type: WARN
+    org.springframework.security: WARN
+    org.testcontainers: INFO

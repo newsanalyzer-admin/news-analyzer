@@ -2,11 +2,13 @@ package org.newsanalyzer.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.newsanalyzer.TestcontainersConfiguration;
 import org.newsanalyzer.model.Statute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,14 +20,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Repository tests for StatuteRepository.
- * Uses @DataJpaTest for lightweight JPA testing.
+ * Uses PostgreSQL Testcontainer for full PostgreSQL feature support.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
 @DataJpaTest
+@ActiveProfiles("tc")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
+@Import(TestcontainersConfiguration.class)
 class StatuteRepositoryTest {
 
     @Autowired
