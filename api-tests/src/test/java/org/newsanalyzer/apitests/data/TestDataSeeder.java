@@ -124,16 +124,33 @@ public class TestDataSeeder {
             return;
         }
 
+        // Remove SQL comments before processing
+        sql = removeComments(sql);
+
         try (Statement statement = connection.createStatement()) {
             // Split by semicolon and execute each statement
             String[] statements = sql.split(";");
             for (String stmt : statements) {
                 String trimmed = stmt.trim();
-                if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
-                    statement.execute(trimmed);
+                if (!trimmed.isEmpty()) {
+                    statement.executeUpdate(trimmed);
                 }
             }
         }
+    }
+
+    /**
+     * Remove SQL comments (lines starting with --) from the script.
+     */
+    private String removeComments(String sql) {
+        StringBuilder result = new StringBuilder();
+        for (String line : sql.split("\n")) {
+            String trimmedLine = line.trim();
+            if (!trimmedLine.startsWith("--")) {
+                result.append(line).append("\n");
+            }
+        }
+        return result.toString();
     }
 
     /**

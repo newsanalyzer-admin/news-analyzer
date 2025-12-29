@@ -43,9 +43,10 @@ public class TestDataCleaner {
             // Disable FK checks for faster cleanup
             stmt.execute("SET session_replication_role = 'replica'");
 
-            // Truncate in order
+            // Truncate in order (child tables first)
             stmt.execute("TRUNCATE TABLE entities CASCADE");
             stmt.execute("TRUNCATE TABLE government_organizations CASCADE");
+            stmt.execute("TRUNCATE TABLE persons CASCADE");
 
             // Re-enable FK checks
             stmt.execute("SET session_replication_role = 'origin'");
