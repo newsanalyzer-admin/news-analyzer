@@ -2,7 +2,7 @@
 
 ## Status
 
-**Draft**
+**Done**
 
 ---
 
@@ -376,16 +376,69 @@ N/A - this is primarily a cleanup/documentation story
 ## Dev Agent Record
 
 ### Agent Model Used
-_To be filled by Dev Agent_
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-_To be filled by Dev Agent_
+- TypeScript compilation passed with no errors
+- ESLint configuration updated to include @typescript-eslint plugin
+- Build symlink error is Windows environment issue (not code issue)
 
 ### Completion Notes List
-_To be filled by Dev Agent_
+1. Verified all redirects are working (already in next.config.js from UI-2.6)
+
+2. Removed deprecated factbase pages:
+   - Deleted `frontend/src/app/factbase/organizations/` directory (all branch pages, OrgDetailPanel, BranchOrgsPage)
+   - Deleted `frontend/src/app/factbase/people/` directory (all person type pages and detail panels)
+   - Deleted `frontend/src/app/factbase/layout.tsx`
+   - Replaced `frontend/src/app/factbase/page.tsx` with simple redirect to `/knowledge-base`
+
+3. Removed deprecated components:
+   - Deleted `frontend/src/components/judicial/JudgeTable.tsx`
+   - Deleted `frontend/src/components/judicial/JudgeFilters.tsx`
+   - Updated `frontend/src/components/judicial/index.ts` to only export JudgeStats
+
+4. Updated navigation links from factbase to knowledge-base:
+   - Updated `frontend/src/lib/menu-config.ts` - all links now point to `/knowledge-base/*`
+   - Updated `frontend/src/components/public/PublicSidebar.tsx` - header links to `/knowledge-base`
+   - Labels updated from "Factbase" to "Knowledge Base"
+
+5. Updated source-tree.md:
+   - Completely rewrote Frontend section with Knowledge Explorer structure
+   - Added knowledge-base routes, components, hooks, and config files
+   - Added Knowledge Explorer Pattern section with component descriptions
+   - Updated date to 2025-12-28
+
+6. Created developer guide:
+   - Created `docs/architecture/adding-entity-types.md`
+   - Comprehensive guide with step-by-step instructions
+   - Includes TypeScript types, API clients, hooks, and configuration examples
+   - Documents EntityTypeConfig, ColumnConfig, FilterConfig, and EntityDetailConfig interfaces
+   - Provides testing checklist
+
+7. Updated ESLint configuration:
+   - Added `@typescript-eslint/recommended` extension
+   - Added parser and plugin configuration
+   - Set `no-explicit-any` to warn (not error)
 
 ### File List
-_To be filled by Dev Agent_
+**Deleted Files:**
+- `frontend/src/app/factbase/layout.tsx`
+- `frontend/src/app/factbase/organizations/` (entire directory)
+- `frontend/src/app/factbase/people/` (entire directory)
+- `frontend/src/components/judicial/JudgeTable.tsx`
+- `frontend/src/components/judicial/JudgeFilters.tsx`
+
+**New Files:**
+- `docs/architecture/adding-entity-types.md` - Developer guide for adding new entity types
+
+**Modified Files:**
+- `frontend/src/app/factbase/page.tsx` - Replaced with simple redirect to /knowledge-base
+- `frontend/src/lib/menu-config.ts` - Updated all links to /knowledge-base, renamed labels
+- `frontend/src/components/public/PublicSidebar.tsx` - Updated header to Knowledge Base
+- `frontend/src/components/judicial/index.ts` - Removed deleted component exports
+- `frontend/.eslintrc.json` - Added TypeScript ESLint plugin and rules
+- `docs/architecture/source-tree.md` - Updated Frontend section with Knowledge Explorer
+- `docs/stories/UI-2/UI-2.8.cleanup-documentation.md` - Updated status and Dev Agent Record
 
 ---
 

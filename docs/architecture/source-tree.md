@@ -1,6 +1,6 @@
 # NewsAnalyzer v2 - Source Tree
 
-**Last Updated:** 2025-11-27
+**Last Updated:** 2025-12-28
 **Version:** 2.0.0-SNAPSHOT
 
 ---
@@ -111,7 +111,7 @@ backend/
 frontend/
 ├── package.json                    # Dependencies & scripts
 ├── pnpm-lock.yaml                  # Lockfile
-├── next.config.js                  # Next.js configuration
+├── next.config.js                  # Next.js configuration + redirects
 ├── tsconfig.json                   # TypeScript config
 ├── tailwind.config.ts              # Tailwind CSS config
 ├── postcss.config.js               # PostCSS config
@@ -122,22 +122,83 @@ frontend/
 ├── src/
 │   ├── app/                        # Next.js App Router pages
 │   │   ├── layout.tsx              # Root layout
-│   │   ├── page.tsx                # Home page
-│   │   ├── entities/
-│   │   │   └── page.tsx            # Entity list page
-│   │   └── government-orgs/
-│   │       └── page.tsx            # Gov org list page
+│   │   ├── page.tsx                # Home page (hero)
+│   │   │
+│   │   ├── knowledge-base/         # Knowledge Explorer (Epic UI-2)
+│   │   │   ├── layout.tsx          # KnowledgeExplorer shell
+│   │   │   ├── page.tsx            # Redirect to default entity type
+│   │   │   └── [entityType]/
+│   │   │       ├── page.tsx        # EntityBrowser (list/hierarchy)
+│   │   │       └── [id]/
+│   │   │           └── page.tsx    # EntityDetail
+│   │   │
+│   │   ├── factbase/               # Legacy routes (redirects only)
+│   │   │   └── page.tsx            # Redirect to /knowledge-base
+│   │   │
+│   │   ├── admin/                  # Admin pages
+│   │   ├── entities/               # Entity extraction
+│   │   ├── members/                # Congressional members
+│   │   └── committees/             # Committees
 │   │
-│   ├── components/                 # React components
-│   │   └── EntityCard.tsx          # Entity display card
+│   ├── components/
+│   │   ├── knowledge-base/         # Knowledge Explorer components
+│   │   │   ├── KnowledgeExplorer.tsx  # Main layout shell
+│   │   │   ├── EntityTypeSelector.tsx # Entity type tabs
+│   │   │   ├── ViewModeSelector.tsx   # View mode toggle (list/hierarchy)
+│   │   │   ├── SearchBar.tsx          # Cross-entity search
+│   │   │   ├── EntityBrowser.tsx      # List/grid display component
+│   │   │   ├── EntityDetail.tsx       # Detail page component
+│   │   │   ├── EntityFilters.tsx      # Filter controls
+│   │   │   ├── HierarchyView.tsx      # Tree visualization
+│   │   │   ├── TreeNode.tsx           # Tree node subcomponent
+│   │   │   └── index.ts               # Barrel export
+│   │   │
+│   │   ├── judicial/               # Judicial-specific components
+│   │   │   ├── JudgeStats.tsx      # Judge statistics display
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── sidebar/                # Shared sidebar components
+│   │   │   ├── BaseSidebar.tsx
+│   │   │   ├── SidebarMenuItem.tsx
+│   │   │   └── types.ts
+│   │   │
+│   │   ├── public/                 # Public-facing components
+│   │   │   ├── PublicSidebar.tsx   # Knowledge Base navigation
+│   │   │   └── ContentPageHeader.tsx
+│   │   │
+│   │   └── ui/                     # Shadcn UI components
 │   │
-│   ├── lib/                        # Utilities
+│   ├── lib/
 │   │   ├── utils.ts                # General utilities
-│   │   └── api/
-│   │       └── entities.ts         # Entity API client
+│   │   ├── menu-config.ts          # Sidebar menu configuration
+│   │   │
+│   │   ├── config/                 # Entity type configurations
+│   │   │   ├── entityTypes.ts      # Entity type registry & interfaces
+│   │   │   └── peopleConfig.ts     # People subtype configs (judges, members, appointees)
+│   │   │
+│   │   └── api/                    # API clients
+│   │       ├── entities.ts
+│   │       ├── judges.ts
+│   │       ├── members.ts
+│   │       └── appointees.ts
+│   │
+│   ├── hooks/                      # React Query hooks
+│   │   ├── useGovernmentOrgs.ts    # Organization data hooks
+│   │   ├── useJudges.ts            # Judge data hooks
+│   │   ├── useMembers.ts           # Member data hooks
+│   │   ├── useAppointees.ts        # Appointee data hooks
+│   │   └── useDebounce.ts          # Debounce utility hook
+│   │
+│   ├── stores/                     # Zustand stores
+│   │   └── publicSidebarStore.ts   # Sidebar state
 │   │
 │   └── types/                      # TypeScript types
-│       └── entity.ts               # Entity type definitions
+│       ├── entity.ts
+│       ├── government-org.ts
+│       ├── judge.ts
+│       ├── member.ts
+│       ├── appointee.ts
+│       └── pagination.ts
 │
 └── node_modules/                   # Dependencies (gitignored)
 ```
@@ -146,10 +207,22 @@ frontend/
 
 | File | Purpose |
 |------|---------|
-| `layout.tsx` | App shell, global providers |
-| `entities/page.tsx` | Entity listing with filters |
-| `api/entities.ts` | React Query hooks for entity API |
-| `types/entity.ts` | TypeScript interfaces matching backend DTOs |
+| `knowledge-base/layout.tsx` | KnowledgeExplorer shell with sidebar |
+| `knowledge-base/[entityType]/page.tsx` | Dynamic EntityBrowser for all entity types |
+| `lib/config/entityTypes.ts` | Entity type configurations and registry |
+| `lib/config/peopleConfig.ts` | Subtype configs for judges, members, appointees |
+| `components/knowledge-base/*.tsx` | Reusable pattern components |
+
+### Knowledge Explorer Pattern
+
+The Knowledge Explorer (Epic UI-2) uses a configuration-driven approach:
+
+1. **EntityTypeConfig** defines columns, filters, views, and detail sections
+2. **EntityBrowser** renders lists/grids based on config
+3. **EntityDetail** renders detail pages based on config
+4. **HierarchyView** renders tree structures for hierarchical entities
+
+To add a new entity type, see `docs/architecture/adding-entity-types.md`.
 
 ---
 

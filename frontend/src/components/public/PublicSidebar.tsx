@@ -35,13 +35,13 @@ export function PublicSidebar({ className }: PublicSidebarProps) {
       isCollapsed={isCollapsed}
       onToggle={toggle}
       header={
-        <Link href="/factbase" className="font-semibold text-lg hover:text-primary transition-colors">
-          Factbase
+        <Link href="/knowledge-base" className="font-semibold text-lg hover:text-primary transition-colors">
+          Knowledge Base
         </Link>
       }
       footer={adminFooter}
       className={className}
-      ariaLabel="Factbase navigation"
+      ariaLabel="Knowledge Base navigation"
       onNavigate={closeMobile}
     />
   );

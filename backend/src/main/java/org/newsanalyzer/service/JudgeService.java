@@ -228,10 +228,11 @@ public class JudgeService {
         if (holding != null) {
             builder.commissionDate(holding.getStartDate())
                    .terminationDate(holding.getEndDate())
+                   .seniorStatusDate(holding.getSeniorStatusDate())
                    .current(holding.isCurrent());
 
-            // Determine status
-            String status = determineStatus(holding.getEndDate());
+            // Determine status using senior status date
+            String status = determineStatus(holding.getSeniorStatusDate(), holding.getEndDate());
             builder.judicialStatus(status);
         }
 
@@ -251,10 +252,17 @@ public class JudgeService {
         return "Other";
     }
 
-    private String determineStatus(LocalDate endDate) {
-        if (endDate == null) return "ACTIVE";
-        if (endDate.isAfter(LocalDate.now())) return "ACTIVE";
-        return "FORMER";
+    private String determineStatus(LocalDate seniorStatusDate, LocalDate endDate) {
+        // If terminated, they're former
+        if (endDate != null && !endDate.isAfter(LocalDate.now())) {
+            return "FORMER";
+        }
+        // If has senior status date in the past, they're senior
+        if (seniorStatusDate != null && !seniorStatusDate.isAfter(LocalDate.now())) {
+            return "SENIOR";
+        }
+        // Otherwise active
+        return "ACTIVE";
     }
 
     private boolean matchesFilters(JudgeDTO judge, String courtLevel, String circuit,

@@ -13,14 +13,14 @@ import { MenuItemData } from '@/components/sidebar/types';
  * Public sidebar menu configuration.
  *
  * Structure follows a 3-level hierarchy:
- * - Level 0: Factbase (root)
+ * - Level 0: Knowledge Base (root)
  * - Level 1: Categories (People, Organizations)
- * - Level 2: Subcategories (Current Government Officials, Federal Government)
+ * - Level 2: Subcategories (Government Officials, Federal Government)
  * - Level 3: Leaf items with hrefs (Congressional Members, etc.)
  */
 export const publicMenuConfig: MenuItemData[] = [
   {
-    label: 'Factbase',
+    label: 'Knowledge Base',
     icon: Database,
     children: [
       {
@@ -28,12 +28,12 @@ export const publicMenuConfig: MenuItemData[] = [
         icon: Users,
         children: [
           {
-            label: 'Current Government Officials',
+            label: 'Government Officials',
             icon: UserCheck,
             children: [
-              { label: 'Congressional Members', href: '/factbase/people/congressional-members' },
-              { label: 'Executive Appointees', href: '/factbase/people/executive-appointees' },
-              { label: 'Federal Judges & Justices', href: '/factbase/people/federal-judges' },
+              { label: 'Congressional Members', href: '/knowledge-base/people?type=members' },
+              { label: 'Executive Appointees', href: '/knowledge-base/people?type=appointees' },
+              { label: 'Federal Judges', href: '/knowledge-base/people?type=judges' },
             ],
           },
         ],
@@ -46,9 +46,9 @@ export const publicMenuConfig: MenuItemData[] = [
             label: 'Federal Government',
             icon: Landmark,
             children: [
-              { label: 'Executive Branch', href: '/factbase/organizations/executive', icon: Landmark },
-              { label: 'Legislative Branch', href: '/factbase/organizations/legislative', icon: Scale },
-              { label: 'Judicial Branch', href: '/factbase/organizations/judicial', icon: Gavel },
+              { label: 'Executive Branch', href: '/knowledge-base/organizations?branch=executive', icon: Landmark },
+              { label: 'Legislative Branch', href: '/knowledge-base/organizations?branch=legislative', icon: Scale },
+              { label: 'Judicial Branch', href: '/knowledge-base/organizations?branch=judicial', icon: Gavel },
             ],
           },
         ],
@@ -58,7 +58,7 @@ export const publicMenuConfig: MenuItemData[] = [
 ];
 
 /**
- * Flattened menu config without the Factbase wrapper.
- * Use this when the sidebar header already displays "Factbase".
+ * Flattened menu config without the Knowledge Base wrapper.
+ * Use this when the sidebar header already displays "Knowledge Base".
  */
 export const publicMenuItemsFlat: MenuItemData[] = publicMenuConfig[0]?.children ?? [];

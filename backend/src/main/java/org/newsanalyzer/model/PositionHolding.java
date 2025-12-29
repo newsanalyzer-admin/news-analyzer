@@ -75,6 +75,10 @@ public class PositionHolding {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
+    @Column(name = "senior_status_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate seniorStatusDate;
+
     @Column(name = "congress")
     @Min(value = 1, message = "Congress number must be positive")
     private Integer congress;
