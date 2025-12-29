@@ -53,7 +53,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | Epic | Status | Progress | Description |
 |------|--------|----------|-------------|
 | **UI-1** | Complete | 100% | Public Navigation & Factbase Pages |
-| **UI-2** | Ready | 0% | Knowledge Explorer UI Refactoring |
+| **UI-2** | Complete | 100% | Knowledge Explorer UI Refactoring |
 
 ### Overall MVP Status
 
@@ -706,9 +706,10 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
-### UI-2: Knowledge Explorer UI Refactoring
+### UI-2: Knowledge Explorer UI Refactoring ✅
 
-**Status:** READY FOR DEVELOPMENT
+**Status:** COMPLETE
+**Completion Date:** 2025-12-29
 **Documentation:** [`docs/stories/UI-2/UI-2.epic-knowledge-explorer.md`](stories/UI-2/UI-2.epic-knowledge-explorer.md)
 
 **Relationship to UI-1:**
@@ -732,15 +733,17 @@ Core differentiator - cross-reference claims against authoritative sources.
 - Migration of ALL People types (Judges, Members, Appointees) to new patterns
 - Cleanup of deprecated factbase code
 
-**Stories (8 total):**
-- UI-2.1: Knowledge Explorer Shell & Navigation
-- UI-2.2: EntityBrowser Pattern Component
-- UI-2.3: EntityDetail Pattern Component
-- UI-2.4: HierarchyView Pattern Component
-- UI-2.5: Cross-Entity Search
-- UI-2.6: Migrate Government Organizations
-- UI-2.7: Migrate People (Judges, Members, Appointees)
-- UI-2.8: Cleanup & Documentation
+**Stories (8 total, all complete):**
+- UI-2.1: Knowledge Explorer Shell & Navigation ✅
+- UI-2.2: EntityBrowser Pattern Component ✅
+- UI-2.3: EntityDetail Pattern Component ✅
+- UI-2.4: HierarchyView Pattern Component ✅
+- UI-2.5: Cross-Entity Search ✅
+- UI-2.6: Migrate Government Organizations ✅
+- UI-2.7: Migrate People (Judges, Members, Appointees) ✅
+- UI-2.8: Cleanup & Documentation ✅
+
+**Quality Gates:** All 8 stories passed QA review.
 
 ---
 
@@ -855,7 +858,7 @@ Based on business requirements document objectives:
 | Epic | Document | Status |
 |------|----------|--------|
 | UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | ✅ Complete |
-| UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | Ready for Development |
+| UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | ✅ Complete |
 
 ### Phase Completion Summaries
 
@@ -908,6 +911,7 @@ Based on business requirements document objectives:
 | 2025-12-12 | 2.8 | **ADMIN-1 Epic COMPLETE**: All 13 stories done - Admin dashboard redesign, GOVMAN/US Code import, API search/import UI (Congress.gov, Federal Register, Legislators repo); Supersedes FB-4, FB-5, FB-6 draft epics; **MVP 100% COMPLETE** |
 | 2025-12-17 | 2.9 | Added **User Experience Track** with **UI-1 Epic** (Public Navigation & User Experience) - 12 stories, 47 points, ready for development |
 | 2025-12-26 | 3.0 | **UI-1 Epic COMPLETE**: All 12 stories done - Public sidebar, factbase pages, federal judges import; Added **UI-2 Epic** (Knowledge Explorer UI Refactoring) - 8 stories, replaces bespoke UI-1 pages with reusable pattern components |
+| 2025-12-29 | 3.1 | **UI-2 Epic COMPLETE**: All 8 stories done - Knowledge Explorer shell, EntityBrowser/EntityDetail/HierarchyView patterns, cross-entity search, migration of Gov Orgs and People (judges/members/appointees), cleanup & documentation; Documentation sync performed to reflect completed status |
 
 ---
 

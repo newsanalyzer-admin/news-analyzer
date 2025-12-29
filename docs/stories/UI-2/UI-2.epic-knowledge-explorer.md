@@ -8,7 +8,7 @@
 | **Epic Name** | Knowledge Explorer UI Refactoring |
 | **Epic Type** | UI/UX Refactoring |
 | **Priority** | HIGH |
-| **Status** | Ready for Development |
+| **Status** | **COMPLETE** ✅ |
 | **Created** | 2025-12-22 |
 | **Owner** | Sarah (PO) |
 | **Depends On** | UI-1 Complete (uses data imports from UI-1.9, 1.10, 1.11) |
@@ -152,11 +152,13 @@ interface EntityTypeConfig {
 - Remove/redirect deprecated navigation paths
 
 **Acceptance Criteria:**
-- [ ] Single "Knowledge Base" link on hero page
-- [ ] EntityTypeSelector shows available entity types
-- [ ] ViewModeSelector shows available views for selected type
-- [ ] URL updates reflect entity type and view mode selections
-- [ ] Old factbase routes redirect to new /knowledge-base routes
+- [x] Single "Knowledge Base" link on hero page
+- [x] EntityTypeSelector shows available entity types
+- [x] ViewModeSelector shows available views for selected type
+- [x] URL updates reflect entity type and view mode selections
+- [x] Old factbase routes redirect to new /knowledge-base routes
+
+**Status:** ✅ Complete (22 tests passing)
 
 ---
 
@@ -171,11 +173,13 @@ interface EntityTypeConfig {
 - Create entity type configuration system
 
 **Acceptance Criteria:**
-- [ ] EntityBrowser renders any entity type based on configuration
-- [ ] Sorting works on configured columns
-- [ ] Pagination handles large datasets
-- [ ] List/grid toggle works
-- [ ] Filters render based on entity type configuration
+- [x] EntityBrowser renders any entity type based on configuration
+- [x] Sorting works on configured columns
+- [x] Pagination handles large datasets
+- [x] List/grid toggle works
+- [x] Filters render based on entity type configuration
+
+**Status:** ✅ Complete (61 tests passing)
 
 ---
 
@@ -190,10 +194,12 @@ interface EntityTypeConfig {
 - Create consistent header/metadata pattern
 
 **Acceptance Criteria:**
-- [ ] EntityDetail renders any entity type based on configuration
-- [ ] Source citations displayed as expandable icons
-- [ ] Related entities linked appropriately
-- [ ] Consistent visual pattern across entity types
+- [x] EntityDetail renders any entity type based on configuration
+- [x] Source citations displayed as expandable icons
+- [x] Related entities linked appropriately
+- [x] Consistent visual pattern across entity types
+
+**Status:** ✅ Done
 
 ---
 
@@ -208,10 +214,12 @@ interface EntityTypeConfig {
 - Handle large hierarchies efficiently
 
 **Acceptance Criteria:**
-- [ ] Tree visualization renders hierarchical data
-- [ ] Nodes expandable/collapsible
-- [ ] Clicking node navigates to detail view
-- [ ] Performance acceptable for 1000+ node trees
+- [x] Tree visualization renders hierarchical data
+- [x] Nodes expandable/collapsible
+- [x] Clicking node navigates to detail view
+- [x] Performance acceptable for 1000+ node trees
+
+**Status:** ✅ Done (keyboard navigation implemented)
 
 ---
 
@@ -226,10 +234,12 @@ interface EntityTypeConfig {
 - Support keyboard navigation
 
 **Acceptance Criteria:**
-- [ ] Search bar visible in Knowledge Explorer header
-- [ ] Search scoped to current entity type
-- [ ] Results displayed in EntityBrowser format
-- [ ] Clicking result navigates to EntityDetail
+- [x] Search bar visible in Knowledge Explorer header
+- [x] Search scoped to current entity type
+- [x] Results displayed in EntityBrowser format
+- [x] Clicking result navigates to EntityDetail
+
+**Status:** ✅ Done (debounced URL-based search)
 
 ---
 
@@ -245,10 +255,12 @@ interface EntityTypeConfig {
 - Remove old bespoke components
 
 **Acceptance Criteria:**
-- [ ] Gov Orgs accessible via `/knowledge-base/organizations`
-- [ ] All existing functionality preserved
-- [ ] Uses shared pattern components
-- [ ] Old routes redirect correctly
+- [x] Gov Orgs accessible via `/knowledge-base/organizations`
+- [x] All existing functionality preserved
+- [x] Uses shared pattern components
+- [x] Old routes redirect correctly
+
+**Status:** ✅ Done (branch-specific redirects working)
 
 ---
 
@@ -264,15 +276,17 @@ interface EntityTypeConfig {
 - Support filtering by person type via URL param
 
 **Acceptance Criteria:**
-- [ ] Judges accessible via `/knowledge-base/people?type=judges`
-- [ ] Congressional Members accessible via `/knowledge-base/people?type=members`
-- [ ] Executive Appointees accessible via `/knowledge-base/people?type=appointees`
-- [ ] All existing functionality preserved for each person type
-- [ ] Uses shared pattern components
-- [ ] Old routes redirect correctly:
+- [x] Judges accessible via `/knowledge-base/people?type=judges`
+- [x] Congressional Members accessible via `/knowledge-base/people?type=members`
+- [x] Executive Appointees accessible via `/knowledge-base/people?type=appointees`
+- [x] All existing functionality preserved for each person type
+- [x] Uses shared pattern components
+- [x] Old routes redirect correctly:
   - `/factbase/people/federal-judges` → `/knowledge-base/people?type=judges`
   - `/factbase/people/congressional-members` → `/knowledge-base/people?type=members`
   - `/factbase/people/executive-appointees` → `/knowledge-base/people?type=appointees`
+
+**Status:** ✅ Done (SubtypeSelector component, peopleConfig.ts with subtypes)
 
 ---
 
@@ -287,10 +301,12 @@ interface EntityTypeConfig {
 - Update any affected tests
 
 **Acceptance Criteria:**
-- [ ] No dead code from old factbase implementation
-- [ ] Architecture documentation updated
-- [ ] "Adding a new entity type" guide created
-- [ ] All tests passing
+- [x] No dead code from old factbase implementation
+- [x] Architecture documentation updated
+- [x] "Adding a new entity type" guide created
+- [x] All tests passing
+
+**Status:** ✅ Done (deprecated pages deleted, docs/architecture/adding-entity-types.md created)
 
 ## Story Sequencing
 
@@ -311,11 +327,11 @@ UI-2.1 (Shell)
 
 ## Compatibility Requirements
 
-- [ ] Existing backend APIs remain unchanged
-- [ ] Database schema unchanged
-- [ ] Admin import functionality unaffected
-- [ ] All existing data accessible through new UI
-- [ ] Old URLs redirect to new equivalents
+- [x] Existing backend APIs remain unchanged
+- [x] Database schema unchanged
+- [x] Admin import functionality unaffected
+- [x] All existing data accessible through new UI
+- [x] Old URLs redirect to new equivalents
 
 ## Risk Mitigation
 
@@ -335,13 +351,15 @@ If critical issues discovered post-deployment:
 
 ## Definition of Done
 
-- [ ] All 8 stories completed with acceptance criteria met
-- [ ] All existing functionality accessible through new UI
-- [ ] Pattern components reusable across 2+ entity types
-- [ ] Old routes redirect correctly
-- [ ] Documentation updated
-- [ ] No regression in existing features
-- [ ] Performance targets met (< 2s page load)
+- [x] All 8 stories completed with acceptance criteria met
+- [x] All existing functionality accessible through new UI
+- [x] Pattern components reusable across 2+ entity types (Gov Orgs, People)
+- [x] Old routes redirect correctly
+- [x] Documentation updated
+- [x] No regression in existing features
+- [x] Performance targets met (< 2s page load)
+
+**Completed:** 2025-12-29
 
 ## Design Decisions
 
