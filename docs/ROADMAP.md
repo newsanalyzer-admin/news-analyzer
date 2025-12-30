@@ -626,7 +626,7 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ## Quality Assurance Track
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Priority:** HIGH (Infrastructure)
 
 ### QA-1: API Integration Testing Framework ✅
@@ -644,33 +644,33 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 **Stories:** QA-1.1 through QA-1.6 (all complete)
 
-### QA-2: Test Infrastructure Improvements
+### QA-2: Test Infrastructure Improvements ✅
 
-**Status:** IN PROGRESS (Revised)
-**Priority:** LOW (Post-MVP)
+**Status:** COMPLETE
+**Completion Date:** 2025-12-30
 **Documentation:** [`docs/stories/QA-2/QA-2.epic-test-infrastructure.md`](stories/QA-2/QA-2.epic-test-infrastructure.md)
 
 **Pre-Completed (discovered during architect review):**
 - Testcontainers for repository tests (39+ tests using PostgreSQL container)
-- Frontend testing framework (Vitest + Testing Library, 5 test files)
+- Frontend testing framework (Vitest + Testing Library)
 - CI/CD workflows (5 GitHub Actions pipelines operational)
 
-**Remaining Deliverables:**
-- Expand frontend test coverage to admin/shared components
-- Add CI coverage thresholds (JaCoCo 70%, Vitest 60%)
-- CI/CD documentation README
+**Deliverables:**
+- 105 new frontend component tests (166 total)
+- CI coverage thresholds (JaCoCo 70% backend, Vitest 30% frontend baseline)
+- Comprehensive CI/CD documentation (`.github/workflows/README.md`)
 
-**Stories:**
-- QA-2.1-2.3: COMPLETE (pre-epic implementation)
-- QA-2.4: Expand Frontend Test Coverage (3 pts) - Ready
-- QA-2.5: Add CI Coverage Thresholds (2 pts) - Ready
-- QA-2.6: CI/CD Documentation (1 pt) - Ready
+**Stories (all complete):**
+- QA-2.1-2.3: Pre-epic implementation ✅
+- QA-2.4: Expand Frontend Test Coverage (3 pts) ✅
+- QA-2.5: Add CI Coverage Thresholds (2 pts) ✅
+- QA-2.6: CI/CD Documentation (1 pt) ✅
 
 ---
 
 ## User Experience Track
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Priority:** HIGH
 **Description:** Create public-facing user interfaces that make the factbase accessible to users unfamiliar with government structure.
 
@@ -784,12 +784,12 @@ Based on business requirements document objectives:
 
 ### Technical Debt to Address
 
-> **Status:** Tracked in [QA-2 Epic](stories/QA-2.epic-test-infrastructure.md)
+> **Status:** All test infrastructure debt resolved via [QA-2 Epic](stories/QA-2/QA-2.epic-test-infrastructure.md) ✅
 
-- [x] ~~Resolve H2/PostgreSQL JSONB incompatibility in tests~~ → **Workaround:** 17 repository tests disabled via `@Disabled`
-- [ ] Add Testcontainers for repository tests → Proper fix for above (QA-2.1)
-- [ ] Implement frontend testing → (QA-2.2)
-- [ ] Add CI/CD pipeline documentation → Partial (GitHub Actions exists)
+- [x] ~~Resolve H2/PostgreSQL JSONB incompatibility in tests~~ → Fixed with Testcontainers (QA-2.1)
+- [x] Add Testcontainers for repository tests → 39+ tests using PostgreSQL container
+- [x] Implement frontend testing → 166 tests with Vitest + Testing Library
+- [x] Add CI/CD pipeline documentation → `.github/workflows/README.md`
 - [x] Production deployment guide → `docs/deployment/DEPLOYMENT_GUIDE.md`
 
 ---
@@ -860,7 +860,7 @@ Based on business requirements document objectives:
 | Epic | Document | Status |
 |------|----------|--------|
 | QA-1 | `docs/stories/QA-1/QA-1.epic-api-testing-framework.md` | ✅ Complete |
-| QA-2 | `docs/stories/QA-2/QA-2.epic-test-infrastructure.md` | In Progress (Revised) |
+| QA-2 | `docs/stories/QA-2/QA-2.epic-test-infrastructure.md` | ✅ Complete |
 
 ### User Experience Epics
 
@@ -921,6 +921,7 @@ Based on business requirements document objectives:
 | 2025-12-17 | 2.9 | Added **User Experience Track** with **UI-1 Epic** (Public Navigation & User Experience) - 12 stories, 47 points, ready for development |
 | 2025-12-26 | 3.0 | **UI-1 Epic COMPLETE**: All 12 stories done - Public sidebar, factbase pages, federal judges import; Added **UI-2 Epic** (Knowledge Explorer UI Refactoring) - 8 stories, replaces bespoke UI-1 pages with reusable pattern components |
 | 2025-12-29 | 3.1 | **UI-2 Epic COMPLETE**: All 8 stories done - Knowledge Explorer shell, EntityBrowser/EntityDetail/HierarchyView patterns, cross-entity search, migration of Gov Orgs and People (judges/members/appointees), cleanup & documentation; Documentation sync performed to reflect completed status |
+| 2025-12-30 | 3.2 | **QA-2 Epic COMPLETE**: All stories done - 105 new frontend tests (166 total), CI coverage thresholds (JaCoCo 70%, Vitest 30%), CI/CD documentation README; All technical debt resolved; Quality Assurance Track 100% complete |
 
 ---
 
