@@ -2,7 +2,7 @@
 
 **Document Version:** 3.0
 **Created:** 2025-11-25
-**Last Updated:** 2025-12-26
+**Last Updated:** 2025-12-30
 **Status:** Active
 
 ---
@@ -46,7 +46,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | Epic | Status | Progress | Description |
 |------|--------|----------|-------------|
 | **QA-1** | Complete | 100% | API Integration Testing Framework |
-| **QA-2** | Planned | 0% | Test Infrastructure Improvements (Post-MVP) |
+| **QA-2** | Complete | 100% | Test Infrastructure Improvements |
 
 ### User Experience Track
 
@@ -646,16 +646,25 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ### QA-2: Test Infrastructure Improvements
 
-**Status:** PLANNED
+**Status:** IN PROGRESS (Revised)
 **Priority:** LOW (Post-MVP)
-**Documentation:** [`docs/stories/QA-2.epic-test-infrastructure.md`](stories/QA-2.epic-test-infrastructure.md)
+**Documentation:** [`docs/stories/QA-2/QA-2.epic-test-infrastructure.md`](stories/QA-2/QA-2.epic-test-infrastructure.md)
 
-**Planned Deliverables:**
-- Testcontainers for repository tests (real PostgreSQL)
-- Frontend component and integration tests
-- CI/CD documentation improvements
+**Pre-Completed (discovered during architect review):**
+- Testcontainers for repository tests (39+ tests using PostgreSQL container)
+- Frontend testing framework (Vitest + Testing Library, 5 test files)
+- CI/CD workflows (5 GitHub Actions pipelines operational)
 
-**Stories:** QA-2.1, QA-2.2, QA-2.3 (planned)
+**Remaining Deliverables:**
+- Expand frontend test coverage to admin/shared components
+- Add CI coverage thresholds (JaCoCo 70%, Vitest 60%)
+- CI/CD documentation README
+
+**Stories:**
+- QA-2.1-2.3: COMPLETE (pre-epic implementation)
+- QA-2.4: Expand Frontend Test Coverage (3 pts) - Ready
+- QA-2.5: Add CI Coverage Thresholds (2 pts) - Ready
+- QA-2.6: CI/CD Documentation (1 pt) - Ready
 
 ---
 
@@ -851,7 +860,7 @@ Based on business requirements document objectives:
 | Epic | Document | Status |
 |------|----------|--------|
 | QA-1 | `docs/stories/QA-1/QA-1.epic-api-testing-framework.md` | ✅ Complete |
-| QA-2 | `docs/stories/QA-2.epic-test-infrastructure.md` | Planned |
+| QA-2 | `docs/stories/QA-2/QA-2.epic-test-infrastructure.md` | In Progress (Revised) |
 
 ### User Experience Epics
 

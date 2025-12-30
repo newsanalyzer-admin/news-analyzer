@@ -42,9 +42,15 @@ jobs:
         working-directory: ./frontend
         run: pnpm type-check
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: ./frontend
-        run: pnpm test
+        run: pnpm test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
 
       - name: Build
         working-directory: ./frontend
