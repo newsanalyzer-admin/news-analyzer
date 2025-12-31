@@ -8,12 +8,36 @@
 | **Epic Name** | Knowledge Explorer UI Refactoring |
 | **Epic Type** | UI/UX Refactoring |
 | **Priority** | HIGH |
-| **Status** | **COMPLETE** ✅ |
+| **Status** | **COMPLETE** ✅ **(Superseded by UI-3)** |
 | **Created** | 2025-12-22 |
 | **Owner** | Sarah (PO) |
 | **Depends On** | UI-1 Complete (uses data imports from UI-1.9, 1.10, 1.11) |
 | **Supersedes** | UI-1 page components (replaces bespoke pages with reusable patterns) |
+| **Superseded By** | [UI-3: Frontend Architecture Realignment](../UI-3/UI-3.epic-frontend-realignment.md) |
 | **Source Brief** | `docs/briefs/knowledge-explorer-ui-brief.md` |
+
+---
+
+## Supersession Notice
+
+> **This epic's route structure has been superseded by UI-3.**
+>
+> UI-2 was completed before architecture v2.5 clarified the dual-layer data model
+> (Article Analyzer vs Knowledge Base). The `/knowledge-base` route was built to
+> browse extracted entities from the `entities` table, but per the clarified
+> architecture, Knowledge Base should browse authoritative data from the `persons`,
+> `committees`, and `government_organizations` tables.
+>
+> **What's Preserved:** All pattern components (EntityBrowser, EntityDetail, HierarchyView)
+> are reused in UI-3. The component architecture and configuration-driven approach
+> remain valuable.
+>
+> **What's Changed:** Route structure and data sources are realigned in UI-3 to match
+> the documented architecture.
+>
+> **Reference:** [`docs/qa/SCP-2025-12-30-001-frontend-realignment.md`](../../qa/SCP-2025-12-30-001-frontend-realignment.md)
+
+---
 
 ## Executive Summary
 
