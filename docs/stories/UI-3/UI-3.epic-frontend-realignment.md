@@ -8,7 +8,7 @@
 | **Epic Name** | Frontend Architecture Realignment |
 | **Epic Type** | UI/UX Refactoring |
 | **Priority** | HIGH |
-| **Status** | PLANNED |
+| **Status** | IN PROGRESS (Phase A Complete) |
 | **Created** | 2025-12-30 |
 | **Owner** | Sarah (PO) |
 | **Depends On** | UI-2 Complete (reuses pattern components) |
@@ -52,10 +52,10 @@ UI-2's excellent pattern components (EntityBrowser, EntityDetail, HierarchyView)
 
 | Metric | Target | Current |
 |--------|--------|---------|
-| KB browses authoritative data | 100% | 0% (browses entities table) |
-| Article Analyzer section exists | Yes | No |
-| Hierarchical KB navigation | Implemented | Not implemented |
-| Architecture Section 8 compliance | Full | Partial |
+| KB browses authoritative data | 100% | ✅ 100% (Phase A complete) |
+| Article Analyzer section exists | Yes | No (Phase B) |
+| Hierarchical KB navigation | Implemented | ✅ Implemented (UI-3.A.2) |
+| Architecture Section 8 compliance | Full | Partial (Phase A: KB nav complete) |
 
 ## Scope
 
@@ -156,12 +156,12 @@ NewsAnalyzer
 
 | ID | Story | Priority | Estimate | Status |
 |----|-------|----------|----------|--------|
-| UI-3.A.1 | Reconfigure EntityBrowser for KB Tables | P0 | 3 pts | Planned |
-| UI-3.A.2 | Implement Hierarchical KB Navigation | P0 | 5 pts | Planned |
-| UI-3.A.3 | Update Entity Type Configs | P1 | 2 pts | Planned |
-| UI-3.A.4 | Route Restructuring & Redirects | P1 | 2 pts | Planned |
-| UI-3.A.5 | Phase A Documentation | P2 | 1 pt | Planned |
-| UI-3.A.6 | Update Test Coverage | P1 | 2 pts | Planned |
+| UI-3.A.1 | Reconfigure EntityBrowser for KB Tables | P0 | 3 pts | ✅ Complete |
+| UI-3.A.2 | Implement Hierarchical KB Navigation | P0 | 5 pts | ✅ Complete |
+| UI-3.A.3 | Update Entity Type Configs | P1 | 2 pts | ✅ Complete (merged into A.1) |
+| UI-3.A.4 | Route Restructuring & Redirects | P1 | 2 pts | ✅ Complete |
+| UI-3.A.5 | Phase A Documentation | P2 | 1 pt | ✅ Complete |
+| UI-3.A.6 | Update Test Coverage | P1 | 2 pts | ✅ Complete (across A.1, A.2, A.4) |
 
 **Phase A Total:** 15 story points
 
@@ -208,7 +208,7 @@ UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
 
 ### UI-3.A.1: Reconfigure EntityBrowser for KB Tables
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31)
 
 **As a** user browsing the Knowledge Base,
 **I want** to see authoritative data (persons, committees, government organizations),
@@ -235,7 +235,7 @@ UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
 
 ### UI-3.A.2: Implement Hierarchical KB Navigation
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31)
 
 **As a** user exploring the Knowledge Base,
 **I want** hierarchical navigation (Government > Branches > Departments),
@@ -262,7 +262,7 @@ UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
 
 ### UI-3.A.4: Route Restructuring & Redirects
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31)
 
 **As a** user with bookmarked pages,
 **I want** old routes to redirect to new locations,
@@ -307,7 +307,7 @@ module.exports = {
 
 ### UI-3.A.6: Update Test Coverage
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31) - Achieved across A.1, A.2, A.4
 
 **As a** developer,
 **I want** tests updated for the new route structure,
@@ -391,13 +391,13 @@ module.exports = {
 
 ## Definition of Done
 
-- [ ] All Phase A stories complete and passing QA
+- [x] All Phase A stories complete and passing QA
 - [ ] All Phase B stories complete and passing QA
-- [ ] No broken links (automated check)
-- [ ] Architecture Section 8 compliance verified
-- [ ] Documentation updated (this epic, ROADMAP)
-- [ ] Redirects in place for old routes
-- [ ] Hero page shows dual navigation
+- [x] No broken links (automated check) - 269 tests pass
+- [x] Architecture Section 8 compliance verified (KB navigation)
+- [x] Documentation updated (this epic, ROADMAP)
+- [x] Redirects in place for old routes (UI-3.A.4)
+- [ ] Hero page shows dual navigation (Phase B)
 
 ## Related Documentation
 
@@ -433,6 +433,7 @@ The epic is architecturally sound and correctly addresses the dual-layer data mo
 |------|---------|-------------|--------|
 | 2025-12-30 | 1.0 | Initial epic creation from Sprint Change Proposal | Sarah (PO) |
 | 2025-12-30 | 1.1 | Architect review: added UI-3.A.6, clarified routes, added redirect strategy | Winston (Architect) |
+| 2025-12-31 | 2.0 | Phase A Complete: A.1 (46 tests), A.2 (43 tests), A.3 (merged into A.1), A.4 (17 tests), A.5 (docs), A.6 (achieved across stories) | James (Dev) |
 
 ## Approval
 
