@@ -171,4 +171,52 @@ describe('Next.js Redirects Configuration', () => {
       expect(judgesIndex).toBeLessThan(genericIndex);
     });
   });
+
+  describe('Extracted Entity Type Redirects (UI-3.B.2)', () => {
+    it('/knowledge-base/person redirects to /article-analyzer/entities?type=person', () => {
+      const redirect = redirects.find((r) => r.source === '/knowledge-base/person');
+      expect(redirect).toBeDefined();
+      expect(redirect?.destination).toBe('/article-analyzer/entities?type=person');
+      expect(redirect?.permanent).toBe(false); // 307 temporary during transition
+    });
+
+    it('/knowledge-base/organization redirects to /article-analyzer/entities?type=organization', () => {
+      const redirect = redirects.find((r) => r.source === '/knowledge-base/organization');
+      expect(redirect).toBeDefined();
+      expect(redirect?.destination).toBe('/article-analyzer/entities?type=organization');
+      expect(redirect?.permanent).toBe(false);
+    });
+
+    it('/knowledge-base/event redirects to /article-analyzer/entities?type=event', () => {
+      const redirect = redirects.find((r) => r.source === '/knowledge-base/event');
+      expect(redirect).toBeDefined();
+      expect(redirect?.destination).toBe('/article-analyzer/entities?type=event');
+      expect(redirect?.permanent).toBe(false);
+    });
+
+    it('/knowledge-base/location redirects to /article-analyzer/entities?type=location', () => {
+      const redirect = redirects.find((r) => r.source === '/knowledge-base/location');
+      expect(redirect).toBeDefined();
+      expect(redirect?.destination).toBe('/article-analyzer/entities?type=location');
+      expect(redirect?.permanent).toBe(false);
+    });
+
+    it('all extracted entity redirects use temporary (307) status', () => {
+      const extractedEntityRedirects = redirects.filter((r) =>
+        ['/knowledge-base/person', '/knowledge-base/organization', '/knowledge-base/event', '/knowledge-base/location'].includes(r.source)
+      );
+      expect(extractedEntityRedirects.length).toBe(4);
+      extractedEntityRedirects.forEach((redirect) => {
+        expect(redirect.permanent).toBe(false);
+      });
+    });
+
+    it('all extracted entity redirects point to Article Analyzer', () => {
+      const extractedEntityRedirects = redirects.filter((r) =>
+        r.source.startsWith('/knowledge-base/') &&
+        r.destination.startsWith('/article-analyzer/entities')
+      );
+      expect(extractedEntityRedirects.length).toBe(4);
+    });
+  });
 });

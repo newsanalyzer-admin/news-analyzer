@@ -89,6 +89,30 @@ const nextConfig = {
         destination: '/knowledge-base/committees',
         permanent: true,
       },
+
+      // Extracted entity type redirects (UI-3.B.2)
+      // These redirect old KB routes for extracted entities to Article Analyzer
+      // Using 307 (temporary) during transition period
+      {
+        source: '/knowledge-base/person',
+        destination: '/article-analyzer/entities?type=person',
+        permanent: false,
+      },
+      {
+        source: '/knowledge-base/organization',
+        destination: '/article-analyzer/entities?type=organization',
+        permanent: false,
+      },
+      {
+        source: '/knowledge-base/event',
+        destination: '/article-analyzer/entities?type=event',
+        permanent: false,
+      },
+      {
+        source: '/knowledge-base/location',
+        destination: '/article-analyzer/entities?type=location',
+        permanent: false,
+      },
     ]
   },
 
