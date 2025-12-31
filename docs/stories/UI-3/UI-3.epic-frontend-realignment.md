@@ -135,9 +135,9 @@ NewsAnalyzer
 | `/knowledge-base/government` | GovBrowser | government_organizations | U.S. Federal Government section |
 | `/knowledge-base/government/[branch]` | BranchView | government_organizations | Executive/Legislative/Judicial |
 | `/knowledge-base/people` | PeopleBrowser | persons | All people types |
-| `/knowledge-base/people/members` | MembersList | persons (filtered) | Congressional members |
-| `/knowledge-base/people/judges` | JudgesList | persons (filtered) | Federal judges |
-| `/knowledge-base/people/appointees` | AppointeesList | persons (filtered) | Executive appointees |
+| `/knowledge-base/people?type=members` | PeopleBrowser | persons (filtered) | Congressional members |
+| `/knowledge-base/people?type=judges` | PeopleBrowser | persons (filtered) | Federal judges |
+| `/knowledge-base/people?type=appointees` | PeopleBrowser | persons (filtered) | Executive appointees |
 | `/knowledge-base/committees` | CommitteesBrowser | committees | Congressional committees |
 | `/article-analyzer` | ArticleAnalyzer | - | Article Analyzer landing |
 | `/article-analyzer/entities` | EntityBrowser | entities | Extracted entities (moved) |
@@ -161,8 +161,9 @@ NewsAnalyzer
 | UI-3.A.3 | Update Entity Type Configs | P1 | 2 pts | Planned |
 | UI-3.A.4 | Route Restructuring & Redirects | P1 | 2 pts | Planned |
 | UI-3.A.5 | Phase A Documentation | P2 | 1 pt | Planned |
+| UI-3.A.6 | Update Test Coverage | P1 | 2 pts | Planned |
 
-**Phase A Total:** 13 story points
+**Phase A Total:** 15 story points
 
 ### Phase B: Article Analyzer Foundation
 
@@ -175,7 +176,7 @@ NewsAnalyzer
 
 **Phase B Total:** 10 story points
 
-**Epic Total:** 23 story points
+**Epic Total:** 25 story points
 
 ### Dependency Graph
 
@@ -188,7 +189,9 @@ UI-3.A.1 (Reconfigure EntityBrowser)
             |
             +-- UI-3.A.4 (Routes) -- after configs updated
                     |
-                    +-- UI-3.A.5 (Docs) -- after routes finalized
+                    +-- UI-3.A.6 (Tests) -- after routes finalized
+                            |
+                            +-- UI-3.A.5 (Docs) -- after tests pass
 
 UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
     |
@@ -254,6 +257,77 @@ UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
 - Leverage existing HierarchyView pattern from UI-2
 - Use `government_organizations.parent_id` for tree structure
 - Consider lazy-loading for deep hierarchies
+
+---
+
+### UI-3.A.4: Route Restructuring & Redirects
+
+**Status:** Planned
+
+**As a** user with bookmarked pages,
+**I want** old routes to redirect to new locations,
+**So that** my bookmarks and shared links continue to work.
+
+#### Acceptance Criteria
+
+| # | Criterion |
+|---|-----------|
+| AC1 | Old `/knowledge-base/[entityType]` routes redirect to appropriate new locations |
+| AC2 | Redirects use 307 (temporary) status during transition period |
+| AC3 | All old factbase routes continue to work via redirects |
+| AC4 | No 404 errors for any previously valid routes |
+
+#### Technical Notes
+
+**Redirect Strategy (next.config.js):**
+
+```javascript
+// next.config.js
+module.exports = {
+  async redirects() {
+    return [
+      // Extracted entities → Article Analyzer
+      {
+        source: '/knowledge-base/:entityType(person|organization|event|location)',
+        destination: '/article-analyzer/entities?type=:entityType',
+        permanent: false,  // Use 307 during transition
+      },
+      // Old factbase routes
+      {
+        source: '/factbase/:path*',
+        destination: '/knowledge-base/:path*',
+        permanent: true,
+      },
+    ];
+  },
+};
+```
+
+---
+
+### UI-3.A.6: Update Test Coverage
+
+**Status:** Planned
+
+**As a** developer,
+**I want** tests updated for the new route structure,
+**So that** we maintain test coverage and catch regressions.
+
+#### Acceptance Criteria
+
+| # | Criterion |
+|---|-----------|
+| AC1 | EntityBrowser tests updated for new KB table configurations |
+| AC2 | Route redirect tests added to verify all redirects work |
+| AC3 | All 166+ existing frontend tests continue to pass |
+| AC4 | New Article Analyzer components have test coverage |
+| AC5 | Test coverage thresholds maintained (30% lines, 50% branches) |
+
+#### Technical Notes
+
+- Update existing `EntityBrowser.test.tsx` for KB configurations
+- Add integration tests for redirect behavior
+- Ensure Vitest coverage thresholds pass in CI
 
 ---
 
@@ -332,18 +406,40 @@ UI-3.B.1 (Article Analyzer Shell) -- can start parallel with Phase A
 - [UI-2 Epic](../UI-2/UI-2.epic-knowledge-explorer.md) - Superseded epic (patterns preserved)
 - [ROADMAP](../../ROADMAP.md) - Project roadmap
 
+## Architect Review Notes
+
+**Reviewed by:** Winston (Architect)
+**Date:** 2025-12-30
+
+### Review Summary
+
+The epic is architecturally sound and correctly addresses the dual-layer data model clarification. The phased approach (Phase A: KB Realignment, Phase B: Article Analyzer) allows for incremental delivery with clear value at each phase.
+
+### Modifications Applied
+
+1. **Added UI-3.A.6: Update Test Coverage** (2 pts) - Ensures test coverage is maintained during route restructuring
+2. **Clarified people sub-routes** - Using query params (`/knowledge-base/people?type=members`) preserves single-component architecture
+3. **Documented redirect strategy** - Added Next.js redirect configuration example to UI-3.A.4
+
+### Technical Alignment
+
+- Route structure aligns with `architecture.md` Section 8
+- Pattern reuse from UI-2 is architecturally correct
+- Data layer separation (KB tables vs entities table) properly reflected in routes
+
 ## Change Log
 
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2025-12-30 | 1.0 | Initial epic creation from Sprint Change Proposal | Sarah (PO) |
+| 2025-12-30 | 1.1 | Architect review: added UI-3.A.6, clarified routes, added redirect strategy | Winston (Architect) |
 
 ## Approval
 
 | Role | Name | Date | Status |
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2025-12-30 | DRAFTED |
-| Architect | Winston | _Pending_ | _Pending_ |
+| Architect | Winston | 2025-12-30 | **APPROVED** |
 | Tech Lead | _Pending_ | _Pending_ | _Pending_ |
 
 ---
