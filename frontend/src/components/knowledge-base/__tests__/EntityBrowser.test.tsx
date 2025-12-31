@@ -16,6 +16,7 @@ const mockConfig: EntityTypeConfig = {
   label: 'Test Entities',
   icon: Building2,
   apiEndpoint: '/api/test',
+  dataLayer: 'kb',
   supportedViews: ['list'],
   defaultView: 'list',
   columns: mockColumns,

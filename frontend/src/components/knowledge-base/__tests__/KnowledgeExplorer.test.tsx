@@ -20,7 +20,9 @@ describe('KnowledgeExplorer', () => {
       </KnowledgeExplorer>
     );
 
-    expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
+    // Header link comes first, breadcrumb link second
+    const kbLinks = screen.getAllByRole('link', { name: 'Knowledge Base' });
+    expect(kbLinks[0]).toHaveAttribute('href', '/knowledge-base');
   });
 
   it('renders EntityTypeSelector in header', () => {
@@ -72,7 +74,9 @@ describe('KnowledgeExplorer', () => {
       </KnowledgeExplorer>
     );
 
-    const container = screen.getByText('Knowledge Base').closest('.custom-class');
+    // Header link comes first, use it to find the container with custom class
+    const kbLinks = screen.getAllByRole('link', { name: 'Knowledge Base' });
+    const container = kbLinks[0].closest('.custom-class');
     expect(container).toBeInTheDocument();
   });
 });

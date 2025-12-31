@@ -21,3 +21,4 @@ export { HierarchyView } from './HierarchyView';
 export type { HierarchyViewProps } from './HierarchyView';
 export { TreeNode } from './TreeNode';
 export type { TreeNodeProps } from './TreeNode';
+export { KBBreadcrumbs } from './KBBreadcrumbs';

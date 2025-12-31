@@ -8,6 +8,7 @@ import { getEntityTypeConfig } from '@/lib/config/entityTypes';
 import { EntityTypeSelector } from './EntityTypeSelector';
 import { ViewModeSelector } from './ViewModeSelector';
 import { SearchBar } from './SearchBar';
+import { KBBreadcrumbs } from './KBBreadcrumbs';
 
 interface KnowledgeExplorerProps {
   children: React.ReactNode;
@@ -76,11 +77,12 @@ export function KnowledgeExplorer({
         </div>
       </header>
 
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="container pt-4" />
+
       {/* Content area */}
       <main className="flex-1">
-        <div className="container py-6">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );
