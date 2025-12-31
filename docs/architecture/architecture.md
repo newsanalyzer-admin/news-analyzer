@@ -1,7 +1,7 @@
 # NewsAnalyzer v2 - Fullstack Architecture Document
 
-**Version:** 2.4
-**Date:** 2025-12-02
+**Version:** 2.5
+**Date:** 2025-12-30
 **Author:** Winston (Architect Agent)
 **Status:** ✅ APPROVED FOR IMPLEMENTATION
 
@@ -17,21 +17,23 @@
 | 2025-12-01 | 2.2 | FB-2 Epic: Executive branch data models (AppointmentType, Branch, PLUM import) | Winston (Architect) |
 | 2025-12-01 | 2.3 | FB-2.4: Appointee Lookup API, Executive Position endpoints | Winston (Architect) |
 | 2025-12-02 | 2.4 | FB-3 Epic: Regulation data models (Regulation, RegulationAgency, DocumentType), 8 regulation API endpoints, agency linkage service, federal_register_agency_id on GovernmentOrganization | Winston (Architect) |
+| 2025-12-30 | 2.5 | **Data Architecture Clarification:** Added Section 2 (Data Architecture Overview) explaining dual-layer model (Article Analyzer vs Knowledge Base). Updated Frontend Architecture with navigation structure. Clarified terminology: Knowledge Base = authoritative reference data, Article Analyzer = analysis layer. | Winston (Architect) |
 
 ---
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [High-Level Architecture](#high-level-architecture)
-3. [Tech Stack](#tech-stack)
-4. [Data Models](#data-models)
-5. [API Specification](#api-specification)
-6. [Components](#components)
-7. [Frontend Architecture](#frontend-architecture)
-8. [Backend Architecture](#backend-architecture)
-9. [Deployment Architecture](#deployment-architecture)
-10. [Development Workflow](#development-workflow)
+1. [Introduction](#1-introduction)
+2. [Data Architecture Overview](#2-data-architecture-overview)
+3. [High-Level Architecture](#3-high-level-architecture)
+4. [Tech Stack](#4-tech-stack)
+5. [Data Models](#5-data-models)
+6. [API Specification](#6-api-specification)
+7. [Components](#7-components)
+8. [Frontend Architecture](#8-frontend-architecture)
+9. [Backend Architecture](#9-backend-architecture)
+10. [Deployment Architecture](#10-deployment-architecture)
+11. [Development Workflow](#11-development-workflow)
 
 ---
 
@@ -85,7 +87,99 @@ The original NewsAnalyzer project failed due to:
 
 ---
 
-## 2. High-Level Architecture
+## 2. Data Architecture Overview
+
+This section explains the dual-layer data architecture that separates **article analysis** (extracted, variable-confidence data) from the **Knowledge Base** (authoritative, curated reference data).
+
+### The Two Data Layers
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           NEWSANALYZER                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────┐       ┌────────────────────────────────────┐│
+│  │     ARTICLE ANALYZER       │       │         KNOWLEDGE BASE             ││
+│  │     (Analysis Layer)       │       │   (Authoritative Reference)        ││
+│  ├────────────────────────────┤       ├────────────────────────────────────┤│
+│  │                            │       │                                    ││
+│  │  • Input articles          │       │  • Curated, verified data          ││
+│  │  • Extract entities        │ ───►  │  • Hierarchical browsing           ││
+│  │  • Variable confidence     │promote│  • Official sources                ││
+│  │  • Links TO Knowledge Base │via    │  • Ground truth for reasoning      ││
+│  │                            │queue  │                                    ││
+│  │  Tables:                   │       │  Tables:                           ││
+│  │  - entities (extracted)    │       │  - persons                         ││
+│  │  - articles                │       │  - committees                      ││
+│  │  - claims                  │       │  - government_organizations        ││
+│  │  - entity_mentions         │       │  - government_positions            ││
+│  │                            │       │  - statutes                        ││
+│  │                            │       │  - regulations                     ││
+│  │                            │       │  - news_sources                    ││
+│  └────────────────────────────┘       └────────────────────────────────────┘│
+│                                                                              │
+│  User Flow: Article → Analysis → Entities → Match to KB → Verify claim      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Layer 1: Article Analyzer (Analysis Layer)
+
+**Purpose:** Process and analyze articles submitted by users, extracting entities and claims for fact-checking.
+
+| Characteristic | Description |
+|----------------|-------------|
+| **Data Source** | User-submitted articles, LLM extraction, NER |
+| **Confidence** | Variable (0.0-1.0), tracked per entity |
+| **Primary Use** | Article analysis workflow |
+| **Tables** | `entities`, `articles`, `claims`, `entity_mentions`, `analyses` |
+
+**User Workflow:**
+1. User submits article (text, URL, source)
+2. Reasoning service extracts entities from article text
+3. Extracted entities are matched against Knowledge Base
+4. User reviews analysis results with KB context
+
+### Layer 2: Knowledge Base (Authoritative Reference)
+
+**Purpose:** Curated, verified reference data that serves as ground truth for both human browsing and AI reasoning.
+
+| Characteristic | Description |
+|----------------|-------------|
+| **Data Sources** | Congress.gov, OPM PLUM, Federal Register, manual curation |
+| **Confidence** | High (1.0), verified from official sources |
+| **Primary Use** | Reference browsing AND reasoning service queries |
+| **Tables** | `persons`, `committees`, `government_organizations`, `government_positions`, `statutes`, `regulations`, `news_sources` |
+
+**Dual Purpose - Knowledge Base serves two consumers:**
+
+| Consumer | How KB is Used |
+|----------|----------------|
+| **Human Users (UI Browsing)** | Explore hierarchical structure to understand relationships, verify claims manually |
+| **Reasoning Service (AI Analysis)** | Query KB as ground truth to match extracted entities, verify claims, discover relationships |
+
+### How the Layers Connect
+
+1. **Entity Resolution:** When the reasoning service extracts "Chuck Schumer" from an article, it queries the KB to find the authoritative `persons` record with `bioguide_id='S000148'`.
+
+2. **Context Enrichment:** If an article mentions "Southern District of Florida", the KB provides context: parent circuit (11th Circuit), judges, jurisdiction.
+
+3. **Claim Verification:** The reasoning service uses KB relationships to verify claims like "DOJ is part of the Executive Branch" → query `government_organizations` hierarchy.
+
+4. **Entity Promotion:** High-confidence extracted entities can be promoted to the KB via admin review queue (future feature).
+
+### Terminology Clarification
+
+| Term | Meaning | NOT |
+|------|---------|-----|
+| **Knowledge Base** | Authoritative, curated reference data | Extracted entities from articles |
+| **Article Analyzer** | Article processing and entity extraction | Knowledge Base browsing |
+| **Extracted Entity** | Entity found in article text (variable confidence) | Authoritative KB record |
+| **KB Record** | Verified entry in Knowledge Base tables | Analysis output |
+
+---
+
+## 3. High-Level Architecture
 
 ### Technical Summary
 
@@ -257,7 +351,7 @@ graph TB
 
 ---
 
-## 3. Tech Stack
+## 4. Tech Stack
 
 This is the **DEFINITIVE technology selection** for the entire project - the single source of truth for all development.
 
@@ -312,7 +406,7 @@ This is the **DEFINITIVE technology selection** for the entire project - the sin
 
 ---
 
-## 4. Data Models
+## 5. Data Models
 
 Based on the brownfield analysis, the V1 failure was **premature specialization** - treating government entities, persons, and organizations as separate models. We're fixing this with a **unified entity model** from day 1.
 
@@ -968,7 +1062,7 @@ erDiagram
 
 ---
 
-## 5. API Specification
+## 6. API Specification
 
 The REST API follows OpenAPI 3.0 specification. Full spec available in separate file, key endpoints summarized below.
 
@@ -1156,7 +1250,7 @@ All error responses follow this structure:
 
 ---
 
-## 6. Components
+## 7. Components
 
 ### Component Overview
 
@@ -1261,7 +1355,63 @@ C4Container
 
 ---
 
-## 7. Frontend Architecture
+## 8. Frontend Architecture
+
+### Application Navigation Structure
+
+The frontend is organized into two primary navigation areas that reflect the dual-layer data architecture:
+
+```
+NewsAnalyzer
+│
+├── Article Analyzer                    ← Analysis Layer (extracted data)
+│   ├── Analyze Article                 ← Submit new article for analysis
+│   └── Articles                        ← List of analyzed articles
+│       └── [Article Detail]
+│           ├── Article Text
+│           ├── Extracted Entities      ← Shows KB matches where found
+│           ├── News Source             ← Link to KB News Source entry
+│           └── Actions                 ← AI analysis (bias check, etc.)
+│
+├── Knowledge Base                      ← Authoritative Reference Layer
+│   ├── News Sources                    ← Managed list of news sources
+│   │   └── [Source Detail]
+│   │       ├── Source Information      ← Name, reliability, bias scores
+│   │       └── Individuals             ← Reporters, editors
+│   ├── U.S. Federal Government
+│   │   ├── U.S. Code                   ← Federal statutes
+│   │   │   └── [Title → Chapter → Section]
+│   │   └── Branches
+│   │       ├── Executive
+│   │       │   ├── Executive Offices
+│   │       │   ├── Executive Departments
+│   │       │   ├── Independent Agencies
+│   │       │   └── Government Corporations
+│   │       ├── Congressional
+│   │       │   ├── Senate
+│   │       │   ├── House of Representatives
+│   │       │   ├── Committees
+│   │       │   └── Support Services
+│   │       └── Judicial
+│   │           ├── Supreme Court
+│   │           ├── Courts of Appeals → [Circuits → Districts]
+│   │           └── District Courts
+│   ├── International Organizations     ← (Future)
+│   ├── State Governments               ← (Future)
+│   ├── Notable Organizations           ← (Future)
+│   └── Universities                    ← (Future)
+│
+└── [Admin]                             ← Administrative functions
+    ├── Data Sync                       ← Import from external sources
+    └── Review Queue                    ← Promote entities to KB (Future)
+```
+
+**Navigation Principles:**
+
+1. **Article Analyzer** contains all article analysis workflows - users submit articles and view analysis results here
+2. **Knowledge Base** is for browsing authoritative reference data - users explore this to understand relationships and verify facts
+3. Extracted entities (from Article Analyzer) link TO Knowledge Base entries when matches are found
+4. The Knowledge Base is hierarchical, reflecting real-world organizational structures
 
 ### Component Organization
 
@@ -1387,7 +1537,7 @@ export default function DashboardLayout({ children }) {
 
 ---
 
-## 8. Backend Architecture
+## 9. Backend Architecture
 
 ### Service Architecture
 
@@ -1546,7 +1696,7 @@ public class SecurityConfig {
 
 ---
 
-## 9. Deployment Architecture
+## 10. Deployment Architecture
 
 ### Infrastructure Overview
 
@@ -1680,7 +1830,7 @@ jobs:
 
 ---
 
-## 10. Development Workflow
+## 11. Development Workflow
 
 ### Prerequisites
 
