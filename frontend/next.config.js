@@ -16,30 +16,35 @@ const nextConfig = {
   },
 
   // Redirects from old factbase routes to new knowledge-base routes
+  // All factbase routes use permanent (308) redirects as they are legacy routes
   async redirects() {
     return [
+      // Root factbase redirect
       {
         source: '/factbase',
         destination: '/knowledge-base',
         permanent: true,
       },
-      // Branch-specific organization redirects (must come before generic :path* redirect)
+
+      // Branch-specific redirects → new hierarchical government pages (UI-3.A.2)
+      // These must come before generic :path* redirect
       {
         source: '/factbase/organizations/executive',
-        destination: '/knowledge-base/organizations?branch=executive',
+        destination: '/knowledge-base/government/executive',
         permanent: true,
       },
       {
         source: '/factbase/organizations/legislative',
-        destination: '/knowledge-base/organizations?branch=legislative',
+        destination: '/knowledge-base/government/legislative',
         permanent: true,
       },
       {
         source: '/factbase/organizations/judicial',
-        destination: '/knowledge-base/organizations?branch=judicial',
+        destination: '/knowledge-base/government/judicial',
         permanent: true,
       },
-      // Generic organization redirect (catches remaining paths)
+
+      // Generic organization redirects
       {
         source: '/factbase/organizations/:path*',
         destination: '/knowledge-base/organizations',
@@ -47,9 +52,11 @@ const nextConfig = {
       },
       {
         source: '/factbase/government-orgs',
-        destination: '/knowledge-base/organizations',
+        destination: '/knowledge-base/government',
         permanent: true,
       },
+
+      // People redirects with subtype preservation
       {
         source: '/factbase/people/federal-judges',
         destination: '/knowledge-base/people?type=judges',
@@ -68,6 +75,18 @@ const nextConfig = {
       {
         source: '/factbase/people/:path*',
         destination: '/knowledge-base/people',
+        permanent: true,
+      },
+
+      // Committees redirect
+      {
+        source: '/factbase/committees',
+        destination: '/knowledge-base/committees',
+        permanent: true,
+      },
+      {
+        source: '/factbase/committees/:path*',
+        destination: '/knowledge-base/committees',
         permanent: true,
       },
     ]
