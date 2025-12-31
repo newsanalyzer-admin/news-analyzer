@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 3.3
+**Document Version:** 3.4
 **Created:** 2025-11-25
-**Last Updated:** 2025-12-30
+**Last Updated:** 2025-12-31
 **Status:** Active
 
 ---
@@ -54,7 +54,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 |------|--------|----------|-------------|
 | **UI-1** | Complete | 100% | Public Navigation & Factbase Pages |
 | **UI-2** | Complete (Superseded) | 100% | Knowledge Explorer UI Refactoring |
-| **UI-3** | Planned | 0% | Frontend Architecture Realignment |
+| **UI-3** | In Progress | 22% | Frontend Architecture Realignment |
 
 ### Overall MVP Status
 
@@ -763,7 +763,7 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ### UI-3: Frontend Architecture Realignment
 
-**Status:** PLANNED
+**Status:** IN PROGRESS (Phase A: 2/5 stories complete)
 **Priority:** HIGH
 **Documentation:** [`docs/stories/UI-3/UI-3.epic-frontend-realignment.md`](stories/UI-3/UI-3.epic-frontend-realignment.md)
 **Depends On:** UI-2 Complete (reuses pattern components)
@@ -788,8 +788,8 @@ The UI-2 implementation built `/knowledge-base` to browse extracted entities (fr
 **Stories (9 total, 23 points):**
 
 *Phase A: Knowledge Base Realignment*
-- UI-3.A.1: Reconfigure EntityBrowser for KB Tables (3 pts)
-- UI-3.A.2: Implement Hierarchical KB Navigation (5 pts)
+- UI-3.A.1: Reconfigure EntityBrowser for KB Tables (3 pts) ✅
+- UI-3.A.2: Implement Hierarchical KB Navigation (5 pts) ✅
 - UI-3.A.3: Update Entity Type Configs (2 pts)
 - UI-3.A.4: Route Restructuring & Redirects (2 pts)
 - UI-3.A.5: Phase A Documentation (1 pt)
@@ -914,7 +914,7 @@ Based on business requirements document objectives:
 |------|----------|--------|
 | UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | ✅ Complete |
 | UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | ✅ Complete (Superseded) |
-| UI-3 | `docs/stories/UI-3/UI-3.epic-frontend-realignment.md` | Planned |
+| UI-3 | `docs/stories/UI-3/UI-3.epic-frontend-realignment.md` | In Progress (2/9 stories) |
 
 ### Phase Completion Summaries
 
@@ -970,6 +970,7 @@ Based on business requirements document objectives:
 | 2025-12-29 | 3.1 | **UI-2 Epic COMPLETE**: All 8 stories done - Knowledge Explorer shell, EntityBrowser/EntityDetail/HierarchyView patterns, cross-entity search, migration of Gov Orgs and People (judges/members/appointees), cleanup & documentation; Documentation sync performed to reflect completed status |
 | 2025-12-30 | 3.2 | **QA-2 Epic COMPLETE**: All stories done - 105 new frontend tests (166 total), CI coverage thresholds (JaCoCo 70%, Vitest 30%), CI/CD documentation README; All technical debt resolved; Quality Assurance Track 100% complete |
 | 2025-12-30 | 3.3 | **UI-3 Epic PLANNED**: Frontend Architecture Realignment - triggered by architecture v2.5 review clarifying dual-layer data model; UI-2 marked as superseded (patterns preserved); 9 stories planned (23 pts) in 2 phases |
+| 2025-12-31 | 3.4 | **UI-3 Phase A Progress**: UI-3.A.1 (EntityBrowser KB config) and UI-3.A.2 (Hierarchical KB Navigation) complete - KB landing page, government branch navigation, breadcrumbs with 43 tests; UI-3 now 22% complete (2/9 stories) |
 
 ---
 
