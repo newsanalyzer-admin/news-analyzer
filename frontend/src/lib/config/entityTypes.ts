@@ -1,8 +1,16 @@
-import { Building2, Users, LucideIcon } from 'lucide-react';
+import { Building2, Users, Users2, LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { createElement, type ReactNode } from 'react';
 import type { GovernmentOrganization, GovernmentBranch } from '@/types/government-org';
 import { peopleSubtypes, type SubtypeConfig } from './peopleConfig';
+import {
+  committeeColumns,
+  committeeFilters,
+  committeeDefaultSort,
+  committeeDetailConfig,
+  committeeHierarchyConfig,
+  committeeCardConfig,
+} from './committeesConfig';
 
 // Re-export SubtypeConfig for convenience
 export type { SubtypeConfig } from './peopleConfig';
@@ -11,6 +19,18 @@ export type { SubtypeConfig } from './peopleConfig';
  * View modes available for entity browsing
  */
 export type ViewMode = 'list' | 'hierarchy';
+
+/**
+ * Data layer classification for entity types.
+ *
+ * - 'kb' = Knowledge Base layer - authoritative, curated reference data
+ *   (persons, committees, government_organizations tables)
+ * - 'analysis' = Article Analyzer layer - extracted/analyzed data
+ *   (entities, articles, claims tables)
+ *
+ * This distinction supports the dual-layer data architecture documented in architecture.md v2.5.
+ */
+export type DataLayer = 'kb' | 'analysis';
 
 /**
  * Sort direction
@@ -240,6 +260,12 @@ export interface EntityTypeConfig<T = unknown> {
   icon: LucideIcon;
   /** API endpoint for fetching entities */
   apiEndpoint: string;
+  /**
+   * Data layer classification.
+   * - 'kb': Knowledge Base (authoritative data)
+   * - 'analysis': Article Analyzer (extracted data)
+   */
+  dataLayer: DataLayer;
   /** Supported view modes for this entity type */
   supportedViews: ViewMode[];
   /** Default view mode */
@@ -545,7 +571,11 @@ const organizationFilters: FilterConfig[] = [
 ];
 
 /**
- * Configuration for all available entity types in Knowledge Explorer
+ * Configuration for all available entity types in Knowledge Explorer.
+ *
+ * All entity types in this array are part of the Knowledge Base (KB) layer,
+ * which contains authoritative, curated reference data. The Article Analyzer
+ * layer (for extracted entities) will be configured separately in UI-3.B.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const entityTypes: EntityTypeConfig<any>[] = [
@@ -554,6 +584,7 @@ export const entityTypes: EntityTypeConfig<any>[] = [
     label: 'Organizations',
     icon: Building2,
     apiEndpoint: '/api/government-organizations',
+    dataLayer: 'kb',
     supportedViews: ['list', 'hierarchy'],
     defaultView: 'list',
     columns: organizationColumns,
@@ -580,11 +611,28 @@ export const entityTypes: EntityTypeConfig<any>[] = [
     label: 'People',
     icon: Users,
     apiEndpoint: '/api/judges', // Default to judges, varies by subtype
+    dataLayer: 'kb',
     supportedViews: ['list'],
     defaultView: 'list',
     hasSubtypes: true,
     subtypes: peopleSubtypes,
     defaultSubtype: 'judges',
+  },
+  {
+    id: 'committees',
+    label: 'Committees',
+    icon: Users2,
+    apiEndpoint: '/api/committees',
+    dataLayer: 'kb',
+    supportedViews: ['list', 'hierarchy'],
+    defaultView: 'list',
+    columns: committeeColumns,
+    filters: committeeFilters,
+    defaultSort: committeeDefaultSort,
+    cardConfig: committeeCardConfig,
+    idField: 'committeeCode', // Committees use committeeCode as PK, not 'id'
+    detailConfig: committeeDetailConfig,
+    hierarchyConfig: committeeHierarchyConfig,
   },
 ];
 

@@ -22,6 +22,7 @@ describe('EntityTypeSelector', () => {
 
     expect(screen.getByRole('tab', { name: /organizations/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /people/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /committees/i })).toBeInTheDocument();
   });
 
   it('shows current entity type as active', () => {
@@ -66,11 +67,11 @@ describe('EntityTypeSelector', () => {
   it('wraps around on keyboard navigation', () => {
     render(<EntityTypeSelector />);
 
-    const peopleTab = screen.getByRole('tab', { name: /people/i });
-    peopleTab.focus();
+    const committeesTab = screen.getByRole('tab', { name: /committees/i });
+    committeesTab.focus();
 
     // Press ArrowRight when at end should wrap to beginning
-    fireEvent.keyDown(peopleTab, { key: 'ArrowRight' });
+    fireEvent.keyDown(committeesTab, { key: 'ArrowRight' });
 
     const orgsTab = screen.getByRole('tab', { name: /organizations/i });
     expect(document.activeElement).toBe(orgsTab);
@@ -82,13 +83,13 @@ describe('EntityTypeSelector', () => {
     const orgsTab = screen.getByRole('tab', { name: /organizations/i });
     orgsTab.focus();
 
-    // Press End to go to last
+    // Press End to go to last (committees is now last)
     fireEvent.keyDown(orgsTab, { key: 'End' });
-    const peopleTab = screen.getByRole('tab', { name: /people/i });
-    expect(document.activeElement).toBe(peopleTab);
+    const committeesTab = screen.getByRole('tab', { name: /committees/i });
+    expect(document.activeElement).toBe(committeesTab);
 
     // Press Home to go to first
-    fireEvent.keyDown(peopleTab, { key: 'Home' });
+    fireEvent.keyDown(committeesTab, { key: 'Home' });
     expect(document.activeElement).toBe(orgsTab);
   });
 
@@ -99,7 +100,7 @@ describe('EntityTypeSelector', () => {
     expect(tablist).toHaveAttribute('aria-label', 'Entity type');
 
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
     tabs.forEach((tab) => {
       expect(tab).toHaveAttribute('aria-selected');
     });
