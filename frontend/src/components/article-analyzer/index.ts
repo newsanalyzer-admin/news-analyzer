@@ -1,0 +1,1 @@
+export { ArticleAnalyzerShell } from './ArticleAnalyzerShell';

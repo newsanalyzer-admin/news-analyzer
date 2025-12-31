@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Settings } from 'lucide-react';
+import { Settings, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getEntityTypeConfig } from '@/lib/config/entityTypes';
 import { EntityTypeSelector } from './EntityTypeSelector';
@@ -47,6 +47,17 @@ export function KnowledgeExplorer({
               className="text-xl font-semibold hover:text-primary transition-colors"
             >
               Knowledge Base
+            </Link>
+            <Link
+              href="/article-analyzer"
+              className={cn(
+                'flex items-center gap-2 rounded-md py-2 px-3 text-sm font-medium',
+                'hover:bg-accent hover:text-accent-foreground transition-colors'
+              )}
+              title="Article Analyzer"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Article Analyzer</span>
             </Link>
             <Link
               href="/admin"

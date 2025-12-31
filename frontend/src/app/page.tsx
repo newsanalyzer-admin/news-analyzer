@@ -10,12 +10,18 @@ export default function Home() {
         <p className="text-center text-muted-foreground mb-8">
           Independent news analysis, fact-checking, and bias detection
         </p>
-        <div className="flex justify-center mb-6">
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
           <Link
             href="/knowledge-base"
             className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl"
           >
             Explore Knowledge Base →
+          </Link>
+          <Link
+            href="/article-analyzer"
+            className="px-8 py-4 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl border"
+          >
+            Article Analyzer →
           </Link>
         </div>
         <div className="flex flex-wrap justify-center gap-4 mb-8">
