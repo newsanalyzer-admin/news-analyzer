@@ -54,7 +54,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 |------|--------|----------|-------------|
 | **UI-1** | Complete | 100% | Public Navigation & Factbase Pages |
 | **UI-2** | Complete (Superseded) | 100% | Knowledge Explorer UI Refactoring |
-| **UI-3** | In Progress | 67% | Frontend Architecture Realignment (Phase A Complete) |
+| **UI-3** | Complete | 100% | Frontend Architecture Realignment |
 
 ### Overall MVP Status
 
@@ -761,10 +761,10 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
-### UI-3: Frontend Architecture Realignment
+### UI-3: Frontend Architecture Realignment ✅
 
-**Status:** IN PROGRESS (Phase A: Complete, Phase B: Planned)
-**Priority:** HIGH
+**Status:** COMPLETE
+**Completion Date:** 2025-12-31
 **Documentation:** [`docs/stories/UI-3/UI-3.epic-frontend-realignment.md`](stories/UI-3/UI-3.epic-frontend-realignment.md)
 **Depends On:** UI-2 Complete (reuses pattern components)
 **Supersedes:** UI-2 route structure (preserves patterns)
@@ -775,17 +775,14 @@ Core differentiator - cross-reference claims against authoritative sources.
 - Enables Phases 4-6 (Article Analyzer is prerequisite)
 - Resolves terminology confusion (Knowledge Base = authoritative data)
 
-**Problem Statement:**
-The UI-2 implementation built `/knowledge-base` to browse extracted entities (from `entities` table), but per architecture v2.5, Knowledge Base should browse authoritative data (from `persons`, `committees`, `government_organizations` tables). Additionally, the Article Analyzer section (for analysis workflows) does not exist.
+**Deliverables:**
+- Knowledge Base reconfigured to browse authoritative data (persons, committees, gov_orgs)
+- Hierarchical KB navigation (Government → Branches → Departments)
+- Article Analyzer section with navigation shell, entities page, articles list
+- Hero page with balanced dual-navigation CTAs
+- 396 frontend tests passing
 
-**Phases:**
-
-| Phase | Scope | Estimate |
-|-------|-------|----------|
-| **UI-3.A** | Knowledge Base Realignment - reconfigure to authoritative data, hierarchical navigation | 13 pts |
-| **UI-3.B** | Article Analyzer Foundation - new navigation section, move extracted entities | 10 pts |
-
-**Stories (9 total, 23 points):**
+**Stories (10 total, 25 points):**
 
 *Phase A: Knowledge Base Realignment* ✅ **COMPLETE**
 - UI-3.A.1: Reconfigure EntityBrowser for KB Tables (3 pts) ✅
@@ -795,11 +792,11 @@ The UI-2 implementation built `/knowledge-base` to browse extracted entities (fr
 - UI-3.A.5: Phase A Documentation (1 pt) ✅
 - UI-3.A.6: Update Test Coverage (2 pts) ✅ *(achieved across A.1, A.2, A.4 - 106 tests)*
 
-*Phase B: Article Analyzer Foundation*
-- UI-3.B.1: Article Analyzer Navigation Shell (3 pts)
-- UI-3.B.2: Move Extracted Entities to Article Analyzer (3 pts)
-- UI-3.B.3: Articles List Page (3 pts)
-- UI-3.B.4: Hero Page Dual Navigation (1 pt)
+*Phase B: Article Analyzer Foundation* ✅ **COMPLETE**
+- UI-3.B.1: Article Analyzer Navigation Shell (3 pts) ✅
+- UI-3.B.2: Move Extracted Entities to Article Analyzer (3 pts) ✅
+- UI-3.B.3: Articles List Page (3 pts) ✅
+- UI-3.B.4: Hero Page Dual Navigation (1 pt) ✅
 
 ---
 

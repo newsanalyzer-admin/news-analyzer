@@ -8,7 +8,7 @@
 | **Epic Name** | Frontend Architecture Realignment |
 | **Epic Type** | UI/UX Refactoring |
 | **Priority** | HIGH |
-| **Status** | IN PROGRESS (Phase A Complete) |
+| **Status** | COMPLETE |
 | **Created** | 2025-12-30 |
 | **Owner** | Sarah (PO) |
 | **Depends On** | UI-2 Complete (reuses pattern components) |
@@ -53,9 +53,9 @@ UI-2's excellent pattern components (EntityBrowser, EntityDetail, HierarchyView)
 | Metric | Target | Current |
 |--------|--------|---------|
 | KB browses authoritative data | 100% | ✅ 100% (Phase A complete) |
-| Article Analyzer section exists | Yes | No (Phase B) |
+| Article Analyzer section exists | Yes | ✅ Yes (Phase B complete) |
 | Hierarchical KB navigation | Implemented | ✅ Implemented (UI-3.A.2) |
-| Architecture Section 8 compliance | Full | Partial (Phase A: KB nav complete) |
+| Architecture Section 8 compliance | Full | ✅ Full (Phase A + B complete) |
 
 ## Scope
 
@@ -169,14 +169,14 @@ NewsAnalyzer
 
 | ID | Story | Priority | Estimate | Status |
 |----|-------|----------|----------|--------|
-| UI-3.B.1 | Article Analyzer Navigation Shell | P0 | 3 pts | Planned |
-| UI-3.B.2 | Move Extracted Entities to Article Analyzer | P0 | 3 pts | Planned |
-| UI-3.B.3 | Articles List Page | P1 | 3 pts | Planned |
-| UI-3.B.4 | Hero Page Dual Navigation | P2 | 1 pt | Planned |
+| UI-3.B.1 | Article Analyzer Navigation Shell | P0 | 3 pts | ✅ Complete |
+| UI-3.B.2 | Move Extracted Entities to Article Analyzer | P0 | 3 pts | ✅ Complete |
+| UI-3.B.3 | Articles List Page | P1 | 3 pts | ✅ Complete |
+| UI-3.B.4 | Hero Page Dual Navigation | P2 | 1 pt | ✅ Complete |
 
-**Phase B Total:** 10 story points
+**Phase B Total:** 10 story points ✅
 
-**Epic Total:** 25 story points
+**Epic Total:** 25 story points ✅
 
 ### Dependency Graph
 
@@ -333,7 +333,7 @@ module.exports = {
 
 ### UI-3.B.1: Article Analyzer Navigation Shell
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31)
 
 **As a** user analyzing articles,
 **I want** a dedicated Article Analyzer section,
@@ -353,7 +353,7 @@ module.exports = {
 
 ### UI-3.B.2: Move Extracted Entities to Article Analyzer
 
-**Status:** Planned
+**Status:** ✅ Complete (2025-12-31)
 
 **As a** user viewing extracted entities,
 **I want** them under Article Analyzer (not Knowledge Base),
@@ -392,12 +392,12 @@ module.exports = {
 ## Definition of Done
 
 - [x] All Phase A stories complete and passing QA
-- [ ] All Phase B stories complete and passing QA
-- [x] No broken links (automated check) - 269 tests pass
+- [x] All Phase B stories complete and passing QA
+- [x] No broken links (automated check) - 396 tests pass
 - [x] Architecture Section 8 compliance verified (KB navigation)
 - [x] Documentation updated (this epic, ROADMAP)
 - [x] Redirects in place for old routes (UI-3.A.4)
-- [ ] Hero page shows dual navigation (Phase B)
+- [x] Hero page shows dual navigation (UI-3.B.4)
 
 ## Related Documentation
 
@@ -434,6 +434,7 @@ The epic is architecturally sound and correctly addresses the dual-layer data mo
 | 2025-12-30 | 1.0 | Initial epic creation from Sprint Change Proposal | Sarah (PO) |
 | 2025-12-30 | 1.1 | Architect review: added UI-3.A.6, clarified routes, added redirect strategy | Winston (Architect) |
 | 2025-12-31 | 2.0 | Phase A Complete: A.1 (46 tests), A.2 (43 tests), A.3 (merged into A.1), A.4 (17 tests), A.5 (docs), A.6 (achieved across stories) | James (Dev) |
+| 2025-12-31 | 3.0 | **EPIC COMPLETE** - Phase B Complete: B.1 (33 tests), B.2 (32 tests), B.3 (41 tests), B.4 (21 tests). Total: 396 tests, 25 story points delivered | James (Dev) |
 
 ## Approval
 
