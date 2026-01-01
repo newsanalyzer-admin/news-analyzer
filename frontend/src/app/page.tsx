@@ -10,40 +10,52 @@ export default function Home() {
         <p className="text-center text-muted-foreground mb-8">
           Independent news analysis, fact-checking, and bias detection
         </p>
-        <div className="flex flex-wrap justify-center gap-4 mb-6">
+
+        {/* Primary Navigation - Dual CTAs */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           <Link
             href="/knowledge-base"
-            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl"
+            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Explore Knowledge Base →
+            Explore Knowledge Base
           </Link>
           <Link
             href="/article-analyzer"
-            className="px-8 py-4 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl border"
+            className="px-8 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold text-lg shadow-lg transition-all hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Article Analyzer →
+            Article Analyzer
           </Link>
         </div>
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+
+        {/* Quick Links - Updated to new routes */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
           <Link
-            href="/entities"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-base"
+            href="/knowledge-base/government"
+            className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
           >
-            Try Entity Extraction →
+            Government Organizations
           </Link>
           <Link
-            href="/members"
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-base"
+            href="/knowledge-base/people"
+            className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
           >
-            Browse Members →
+            People
           </Link>
           <Link
-            href="/committees"
-            className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium text-base"
+            href="/knowledge-base/committees"
+            className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
           >
-            Browse Committees →
+            Committees
+          </Link>
+          <Link
+            href="/article-analyzer/entities"
+            className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-md transition-colors"
+          >
+            Extracted Entities
           </Link>
         </div>
+
+        {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-2">✅ Factual Accuracy</h2>
