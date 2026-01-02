@@ -1,6 +1,5 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Scale, Landmark, Building } from 'lucide-react';
@@ -52,7 +51,7 @@ const govOrgHierarchyConfig: HierarchyConfig = {
 };
 
 interface BranchPageProps {
-  params: Promise<{ branch: string }>;
+  params: { branch: string };
 }
 
 /**
@@ -60,7 +59,7 @@ interface BranchPageProps {
  * Shows a tree view of organizations within the selected branch.
  */
 export default function BranchPage({ params }: BranchPageProps) {
-  const { branch } = use(params);
+  const { branch } = params;
 
   // Validate branch parameter
   const config = branchConfig[branch];

@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useMemo } from 'react';
+import { useMemo } from 'react';
 import { notFound, useSearchParams } from 'next/navigation';
 import { getEntityTypeConfig } from '@/lib/config/entityTypes';
 import { getPeopleSubtypeConfig } from '@/lib/config/peopleConfig';
@@ -11,10 +11,10 @@ import { useMember } from '@/hooks/useMembers';
 import { useAppointee } from '@/hooks/useAppointees';
 
 interface EntityDetailPageProps {
-  params: Promise<{
+  params: {
     entityType: string;
     id: string;
-  }>;
+  };
 }
 
 /**
@@ -22,7 +22,7 @@ interface EntityDetailPageProps {
  * Uses the EntityDetail pattern component for configuration-driven rendering.
  */
 export default function EntityDetailPage({ params }: EntityDetailPageProps) {
-  const { entityType, id } = use(params);
+  const { entityType, id } = params;
   const searchParams = useSearchParams();
 
   // Get entity configuration
