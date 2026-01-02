@@ -1,19 +1,28 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
-import { useState, Suspense } from 'react';
-import { cn } from '@/lib/utils';
-import { KnowledgeExplorer } from '@/components/knowledge-base';
+import { Suspense } from 'react';
+import { SidebarLayout } from '@/components/layout';
+import { usePublicSidebarStore } from '@/stores/publicSidebarStore';
+import { PublicSidebar } from '@/components/public/PublicSidebar';
+import { KBContentHeader, KBBreadcrumbs } from '@/components/knowledge-base';
 
-function KnowledgeExplorerSkeleton() {
+/**
+ * Loading skeleton for Knowledge Base section
+ */
+function KnowledgeBaseSkeleton() {
   return (
     <div className="min-h-screen bg-background animate-pulse">
-      <div className="border-b">
-        <div className="container py-4">
-          <div className="h-8 bg-muted rounded w-48 mb-4" />
-          <div className="flex gap-3">
-            <div className="h-10 bg-muted rounded w-64" />
-            <div className="h-10 bg-muted rounded w-32" />
+      {/* Mobile header skeleton */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-card border-b border-border" />
+      {/* Content skeleton */}
+      <div className="pt-14 md:pt-0 md:ml-64">
+        <div className="border-b">
+          <div className="container py-4">
+            <div className="h-8 bg-muted rounded w-48 mb-4" />
+            <div className="flex gap-3">
+              <div className="h-10 bg-muted rounded w-64" />
+              <div className="h-10 bg-muted rounded w-32" />
+            </div>
           </div>
         </div>
       </div>
@@ -21,56 +30,43 @@ function KnowledgeExplorerSkeleton() {
   );
 }
 
+/**
+ * Main content wrapper for Knowledge Base that uses SidebarLayout
+ */
 function KnowledgeBaseContent({ children }: { children: React.ReactNode }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const store = usePublicSidebarStore();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={cn(
-          'fixed top-4 left-4 z-50 p-2 rounded-md md:hidden',
-          'bg-background border border-border shadow-sm',
-          'hover:bg-accent transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-        )}
-        aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-      >
-        {isMobileMenuOpen ? (
-          <X className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
-      </button>
+    <SidebarLayout
+      sidebar={<PublicSidebar className="h-full" />}
+      sectionTitle="Knowledge Base"
+      store={store}
+    >
+      {/* Content header with selectors */}
+      <KBContentHeader onNavigate={store.closeMobile} />
 
-      {/* Mobile backdrop */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="container pt-4" />
 
-      {/* Main content area */}
-      <KnowledgeExplorer
-        isMobileMenuOpen={isMobileMenuOpen}
-        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
-      >
+      {/* Page content */}
+      <main className="flex-1">
         {children}
-      </KnowledgeExplorer>
-    </div>
+      </main>
+    </SidebarLayout>
   );
 }
 
+/**
+ * Layout for the Knowledge Base section.
+ * Provides sidebar navigation and content header with selectors.
+ */
 export default function KnowledgeBaseLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<KnowledgeExplorerSkeleton />}>
+    <Suspense fallback={<KnowledgeBaseSkeleton />}>
       <KnowledgeBaseContent>{children}</KnowledgeBaseContent>
     </Suspense>
   );

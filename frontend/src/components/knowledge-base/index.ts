@@ -1,4 +1,5 @@
 export { KnowledgeExplorer } from './KnowledgeExplorer';
+export { KBContentHeader } from './KBContentHeader';
 export { EntityTypeSelector } from './EntityTypeSelector';
 export { ViewModeSelector } from './ViewModeSelector';
 export { SearchBar } from './SearchBar';
