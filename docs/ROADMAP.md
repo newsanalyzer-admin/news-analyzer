@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 3.7
+**Document Version:** 3.8
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-01
+**Last Updated:** 2026-01-02
 **Status:** Active
 
 ---
@@ -55,7 +55,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **UI-1** | Complete | 100% | Public Navigation & Factbase Pages |
 | **UI-2** | Complete (Superseded) | 100% | Knowledge Explorer UI Refactoring |
 | **UI-3** | Complete | 100% | Frontend Architecture Realignment |
-| **UI-4** | Approved | 0% | Public Sidebar Integration |
+| **UI-4** | Complete | 100% | Public Sidebar Integration |
 
 ### Overall MVP Status
 
@@ -672,7 +672,7 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ## User Experience Track
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 **Priority:** HIGH
 **Description:** Create public-facing user interfaces that make the factbase accessible to users unfamiliar with government structure.
 
@@ -801,10 +801,11 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
-### UI-4: Public Sidebar Integration
+### UI-4: Public Sidebar Integration ✅
 
-**Status:** APPROVED
+**Status:** COMPLETE
 **Created:** 2026-01-01
+**Completion Date:** 2026-01-02
 **Documentation:** [`docs/stories/UI-4/UI-4.epic-sidebar-integration.md`](stories/UI-4/UI-4.epic-sidebar-integration.md)
 **Depends On:** UI-3 Complete (layout structure exists)
 **Triggered By:** User feedback: "There is no sidebar in the UI"
@@ -815,23 +816,24 @@ Core differentiator - cross-reference claims against authoritative sources.
 - Improved discoverability via hierarchical navigation
 - Architecture Section 8 compliance
 
-**The Gap:**
-PublicSidebar component was built and tested but never integrated into Knowledge Base or Article Analyzer layouts. Both sections currently use header-only navigation (dropdowns/tabs) instead of the documented sidebar pattern.
-
 **Deliverables:**
 - Shared `SidebarLayout` component (extracted from Admin pattern)
 - Knowledge Base sidebar integration with PublicSidebar
 - Article Analyzer sidebar with new ArticleAnalyzerSidebar component
 - Mobile responsive sidebars (slide-in overlay)
-- Menu configuration updates
+- Menu configuration updates matching actual routes
+- 39 new mobile responsiveness tests
+- 666 lines of deprecated code removed
 
-**Stories (6 total, 13 points):**
-- UI-4.0: Shared Sidebar Layout Component (2 pts)
-- UI-4.1: Knowledge Base Sidebar Integration (3 pts)
-- UI-4.2: Article Analyzer Sidebar (3 pts)
-- UI-4.3: Menu Configuration Updates (2 pts)
-- UI-4.4: Mobile Responsiveness Testing (2 pts)
-- UI-4.5: Cleanup Deprecated Components (1 pt)
+**Stories (6 total, 13 points - all complete):**
+- UI-4.0: Shared Sidebar Layout Component (2 pts) ✅
+- UI-4.1: Knowledge Base Sidebar Integration (3 pts) ✅
+- UI-4.2: Article Analyzer Sidebar (3 pts) ✅
+- UI-4.3: Menu Configuration Updates (2 pts) ✅
+- UI-4.4: Mobile Responsiveness Testing (2 pts) ✅
+- UI-4.5: Cleanup Deprecated Components (1 pt) ✅
+
+**Quality Gates:** All 6 stories passed QA review. 544 frontend tests passing.
 
 ---
 
@@ -948,7 +950,7 @@ Based on business requirements document objectives:
 | UI-1 | `docs/stories/UI-1/UI-1.epic-public-navigation-ux.md` | ✅ Complete |
 | UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | ✅ Complete (Superseded) |
 | UI-3 | `docs/stories/UI-3/UI-3.epic-frontend-realignment.md` | ✅ Complete |
-| UI-4 | `docs/stories/UI-4/UI-4.epic-sidebar-integration.md` | Approved (0/6 stories) |
+| UI-4 | `docs/stories/UI-4/UI-4.epic-sidebar-integration.md` | ✅ Complete |
 
 ### Phase Completion Summaries
 
@@ -1008,6 +1010,7 @@ Based on business requirements document objectives:
 | 2025-12-31 | 3.5 | **UI-3 Phase A Near Complete**: UI-3.A.3 (merged into A.1) and UI-3.A.4 (Route Redirects) complete - factbase redirects updated for hierarchical routes, 17 redirect tests added; UI-3 now 52% complete (4/9 stories, Phase A: 4/5) |
 | 2025-12-31 | 3.6 | **UI-3 Phase A COMPLETE**: UI-3.A.5 (Phase A Documentation) complete - epic updated, architecture verified, route docs verified, component JSDoc verified; Phase A: 6 stories done (15 pts), 106 new tests; UI-3 now 67% complete (6/10 stories) |
 | 2026-01-01 | 3.7 | **UI-4 Epic APPROVED**: Public Sidebar Integration - addresses gap where PublicSidebar component was built but never integrated into KB/AA layouts; 6 stories (13 pts); Architect review added UI-4.0 (shared SidebarLayout component) to reduce duplication |
+| 2026-01-02 | 3.8 | **UI-4 Epic COMPLETE**: All 6 stories done - Shared SidebarLayout component, KB/AA sidebar integration, menu config updates, 39 mobile responsiveness tests, deprecated component cleanup (666 lines removed); User Experience Track 100% complete; 544 frontend tests passing |
 
 ---
 
