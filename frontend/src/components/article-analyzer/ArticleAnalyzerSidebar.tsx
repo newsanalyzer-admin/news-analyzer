@@ -1,34 +1,11 @@
 'use client';
 
-import { Database, FileText, List } from 'lucide-react';
+import { Database } from 'lucide-react';
 import { useArticleAnalyzerSidebarStore } from '@/stores/articleAnalyzerSidebarStore';
 import { BaseSidebar } from '@/components/sidebar';
-import { MenuItemData } from '@/components/sidebar/types';
+import { articleAnalyzerMenuItems } from '@/lib/menu-config';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-/**
- * Menu configuration for Article Analyzer sidebar.
- * Includes: Analyze Article (disabled), Articles, Entities
- */
-const articleAnalyzerMenuItems: MenuItemData[] = [
-  {
-    label: 'Analyze Article',
-    icon: FileText,
-    href: '/article-analyzer/analyze',
-    disabled: true,
-  },
-  {
-    label: 'Articles',
-    icon: List,
-    href: '/article-analyzer/articles',
-  },
-  {
-    label: 'Entities',
-    icon: Database,
-    href: '/article-analyzer/entities',
-  },
-];
 
 interface ArticleAnalyzerSidebarProps {
   className?: string;

@@ -13,6 +13,15 @@ vi.mock('@/stores/articleAnalyzerSidebarStore', () => ({
   useArticleAnalyzerSidebarStore: () => mockStore,
 }));
 
+// Mock menu config
+vi.mock('@/lib/menu-config', () => ({
+  articleAnalyzerMenuItems: [
+    { label: 'Analyze Article', href: '/article-analyzer/analyze', disabled: true },
+    { label: 'Articles', href: '/article-analyzer/articles' },
+    { label: 'Entities', href: '/article-analyzer/entities' },
+  ],
+}));
+
 // Mock BaseSidebar
 vi.mock('@/components/sidebar', () => ({
   BaseSidebar: ({
