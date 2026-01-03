@@ -9,6 +9,8 @@ import {
   Gavel,
   FileText,
   List,
+  GitBranch,
+  BookOpen,
 } from 'lucide-react';
 import { MenuItemData } from '@/components/sidebar/types';
 
@@ -16,7 +18,9 @@ import { MenuItemData } from '@/components/sidebar/types';
  * Public sidebar menu configuration for Knowledge Base.
  *
  * Structure matches the actual KB route hierarchy:
- * - Government → /knowledge-base/government → branch pages
+ * - U.S. Federal Government → /knowledge-base/government
+ *   - Branches (non-clickable grouping) → executive/legislative/judicial
+ *   - U.S. Code (Federal Laws) → /knowledge-base/government/us-code
  * - People → /knowledge-base/people with subtypes
  * - Committees → /knowledge-base/committees
  * - Organizations → /knowledge-base/organizations (flat list view)
@@ -27,24 +31,36 @@ export const publicMenuConfig: MenuItemData[] = [
     icon: Database,
     children: [
       {
-        label: 'Government',
+        label: 'U.S. Federal Government',
         icon: Building,
         href: '/knowledge-base/government',
         children: [
           {
-            label: 'Executive Branch',
-            icon: Building,
-            href: '/knowledge-base/government/executive',
+            label: 'Branches',
+            icon: GitBranch,
+            // No href - non-clickable grouping
+            children: [
+              {
+                label: 'Executive Branch',
+                icon: Building,
+                href: '/knowledge-base/government/executive',
+              },
+              {
+                label: 'Legislative Branch',
+                icon: Landmark,
+                href: '/knowledge-base/government/legislative',
+              },
+              {
+                label: 'Judicial Branch',
+                icon: Scale,
+                href: '/knowledge-base/government/judicial',
+              },
+            ],
           },
           {
-            label: 'Legislative Branch',
-            icon: Landmark,
-            href: '/knowledge-base/government/legislative',
-          },
-          {
-            label: 'Judicial Branch',
-            icon: Scale,
-            href: '/knowledge-base/government/judicial',
+            label: 'U.S. Code (Federal Laws)',
+            icon: BookOpen,
+            href: '/knowledge-base/government/us-code',
           },
         ],
       },

@@ -68,6 +68,15 @@ describe('KBBreadcrumbs', () => {
       expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
       expect(screen.getByText('Judicial')).toBeInTheDocument();
     });
+
+    it('shows correct breadcrumbs for U.S. Code page', () => {
+      mockPathname.mockReturnValue('/knowledge-base/government/us-code');
+      render(<KBBreadcrumbs />);
+
+      expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
+      expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
+      expect(screen.getByText('U.S. Code')).toBeInTheDocument();
+    });
   });
 
   describe('Other Sections', () => {

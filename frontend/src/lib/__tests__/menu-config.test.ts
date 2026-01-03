@@ -18,7 +18,7 @@ describe('menu-config', () => {
       const children = publicMenuConfig[0].children;
       expect(children).toHaveLength(4);
       expect(children?.map((c) => c.label)).toEqual([
-        'Government',
+        'U.S. Federal Government',
         'People',
         'Committees',
         'Organizations',
@@ -31,25 +31,54 @@ describe('menu-config', () => {
       expect(publicMenuItemsFlat).toHaveLength(4);
     });
 
-    it('Government category has correct structure', () => {
-      const government = publicMenuItemsFlat.find((item) => item.label === 'Government');
+    it('U.S. Federal Government category has correct structure', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
       expect(government).toBeDefined();
       expect(government?.href).toBe('/knowledge-base/government');
-      expect(government?.children).toHaveLength(3);
+      // Now has 2 children: Branches (grouping) and U.S. Code
+      expect(government?.children).toHaveLength(2);
     });
 
-    it('Government branch routes are correct', () => {
-      const government = publicMenuItemsFlat.find((item) => item.label === 'Government');
-      const branches = government?.children;
+    it('Branches grouping has no href (non-clickable)', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
 
-      expect(branches?.[0].label).toBe('Executive Branch');
-      expect(branches?.[0].href).toBe('/knowledge-base/government/executive');
+      expect(branches).toBeDefined();
+      expect(branches?.href).toBeUndefined();
+      expect(branches?.children).toHaveLength(3);
+    });
 
-      expect(branches?.[1].label).toBe('Legislative Branch');
-      expect(branches?.[1].href).toBe('/knowledge-base/government/legislative');
+    it('Government branch routes are nested under Branches', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const branchChildren = branches?.children;
 
-      expect(branches?.[2].label).toBe('Judicial Branch');
-      expect(branches?.[2].href).toBe('/knowledge-base/government/judicial');
+      expect(branchChildren?.[0].label).toBe('Executive Branch');
+      expect(branchChildren?.[0].href).toBe('/knowledge-base/government/executive');
+
+      expect(branchChildren?.[1].label).toBe('Legislative Branch');
+      expect(branchChildren?.[1].href).toBe('/knowledge-base/government/legislative');
+
+      expect(branchChildren?.[2].label).toBe('Judicial Branch');
+      expect(branchChildren?.[2].href).toBe('/knowledge-base/government/judicial');
+    });
+
+    it('U.S. Code (Federal Laws) has correct route', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const usCode = government?.children?.find(
+        (item) => item.label === 'U.S. Code (Federal Laws)'
+      );
+
+      expect(usCode).toBeDefined();
+      expect(usCode?.href).toBe('/knowledge-base/government/us-code');
     });
 
     it('People category has correct structure', () => {

@@ -22,6 +22,7 @@ const segmentLabels: Record<string, string> = {
   'executive': 'Executive',
   'legislative': 'Legislative',
   'judicial': 'Judicial',
+  'us-code': 'U.S. Code',
   'organizations': 'Organizations',
   'people': 'People',
   'committees': 'Committees',
