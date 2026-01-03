@@ -271,13 +271,13 @@ const sections = await fetch(`/api/statutes/chapters/${chapterId}/sections`).the
 
 ## Definition of Done
 
-- [ ] UI-5.1 complete: Sidebar restructured
-- [ ] UI-5.2 complete: U.S. Code browse page works
-- [ ] All existing tests pass
-- [ ] New tests added for U.S. Code page
-- [ ] Breadcrumbs display correct hierarchy
-- [ ] Manual testing on mobile and desktop
-- [ ] ROADMAP.md updated with UI-5 entry
+- [x] UI-5.1 complete: Sidebar restructured
+- [x] UI-5.2 complete: U.S. Code browse page works
+- [x] All existing tests pass
+- [x] New tests added for U.S. Code page
+- [x] Breadcrumbs display correct hierarchy
+- [x] Manual testing on mobile and desktop
+- [x] ROADMAP.md updated with UI-5 entry
 
 ## Related Documentation
 
@@ -327,6 +327,7 @@ The epic is architecturally sound and demonstrates excellent planning. It correc
 |------|---------|-------------|--------|
 | 2026-01-02 | 1.0 | Initial epic creation from user feedback | Sarah (PO) |
 | 2026-01-02 | 1.1 | Architect review: verified technical feasibility, added AC7, clarified component strategy | Winston (Architect) |
+| 2026-01-03 | 1.2 | Epic COMPLETE: Both stories implemented, 19 new tests, 585 frontend tests passing | James (Dev) |
 
 ## Approval
 
@@ -334,6 +335,7 @@ The epic is architecturally sound and demonstrates excellent planning. It correc
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-02 | DRAFTED |
 | Architect | Winston | 2026-01-02 | **APPROVED** |
+| Developer | James | 2026-01-03 | **COMPLETE** |
 
 ---
 

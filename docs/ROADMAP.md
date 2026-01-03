@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 3.8
+**Document Version:** 3.9
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-02
+**Last Updated:** 2026-01-03
 **Status:** Active
 
 ---
@@ -56,6 +56,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **UI-2** | Complete (Superseded) | 100% | Knowledge Explorer UI Refactoring |
 | **UI-3** | Complete | 100% | Frontend Architecture Realignment |
 | **UI-4** | Complete | 100% | Public Sidebar Integration |
+| **UI-5** | Complete | 100% | KB Sidebar Reorganization & U.S. Code |
 
 ### Overall MVP Status
 
@@ -837,6 +838,39 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
+### UI-5: KB Sidebar Reorganization & U.S. Code Integration ✅
+
+**Status:** COMPLETE
+**Created:** 2026-01-02
+**Completion Date:** 2026-01-03
+**Documentation:** [`docs/stories/UI-5/UI-5.epic-kb-sidebar-uscode.md`](stories/UI-5/UI-5.epic-kb-sidebar-uscode.md)
+**Depends On:** UI-4 Complete (sidebar infrastructure exists)
+**Triggered By:** User feedback: Sidebar structure needs reorganization; U.S. Code missing from v1 migration
+
+**Business Value:**
+- Terminology precision: "U.S. Federal Government" matches official naming
+- Logical structure: "Branches" grouping enables future expansion
+- Feature recovery: Restores U.S. Code browsing from v1
+- Component reuse: Admin's UsCodeTreeView adapted for public use
+
+**Deliverables:**
+- Sidebar reorganization: "Government" → "U.S. Federal Government"
+- "Branches" non-clickable grouping with nested Executive/Legislative/Judicial
+- "U.S. Code (Federal Laws)" new menu item
+- Public U.S. Code browse page at `/knowledge-base/government/us-code`
+- Hierarchical Title → Chapter → Section navigation
+- External links to official sources (uscode.house.gov)
+- 19 new tests for U.S. Code page
+- 585 frontend tests passing
+
+**Stories (2 total, 5 points - all complete):**
+- UI-5.1: Reorganize KB Sidebar Navigation (2 pts) ✅
+- UI-5.2: Public U.S. Code Browse Page (3 pts) ✅
+
+**Quality Gates:** All 2 stories passed QA review.
+
+---
+
 ## Future Vision
 
 ### Long-Term Goals (Year 2-3)
@@ -951,6 +985,7 @@ Based on business requirements document objectives:
 | UI-2 | `docs/stories/UI-2/UI-2.epic-knowledge-explorer.md` | ✅ Complete (Superseded) |
 | UI-3 | `docs/stories/UI-3/UI-3.epic-frontend-realignment.md` | ✅ Complete |
 | UI-4 | `docs/stories/UI-4/UI-4.epic-sidebar-integration.md` | ✅ Complete |
+| UI-5 | `docs/stories/UI-5/UI-5.epic-kb-sidebar-uscode.md` | ✅ Complete |
 
 ### Phase Completion Summaries
 
@@ -1011,6 +1046,7 @@ Based on business requirements document objectives:
 | 2025-12-31 | 3.6 | **UI-3 Phase A COMPLETE**: UI-3.A.5 (Phase A Documentation) complete - epic updated, architecture verified, route docs verified, component JSDoc verified; Phase A: 6 stories done (15 pts), 106 new tests; UI-3 now 67% complete (6/10 stories) |
 | 2026-01-01 | 3.7 | **UI-4 Epic APPROVED**: Public Sidebar Integration - addresses gap where PublicSidebar component was built but never integrated into KB/AA layouts; 6 stories (13 pts); Architect review added UI-4.0 (shared SidebarLayout component) to reduce duplication |
 | 2026-01-02 | 3.8 | **UI-4 Epic COMPLETE**: All 6 stories done - Shared SidebarLayout component, KB/AA sidebar integration, menu config updates, 39 mobile responsiveness tests, deprecated component cleanup (666 lines removed); User Experience Track 100% complete; 544 frontend tests passing |
+| 2026-01-03 | 3.9 | **UI-5 Epic COMPLETE**: All 2 stories done - KB sidebar reorganization ("Government" → "U.S. Federal Government", "Branches" grouping), public U.S. Code browse page with hierarchical tree view; 19 new tests; 585 frontend tests passing |
 
 ---
 
