@@ -1,12 +1,9 @@
 import {
   Database,
-  Users,
-  Users2,
   Building,
   Building2,
   Landmark,
   Scale,
-  Gavel,
   FileText,
   List,
   GitBranch,
@@ -25,9 +22,6 @@ import { MenuItemData } from '@/components/sidebar/types';
  * - U.S. Federal Government → /knowledge-base/government
  *   - Branches (non-clickable grouping) → executive/legislative/judicial
  *   - U.S. Code (Federal Laws) → /knowledge-base/government/us-code
- * - People → /knowledge-base/people with subtypes
- * - Committees → /knowledge-base/committees
- * - Organizations → /knowledge-base/organizations (flat list view)
  */
 export const publicMenuConfig: MenuItemData[] = [
   {
@@ -99,38 +93,6 @@ export const publicMenuConfig: MenuItemData[] = [
             href: '/knowledge-base/government/us-code',
           },
         ],
-      },
-      {
-        label: 'People',
-        icon: Users,
-        href: '/knowledge-base/people',
-        children: [
-          {
-            label: 'Federal Judges',
-            icon: Gavel,
-            href: '/knowledge-base/people?type=judges',
-          },
-          {
-            label: 'Congressional Members',
-            icon: Users,
-            href: '/knowledge-base/people?type=members',
-          },
-          {
-            label: 'Executive Appointees',
-            icon: Users,
-            href: '/knowledge-base/people?type=appointees',
-          },
-        ],
-      },
-      {
-        label: 'Committees',
-        icon: Users2,
-        href: '/knowledge-base/committees',
-      },
-      {
-        label: 'Organizations',
-        icon: Building2,
-        href: '/knowledge-base/organizations',
       },
     ],
   },

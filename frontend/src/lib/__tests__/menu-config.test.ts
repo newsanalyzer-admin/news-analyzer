@@ -14,21 +14,19 @@ describe('menu-config', () => {
       expect(publicMenuConfig[0].label).toBe('Knowledge Base');
     });
 
-    it('has four main categories', () => {
+    it('has U.S. Federal Government as main category', () => {
       const children = publicMenuConfig[0].children;
-      expect(children).toHaveLength(4);
+      expect(children).toHaveLength(1);
       expect(children?.map((c) => c.label)).toEqual([
         'U.S. Federal Government',
-        'People',
-        'Committees',
-        'Organizations',
       ]);
     });
   });
 
   describe('publicMenuItemsFlat', () => {
-    it('contains all main categories', () => {
-      expect(publicMenuItemsFlat).toHaveLength(4);
+    it('contains U.S. Federal Government', () => {
+      expect(publicMenuItemsFlat).toHaveLength(1);
+      expect(publicMenuItemsFlat[0].label).toBe('U.S. Federal Government');
     });
 
     it('U.S. Federal Government category has correct structure', () => {
@@ -125,41 +123,6 @@ describe('menu-config', () => {
 
       expect(usCode).toBeDefined();
       expect(usCode?.href).toBe('/knowledge-base/government/us-code');
-    });
-
-    it('People category has correct structure', () => {
-      const people = publicMenuItemsFlat.find((item) => item.label === 'People');
-      expect(people).toBeDefined();
-      expect(people?.href).toBe('/knowledge-base/people');
-      expect(people?.children).toHaveLength(3);
-    });
-
-    it('People subtype routes use query params', () => {
-      const people = publicMenuItemsFlat.find((item) => item.label === 'People');
-      const subtypes = people?.children;
-
-      expect(subtypes?.[0].label).toBe('Federal Judges');
-      expect(subtypes?.[0].href).toBe('/knowledge-base/people?type=judges');
-
-      expect(subtypes?.[1].label).toBe('Congressional Members');
-      expect(subtypes?.[1].href).toBe('/knowledge-base/people?type=members');
-
-      expect(subtypes?.[2].label).toBe('Executive Appointees');
-      expect(subtypes?.[2].href).toBe('/knowledge-base/people?type=appointees');
-    });
-
-    it('Committees category has direct href', () => {
-      const committees = publicMenuItemsFlat.find((item) => item.label === 'Committees');
-      expect(committees).toBeDefined();
-      expect(committees?.href).toBe('/knowledge-base/committees');
-      expect(committees?.children).toBeUndefined();
-    });
-
-    it('Organizations category has direct href', () => {
-      const organizations = publicMenuItemsFlat.find((item) => item.label === 'Organizations');
-      expect(organizations).toBeDefined();
-      expect(organizations?.href).toBe('/knowledge-base/organizations');
-      expect(organizations?.children).toBeUndefined();
     });
 
     it('all menu items have icons', () => {
