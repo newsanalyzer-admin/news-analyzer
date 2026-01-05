@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { SidebarLayout } from '@/components/layout';
 import { usePublicSidebarStore } from '@/stores/publicSidebarStore';
 import { PublicSidebar } from '@/components/public/PublicSidebar';
-import { KBContentHeader, KBBreadcrumbs } from '@/components/knowledge-base';
+import { KBContentHeader } from '@/components/knowledge-base';
 
 /**
  * Loading skeleton for Knowledge Base section
@@ -44,9 +44,6 @@ function KnowledgeBaseContent({ children }: { children: React.ReactNode }) {
     >
       {/* Content header with selectors */}
       <KBContentHeader onNavigate={store.closeMobile} />
-
-      {/* Breadcrumbs */}
-      <KBBreadcrumbs className="container pt-4" />
 
       {/* Page content */}
       <main className="flex-1">

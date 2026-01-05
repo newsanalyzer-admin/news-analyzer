@@ -96,11 +96,8 @@ export default function CorporationsPage() {
 
   return (
     <div className="container py-8">
-      {/* Breadcrumbs */}
-      <KBBreadcrumbs className="mb-6" />
-
       {/* Back link */}
-      <div className="mb-6">
+      <div className="mb-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href="/knowledge-base/government/executive">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -108,6 +105,9 @@ export default function CorporationsPage() {
           </Link>
         </Button>
       </div>
+
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="mb-6" />
 
       {/* Header */}
       <div className="mb-8">

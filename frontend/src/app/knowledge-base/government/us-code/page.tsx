@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   BookOpen,
   RefreshCw,
@@ -15,10 +16,12 @@ import {
   ExternalLink,
   ChevronRight,
   ChevronDown,
+  ArrowLeft,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UsCodeTreeView } from '@/components/admin/UsCodeTreeView';
+import { KBBreadcrumbs } from '@/components/knowledge-base';
 
 interface TitleInfo {
   titleNumber: number;
@@ -65,7 +68,20 @@ export default function UsCodePage() {
   };
 
   return (
-    <main className="py-6">
+    <main className="container py-8">
+      {/* Back link */}
+      <div className="mb-4">
+        <Button variant="ghost" size="sm" asChild className="-ml-2">
+          <Link href="/knowledge-base/government">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to U.S. Federal Government
+          </Link>
+        </Button>
+      </div>
+
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="mb-6" />
+
       {/* Page Header */}
       <div className="flex items-center gap-3 mb-4">
         <BookOpen className="h-8 w-8 text-primary" />

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Scale, Landmark, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { HierarchyView } from '@/components/knowledge-base';
+import { HierarchyView, KBBreadcrumbs } from '@/components/knowledge-base';
 import { useGovernmentOrgsHierarchy } from '@/hooks/useGovernmentOrgs';
 import type { GovernmentBranch } from '@/types/government-org';
 import type { HierarchyConfig } from '@/lib/config/entityTypes';
@@ -73,7 +73,7 @@ export default function BranchPage({ params }: BranchPageProps) {
   return (
     <div className="container py-8">
       {/* Back link */}
-      <div className="mb-6">
+      <div className="mb-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href="/knowledge-base/government">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -81,6 +81,9 @@ export default function BranchPage({ params }: BranchPageProps) {
           </Link>
         </Button>
       </div>
+
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="mb-6" />
 
       {/* Header */}
       <div className="mb-8">

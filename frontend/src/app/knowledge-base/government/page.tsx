@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Scale, Landmark, Building, ChevronRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { KBBreadcrumbs } from '@/components/knowledge-base';
 
 /**
  * Branch card configuration
@@ -101,7 +102,7 @@ export default function GovernmentPage() {
   return (
     <div className="container py-8">
       {/* Back link */}
-      <div className="mb-6">
+      <div className="mb-4">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <Link href="/knowledge-base">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -109,6 +110,9 @@ export default function GovernmentPage() {
           </Link>
         </Button>
       </div>
+
+      {/* Breadcrumbs */}
+      <KBBreadcrumbs className="mb-6" />
 
       {/* Header */}
       <div className="mb-8">
