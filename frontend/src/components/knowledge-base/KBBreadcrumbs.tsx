@@ -19,13 +19,20 @@ interface BreadcrumbItem {
 const segmentLabels: Record<string, string> = {
   'knowledge-base': 'Knowledge Base',
   'government': 'U.S. Federal Government',
-  'executive': 'Executive',
-  'legislative': 'Legislative',
-  'judicial': 'Judicial',
+  'executive': 'Executive Branch',
+  'legislative': 'Legislative Branch',
+  'judicial': 'Judicial Branch',
   'us-code': 'U.S. Code',
   'organizations': 'Organizations',
   'people': 'People',
   'committees': 'Committees',
+  // Executive Branch sub-sections (UI-6.3)
+  'president': 'President',
+  'vice-president': 'Vice President',
+  'eop': 'Executive Office',
+  'cabinet': 'Cabinet Departments',
+  'independent-agencies': 'Independent Agencies',
+  'corporations': 'Government Corporations',
 };
 
 /**

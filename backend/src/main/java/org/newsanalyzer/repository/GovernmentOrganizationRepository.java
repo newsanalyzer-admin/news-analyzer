@@ -144,6 +144,16 @@ public interface GovernmentOrganizationRepository extends JpaRepository<Governme
            "ORDER BY o.officialName")
     List<GovernmentOrganization> findIndependentAgencies();
 
+    /**
+     * Find government corporations (UI-6.0)
+     */
+    @Query("SELECT o FROM GovernmentOrganization o " +
+           "WHERE o.orgType = org.newsanalyzer.model.GovernmentOrganization$OrganizationType.GOVERNMENT_CORPORATION " +
+           "AND o.branch = org.newsanalyzer.model.GovernmentOrganization$GovernmentBranch.EXECUTIVE " +
+           "AND o.dissolvedDate IS NULL " +
+           "ORDER BY o.officialName")
+    List<GovernmentOrganization> findGovernmentCorporations();
+
     // =====================================================================
     // Hierarchy Queries
     // =====================================================================

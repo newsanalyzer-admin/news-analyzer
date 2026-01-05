@@ -11,6 +11,10 @@ import {
   List,
   GitBranch,
   BookOpen,
+  Crown,
+  UserCircle,
+  Briefcase,
+  Factory,
 } from 'lucide-react';
 import { MenuItemData } from '@/components/sidebar/types';
 
@@ -44,6 +48,38 @@ export const publicMenuConfig: MenuItemData[] = [
                 label: 'Executive Branch',
                 icon: Building,
                 href: '/knowledge-base/government/executive',
+                children: [
+                  {
+                    label: 'President of the United States',
+                    icon: Crown,
+                    href: '/knowledge-base/government/executive/president',
+                  },
+                  {
+                    label: 'Vice President of the United States',
+                    icon: UserCircle,
+                    href: '/knowledge-base/government/executive/vice-president',
+                  },
+                  {
+                    label: 'Executive Office of the President',
+                    icon: Building,
+                    href: '/knowledge-base/government/executive/eop',
+                  },
+                  {
+                    label: 'Cabinet Departments',
+                    icon: Briefcase,
+                    href: '/knowledge-base/government/executive/cabinet',
+                  },
+                  {
+                    label: 'Independent Agencies',
+                    icon: Building2,
+                    href: '/knowledge-base/government/executive/independent-agencies',
+                  },
+                  {
+                    label: 'Government Corporations',
+                    icon: Factory,
+                    href: '/knowledge-base/government/executive/corporations',
+                  },
+                ],
               },
               {
                 label: 'Legislative Branch',

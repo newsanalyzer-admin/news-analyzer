@@ -13,6 +13,8 @@ export interface MenuItemData {
   icon?: ComponentType<{ className?: string }>;
   /** Nested child menu items (max 3 levels recommended) */
   children?: MenuItemData[];
+  /** Whether menu item is disabled (grayed out, not clickable) */
+  disabled?: boolean;
 }
 
 /**

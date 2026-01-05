@@ -48,7 +48,7 @@ describe('KBBreadcrumbs', () => {
 
       expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
       expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
-      expect(screen.getByText('Executive')).toBeInTheDocument();
+      expect(screen.getByText('Executive Branch')).toBeInTheDocument();
     });
 
     it('shows correct breadcrumbs for legislative branch', () => {
@@ -57,7 +57,7 @@ describe('KBBreadcrumbs', () => {
 
       expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
       expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
-      expect(screen.getByText('Legislative')).toBeInTheDocument();
+      expect(screen.getByText('Legislative Branch')).toBeInTheDocument();
     });
 
     it('shows correct breadcrumbs for judicial branch', () => {
@@ -66,7 +66,7 @@ describe('KBBreadcrumbs', () => {
 
       expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
       expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
-      expect(screen.getByText('Judicial')).toBeInTheDocument();
+      expect(screen.getByText('Judicial Branch')).toBeInTheDocument();
     });
 
     it('shows correct breadcrumbs for U.S. Code page', () => {
@@ -121,8 +121,8 @@ describe('KBBreadcrumbs', () => {
       mockPathname.mockReturnValue('/knowledge-base/government/executive');
       render(<KBBreadcrumbs />);
 
-      // "Executive" should be a span with aria-current, not a link
-      const executiveItem = screen.getByText('Executive');
+      // "Executive Branch" should be a span with aria-current, not a link
+      const executiveItem = screen.getByText('Executive Branch');
       expect(executiveItem.tagName).toBe('SPAN');
       expect(executiveItem).toHaveAttribute('aria-current', 'page');
     });

@@ -69,6 +69,52 @@ describe('menu-config', () => {
       expect(branchChildren?.[2].href).toBe('/knowledge-base/government/judicial');
     });
 
+    it('Executive Branch has 6 sub-sections (UI-6.1)', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const executive = branches?.children?.find((item) => item.label === 'Executive Branch');
+
+      expect(executive?.children).toHaveLength(6);
+      expect(executive?.children?.map((c) => c.label)).toEqual([
+        'President of the United States',
+        'Vice President of the United States',
+        'Executive Office of the President',
+        'Cabinet Departments',
+        'Independent Agencies',
+        'Government Corporations',
+      ]);
+    });
+
+    it('Executive Branch sub-sections have correct routes', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const executive = branches?.children?.find((item) => item.label === 'Executive Branch');
+      const subSections = executive?.children;
+
+      expect(subSections?.[0].href).toBe('/knowledge-base/government/executive/president');
+      expect(subSections?.[1].href).toBe('/knowledge-base/government/executive/vice-president');
+      expect(subSections?.[2].href).toBe('/knowledge-base/government/executive/eop');
+      expect(subSections?.[3].href).toBe('/knowledge-base/government/executive/cabinet');
+      expect(subSections?.[4].href).toBe('/knowledge-base/government/executive/independent-agencies');
+      expect(subSections?.[5].href).toBe('/knowledge-base/government/executive/corporations');
+    });
+
+    it('Executive Branch sub-sections all have icons', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const executive = branches?.children?.find((item) => item.label === 'Executive Branch');
+
+      executive?.children?.forEach((subSection) => {
+        expect(subSection.icon).toBeDefined();
+      });
+    });
+
     it('U.S. Code (Federal Laws) has correct route', () => {
       const government = publicMenuItemsFlat.find(
         (item) => item.label === 'U.S. Federal Government'

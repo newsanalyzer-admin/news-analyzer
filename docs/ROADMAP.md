@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 3.9
+**Document Version:** 4.1
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-05
 **Status:** Active
 
 ---
@@ -57,6 +57,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **UI-3** | Complete | 100% | Frontend Architecture Realignment |
 | **UI-4** | Complete | 100% | Public Sidebar Integration |
 | **UI-5** | Complete | 100% | KB Sidebar Reorganization & U.S. Code |
+| **UI-6** | Complete | 100% | Executive Branch Hierarchical Navigation |
 
 ### Overall MVP Status
 
@@ -673,7 +674,7 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ## User Experience Track
 
-**Status:** COMPLETE
+**Status:** IN PROGRESS
 **Priority:** HIGH
 **Description:** Create public-facing user interfaces that make the factbase accessible to users unfamiliar with government structure.
 
@@ -871,6 +872,40 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
+### UI-6: Executive Branch Hierarchical Navigation ✅
+
+**Status:** COMPLETE
+**Created:** 2026-01-03
+**Completion Date:** 2026-01-05
+**Documentation:** [`docs/stories/UI-6/UI-6.epic-executive-branch-hierarchy.md`](stories/UI-6/UI-6.epic-executive-branch-hierarchy.md)
+**Depends On:** UI-5 Complete ✅
+**Triggered By:** User feedback: Executive Branch needs sub-section navigation
+
+**Business Value:**
+- Navigational clarity for Executive Branch structure
+- Constitutional accuracy (Article II reference)
+- Educational UX teaching government organization
+- Replaces flat list with structured hierarchy
+
+**Deliverables:**
+- Executive Branch sidebar expansion with 6 sub-sections
+- Executive Branch hub page with Article II description + navigation cards
+- 6 new pages: President, VP, EOP, Cabinet, Independent Agencies, Corporations
+- Backend enum extension for GOVERNMENT_CORPORATION type (V29 migration)
+- Breadcrumb updates for new hierarchy
+- 54 new tests (38 subsections + 16 hub page)
+- 623 frontend tests passing, 590 backend tests passing
+
+**Stories (4 total, 12 points - all complete):**
+- UI-6.0: Executive Organization Classification Updates (1 pt) ✅
+- UI-6.1: Expand Executive Branch Sidebar Navigation (2 pts) ✅
+- UI-6.2: Redesign Executive Branch Landing Page (3 pts) ✅
+- UI-6.3: Create Executive Branch Sub-Section Pages (6 pts) ✅
+
+**Quality Gates:** All 4 stories passed development.
+
+---
+
 ## Future Vision
 
 ### Long-Term Goals (Year 2-3)
@@ -986,6 +1021,7 @@ Based on business requirements document objectives:
 | UI-3 | `docs/stories/UI-3/UI-3.epic-frontend-realignment.md` | ✅ Complete |
 | UI-4 | `docs/stories/UI-4/UI-4.epic-sidebar-integration.md` | ✅ Complete |
 | UI-5 | `docs/stories/UI-5/UI-5.epic-kb-sidebar-uscode.md` | ✅ Complete |
+| UI-6 | `docs/stories/UI-6/UI-6.epic-executive-branch-hierarchy.md` | ✅ Complete |
 
 ### Phase Completion Summaries
 
@@ -1047,6 +1083,8 @@ Based on business requirements document objectives:
 | 2026-01-01 | 3.7 | **UI-4 Epic APPROVED**: Public Sidebar Integration - addresses gap where PublicSidebar component was built but never integrated into KB/AA layouts; 6 stories (13 pts); Architect review added UI-4.0 (shared SidebarLayout component) to reduce duplication |
 | 2026-01-02 | 3.8 | **UI-4 Epic COMPLETE**: All 6 stories done - Shared SidebarLayout component, KB/AA sidebar integration, menu config updates, 39 mobile responsiveness tests, deprecated component cleanup (666 lines removed); User Experience Track 100% complete; 544 frontend tests passing |
 | 2026-01-03 | 3.9 | **UI-5 Epic COMPLETE**: All 2 stories done - KB sidebar reorganization ("Government" → "U.S. Federal Government", "Branches" grouping), public U.S. Code browse page with hierarchical tree view; 19 new tests; 585 frontend tests passing |
+| 2026-01-04 | 4.0 | **UI-6 Epic APPROVED**: Executive Branch Hierarchical Navigation - 4 stories (12 pts) adding 6 sub-sections (President, VP, EOP, Cabinet, Independent Agencies, Corporations); includes backend enum extension for GOVERNMENT_CORPORATION; User Experience Track status updated to IN PROGRESS |
+| 2026-01-05 | 4.1 | **UI-6 Epic COMPLETE**: All 4 stories done - Backend GOVERNMENT_CORPORATION enum (V29 migration), sidebar expansion (6 sub-sections with icons), Executive Branch hub page (Article II reference, 6 nav cards), 6 sub-section pages (President, VP, EOP, Cabinet, Independent Agencies, Corporations); 54 new tests; 623 frontend tests passing, 590 backend tests passing |
 
 ---
 

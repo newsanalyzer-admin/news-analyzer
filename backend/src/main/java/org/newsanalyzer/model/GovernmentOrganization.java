@@ -265,6 +265,15 @@ public class GovernmentOrganization {
     }
 
     /**
+     * Check if organization is a government corporation
+     */
+    public boolean isGovernmentCorporation() {
+        return orgType == OrganizationType.GOVERNMENT_CORPORATION
+                && branch == GovernmentBranch.EXECUTIVE
+                && isActive();
+    }
+
+    /**
      * Get display name (acronym if available, otherwise official name)
      */
     public String getDisplayName() {
@@ -292,6 +301,7 @@ public class GovernmentOrganization {
         BRANCH("branch"),
         DEPARTMENT("department"),
         INDEPENDENT_AGENCY("independent_agency"),
+        GOVERNMENT_CORPORATION("government_corporation"),
         BUREAU("bureau"),
         OFFICE("office"),
         COMMISSION("commission"),
