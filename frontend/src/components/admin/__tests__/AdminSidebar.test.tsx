@@ -40,7 +40,8 @@ describe('AdminSidebar', () => {
 
     it('renders top-level menu items', () => {
       render(<AdminSidebar />);
-      expect(screen.getByText('Factbase')).toBeInTheDocument();
+      expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
+      expect(screen.getByText('Factbase (Legacy)')).toBeInTheDocument();
     });
 
     it('renders Dashboard footer link', () => {
@@ -52,9 +53,13 @@ describe('AdminSidebar', () => {
       render(<AdminSidebar />);
 
       // Top level
-      expect(screen.getByText('Factbase')).toBeInTheDocument();
+      expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
+      expect(screen.getByText('Factbase (Legacy)')).toBeInTheDocument();
 
-      // Second level
+      // Knowledge Base second level
+      expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
+
+      // Legacy Factbase second level
       expect(screen.getByText('Government Entities')).toBeInTheDocument();
       expect(screen.getByText('Federal Laws & Regulations')).toBeInTheDocument();
     });
@@ -62,9 +67,10 @@ describe('AdminSidebar', () => {
     it('renders third level menu items', () => {
       render(<AdminSidebar />);
 
-      expect(screen.getByText('Executive Branch')).toBeInTheDocument();
-      expect(screen.getByText('Legislative Branch')).toBeInTheDocument();
-      expect(screen.getByText('Judicial Branch')).toBeInTheDocument();
+      // Both Knowledge Base and Legacy Factbase have Executive/Legislative/Judicial branches
+      expect(screen.getAllByText('Executive Branch')).toHaveLength(2);
+      expect(screen.getAllByText('Legislative Branch')).toHaveLength(2);
+      expect(screen.getAllByText('Judicial Branch')).toHaveLength(2);
     });
 
     it('renders leaf menu items with links', () => {
@@ -148,16 +154,16 @@ describe('AdminSidebar', () => {
     it('expands/collapses menu sections on click', () => {
       render(<AdminSidebar />);
 
-      // Find the Factbase menu item
-      const factbaseButton = screen.getByText('Factbase').closest('[role="button"]');
-      expect(factbaseButton).toBeInTheDocument();
+      // Find the Knowledge Base menu item
+      const kbButton = screen.getByText('Knowledge Base').closest('[role="button"]');
+      expect(kbButton).toBeInTheDocument();
 
-      if (factbaseButton) {
+      if (kbButton) {
         // Initially expanded (children visible)
-        expect(screen.getByText('Government Entities')).toBeInTheDocument();
+        expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
 
         // Click to collapse
-        fireEvent.click(factbaseButton);
+        fireEvent.click(kbButton);
 
         // Children should be hidden after collapse
         // Note: The actual behavior depends on SidebarMenuItem implementation
@@ -167,19 +173,19 @@ describe('AdminSidebar', () => {
     it('supports keyboard navigation for menu expansion', () => {
       render(<AdminSidebar />);
 
-      const factbaseButton = screen.getByText('Factbase').closest('[role="button"]');
+      const kbButton = screen.getByText('Knowledge Base').closest('[role="button"]');
 
-      if (factbaseButton) {
-        factbaseButton.focus();
+      if (kbButton) {
+        kbButton.focus();
 
         // Press Enter to toggle
-        fireEvent.keyDown(factbaseButton, { key: 'Enter' });
+        fireEvent.keyDown(kbButton, { key: 'Enter' });
 
         // Press ArrowLeft to collapse
-        fireEvent.keyDown(factbaseButton, { key: 'ArrowLeft' });
+        fireEvent.keyDown(kbButton, { key: 'ArrowLeft' });
 
         // Press ArrowRight to expand
-        fireEvent.keyDown(factbaseButton, { key: 'ArrowRight' });
+        fireEvent.keyDown(kbButton, { key: 'ArrowRight' });
       }
     });
   });
@@ -198,8 +204,8 @@ describe('AdminSidebar', () => {
     it('menu buttons have aria-expanded attribute', () => {
       render(<AdminSidebar />);
 
-      const factbaseButton = screen.getByText('Factbase').closest('[role="button"]');
-      expect(factbaseButton).toHaveAttribute('aria-expanded');
+      const kbButton = screen.getByText('Knowledge Base').closest('[role="button"]');
+      expect(kbButton).toHaveAttribute('aria-expanded');
     });
 
     it('links are keyboard focusable', () => {
@@ -214,7 +220,7 @@ describe('AdminSidebar', () => {
     it('submenus have aria-label', () => {
       render(<AdminSidebar />);
 
-      const submenu = screen.getByRole('group', { name: /factbase submenu/i });
+      const submenu = screen.getByRole('group', { name: /knowledge base submenu/i });
       expect(submenu).toBeInTheDocument();
     });
   });

@@ -9,14 +9,79 @@ import {
   ScrollText,
   Search,
   Github,
+  BookOpen,
+  Building,
+  Crown,
+  UserCircle,
+  Briefcase,
+  Factory,
+  Home,
+  HeartHandshake,
+  Users2,
+  MapPin,
 } from 'lucide-react';
 import { useSidebarStore } from '@/stores/sidebarStore';
 import { BaseSidebar, SidebarMenuItem, MenuItemData } from '@/components/sidebar';
 
-// Menu structure per PRD
+// Menu structure mirroring public Knowledge Base
 const menuItems: MenuItemData[] = [
   {
-    label: 'Factbase',
+    label: 'Knowledge Base',
+    icon: BookOpen,
+    children: [
+      {
+        label: 'U.S. Federal Government',
+        icon: Building2,
+        href: '/admin/knowledge-base/government',
+        children: [
+          {
+            label: 'Executive Branch',
+            icon: Building,
+            href: '/admin/knowledge-base/government/executive',
+            children: [
+              { label: 'President', href: '/admin/knowledge-base/government/executive/president', icon: Crown },
+              { label: 'Vice President', href: '/admin/knowledge-base/government/executive/vice-president', icon: UserCircle },
+              { label: 'Executive Office', href: '/admin/knowledge-base/government/executive/eop', icon: Building },
+              { label: 'Cabinet Departments', href: '/admin/knowledge-base/government/executive/cabinet', icon: Briefcase },
+              { label: 'Independent Agencies', href: '/admin/knowledge-base/government/executive/independent-agencies', icon: Building2 },
+              { label: 'Gov. Corporations', href: '/admin/knowledge-base/government/executive/corporations', icon: Factory },
+            ],
+          },
+          {
+            label: 'Legislative Branch',
+            icon: Landmark,
+            href: '/admin/knowledge-base/government/legislative',
+            children: [
+              { label: 'Senate', href: '/admin/knowledge-base/government/legislative/senate', icon: Building2 },
+              { label: 'House of Representatives', href: '/admin/knowledge-base/government/legislative/house', icon: Home },
+              { label: 'Support Services', href: '/admin/knowledge-base/government/legislative/support-services', icon: HeartHandshake },
+              { label: 'Committees', href: '/admin/knowledge-base/government/legislative/committees', icon: Users2 },
+            ],
+          },
+          {
+            label: 'Judicial Branch',
+            icon: Scale,
+            href: '/admin/knowledge-base/government/judicial',
+            children: [
+              { label: 'Supreme Court', href: '/admin/knowledge-base/government/judicial/supreme-court', icon: Gavel },
+              { label: 'Courts of Appeals', href: '/admin/knowledge-base/government/judicial/courts-of-appeals', icon: Building },
+              { label: 'District Courts', href: '/admin/knowledge-base/government/judicial/district-courts', icon: MapPin },
+              { label: 'Specialized Courts', href: '/admin/knowledge-base/government/judicial/specialized-courts', icon: Briefcase },
+            ],
+          },
+          {
+            label: 'U.S. Code',
+            icon: BookOpen,
+            href: '/admin/knowledge-base/government/us-code',
+          },
+        ],
+      },
+    ],
+  },
+  // TECHNICAL DEBT: Legacy Factbase section - to be removed after migration complete
+  // See docs/stories/UI-6/ for migration tracking
+  {
+    label: 'Factbase (Legacy)',
     icon: Database,
     children: [
       {
