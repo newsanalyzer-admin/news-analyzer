@@ -12,6 +12,9 @@ import {
   UserCircle,
   Briefcase,
   Factory,
+  Home,
+  HeartHandshake,
+  Users2,
 } from 'lucide-react';
 import { MenuItemData } from '@/components/sidebar/types';
 
@@ -79,6 +82,28 @@ export const publicMenuConfig: MenuItemData[] = [
                 label: 'Legislative Branch',
                 icon: Landmark,
                 href: '/knowledge-base/government/legislative',
+                children: [
+                  {
+                    label: 'Senate',
+                    icon: Building2,
+                    href: '/knowledge-base/government/legislative/senate',
+                  },
+                  {
+                    label: 'House of Representatives',
+                    icon: Home,
+                    href: '/knowledge-base/government/legislative/house',
+                  },
+                  {
+                    label: 'Support Services',
+                    icon: HeartHandshake,
+                    href: '/knowledge-base/government/legislative/support-services',
+                  },
+                  {
+                    label: 'Committees',
+                    icon: Users2,
+                    href: '/knowledge-base/government/legislative/committees',
+                  },
+                ],
               },
               {
                 label: 'Judicial Branch',

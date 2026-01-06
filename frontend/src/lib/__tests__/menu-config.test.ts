@@ -113,6 +113,48 @@ describe('menu-config', () => {
       });
     });
 
+    it('Legislative Branch has 4 sub-sections', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const legislative = branches?.children?.find((item) => item.label === 'Legislative Branch');
+
+      expect(legislative?.children).toHaveLength(4);
+      expect(legislative?.children?.map((c) => c.label)).toEqual([
+        'Senate',
+        'House of Representatives',
+        'Support Services',
+        'Committees',
+      ]);
+    });
+
+    it('Legislative Branch sub-sections have correct routes', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const legislative = branches?.children?.find((item) => item.label === 'Legislative Branch');
+      const subSections = legislative?.children;
+
+      expect(subSections?.[0].href).toBe('/knowledge-base/government/legislative/senate');
+      expect(subSections?.[1].href).toBe('/knowledge-base/government/legislative/house');
+      expect(subSections?.[2].href).toBe('/knowledge-base/government/legislative/support-services');
+      expect(subSections?.[3].href).toBe('/knowledge-base/government/legislative/committees');
+    });
+
+    it('Legislative Branch sub-sections all have icons', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const legislative = branches?.children?.find((item) => item.label === 'Legislative Branch');
+
+      legislative?.children?.forEach((subSection) => {
+        expect(subSection.icon).toBeDefined();
+      });
+    });
+
     it('U.S. Code (Federal Laws) has correct route', () => {
       const government = publicMenuItemsFlat.find(
         (item) => item.label === 'U.S. Federal Government'
