@@ -155,6 +155,48 @@ describe('menu-config', () => {
       });
     });
 
+    it('Judicial Branch has 4 sub-sections', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const judicial = branches?.children?.find((item) => item.label === 'Judicial Branch');
+
+      expect(judicial?.children).toHaveLength(4);
+      expect(judicial?.children?.map((c) => c.label)).toEqual([
+        'Supreme Court',
+        'Courts of Appeals',
+        'District Courts',
+        'Specialized Courts',
+      ]);
+    });
+
+    it('Judicial Branch sub-sections have correct routes', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const judicial = branches?.children?.find((item) => item.label === 'Judicial Branch');
+      const subSections = judicial?.children;
+
+      expect(subSections?.[0].href).toBe('/knowledge-base/government/judicial/supreme-court');
+      expect(subSections?.[1].href).toBe('/knowledge-base/government/judicial/courts-of-appeals');
+      expect(subSections?.[2].href).toBe('/knowledge-base/government/judicial/district-courts');
+      expect(subSections?.[3].href).toBe('/knowledge-base/government/judicial/specialized-courts');
+    });
+
+    it('Judicial Branch sub-sections all have icons', () => {
+      const government = publicMenuItemsFlat.find(
+        (item) => item.label === 'U.S. Federal Government'
+      );
+      const branches = government?.children?.find((item) => item.label === 'Branches');
+      const judicial = branches?.children?.find((item) => item.label === 'Judicial Branch');
+
+      judicial?.children?.forEach((subSection) => {
+        expect(subSection.icon).toBeDefined();
+      });
+    });
+
     it('U.S. Code (Federal Laws) has correct route', () => {
       const government = publicMenuItemsFlat.find(
         (item) => item.label === 'U.S. Federal Government'

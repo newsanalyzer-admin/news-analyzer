@@ -15,6 +15,8 @@ import {
   Home,
   HeartHandshake,
   Users2,
+  Gavel,
+  MapPin,
 } from 'lucide-react';
 import { MenuItemData } from '@/components/sidebar/types';
 
@@ -109,6 +111,28 @@ export const publicMenuConfig: MenuItemData[] = [
                 label: 'Judicial Branch',
                 icon: Scale,
                 href: '/knowledge-base/government/judicial',
+                children: [
+                  {
+                    label: 'Supreme Court',
+                    icon: Gavel,
+                    href: '/knowledge-base/government/judicial/supreme-court',
+                  },
+                  {
+                    label: 'Courts of Appeals',
+                    icon: Building,
+                    href: '/knowledge-base/government/judicial/courts-of-appeals',
+                  },
+                  {
+                    label: 'District Courts',
+                    icon: MapPin,
+                    href: '/knowledge-base/government/judicial/district-courts',
+                  },
+                  {
+                    label: 'Specialized Courts',
+                    icon: Briefcase,
+                    href: '/knowledge-base/government/judicial/specialized-courts',
+                  },
+                ],
               },
             ],
           },
