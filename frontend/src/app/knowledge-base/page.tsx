@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Building2, Users, Users2, ChevronRight } from 'lucide-react';
+import { Building2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -60,18 +60,6 @@ export default function KnowledgeBasePage() {
       description: 'Explore the structure of the federal government including executive departments, agencies, congressional committees, and judicial courts.',
       href: '/knowledge-base/government',
       icon: <Building2 className="h-6 w-6" />,
-    },
-    {
-      title: 'People',
-      description: 'Browse federal judges, congressional members, and executive appointees with their positions and affiliations.',
-      href: '/knowledge-base/people',
-      icon: <Users className="h-6 w-6" />,
-    },
-    {
-      title: 'Committees',
-      description: 'View congressional committees and subcommittees from the Senate, House, and joint committees.',
-      href: '/knowledge-base/committees',
-      icon: <Users2 className="h-6 w-6" />,
     },
   ];
 

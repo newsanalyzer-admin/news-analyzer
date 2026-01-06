@@ -23,46 +23,15 @@ describe('KnowledgeBasePage', () => {
   });
 
   describe('Category Cards', () => {
-    it('renders all three category cards', () => {
-      render(<KnowledgeBasePage />);
-      // Get all links and filter by href to find our category cards
-      const links = screen.getAllByRole('link');
-      const categoryLinks = links.filter(
-        (link) =>
-          link.getAttribute('href') === '/knowledge-base/government' ||
-          link.getAttribute('href') === '/knowledge-base/people' ||
-          link.getAttribute('href') === '/knowledge-base/committees'
-      );
-      expect(categoryLinks).toHaveLength(3);
-    });
-
-    it('Government card links to /knowledge-base/government', () => {
+    it('renders U.S. Federal Government card', () => {
       render(<KnowledgeBasePage />);
       const link = screen.getByRole('link', { name: /u\.s\. federal government/i });
       expect(link).toHaveAttribute('href', '/knowledge-base/government');
     });
 
-    it('People card links to /knowledge-base/people', () => {
-      render(<KnowledgeBasePage />);
-      // Find the link by its href directly
-      const links = screen.getAllByRole('link');
-      const peopleLink = links.find((link) => link.getAttribute('href') === '/knowledge-base/people');
-      expect(peopleLink).toBeInTheDocument();
-    });
-
-    it('Committees card links to /knowledge-base/committees', () => {
-      render(<KnowledgeBasePage />);
-      // Find the link by its href directly
-      const links = screen.getAllByRole('link');
-      const committeesLink = links.find((link) => link.getAttribute('href') === '/knowledge-base/committees');
-      expect(committeesLink).toBeInTheDocument();
-    });
-
-    it('card titles are visible', () => {
+    it('card title is visible', () => {
       render(<KnowledgeBasePage />);
       expect(screen.getByText('U.S. Federal Government')).toBeInTheDocument();
-      expect(screen.getByText('People')).toBeInTheDocument();
-      expect(screen.getByText('Committees')).toBeInTheDocument();
     });
   });
 
