@@ -1,0 +1,863 @@
+{
+  "presidencies": [
+    {
+      "number": 1,
+      "president": {
+        "firstName": "George",
+        "lastName": "Washington",
+        "birthDate": "1732-02-22",
+        "deathDate": "1799-12-14",
+        "birthPlace": "Westmoreland County, Virginia"
+      },
+      "party": "Independent",
+      "startDate": "1789-04-30",
+      "endDate": "1797-03-04",
+      "electionYear": 1788,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Adams", "startDate": "1789-04-21", "endDate": "1797-03-04"}
+      ]
+    },
+    {
+      "number": 2,
+      "president": {
+        "firstName": "John",
+        "lastName": "Adams",
+        "birthDate": "1735-10-30",
+        "deathDate": "1826-07-04",
+        "birthPlace": "Braintree, Massachusetts"
+      },
+      "party": "Federalist",
+      "startDate": "1797-03-04",
+      "endDate": "1801-03-04",
+      "electionYear": 1796,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Thomas", "lastName": "Jefferson", "startDate": "1797-03-04", "endDate": "1801-03-04"}
+      ]
+    },
+    {
+      "number": 3,
+      "president": {
+        "firstName": "Thomas",
+        "lastName": "Jefferson",
+        "birthDate": "1743-04-13",
+        "deathDate": "1826-07-04",
+        "birthPlace": "Shadwell, Virginia"
+      },
+      "party": "Democratic-Republican",
+      "startDate": "1801-03-04",
+      "endDate": "1809-03-04",
+      "electionYear": 1800,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Aaron", "lastName": "Burr", "startDate": "1801-03-04", "endDate": "1805-03-04"},
+        {"firstName": "George", "lastName": "Clinton", "startDate": "1805-03-04", "endDate": "1809-03-04"}
+      ]
+    },
+    {
+      "number": 4,
+      "president": {
+        "firstName": "James",
+        "lastName": "Madison",
+        "birthDate": "1751-03-16",
+        "deathDate": "1836-06-28",
+        "birthPlace": "Port Conway, Virginia"
+      },
+      "party": "Democratic-Republican",
+      "startDate": "1809-03-04",
+      "endDate": "1817-03-04",
+      "electionYear": 1808,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "George", "lastName": "Clinton", "startDate": "1809-03-04", "endDate": "1812-04-20"},
+        {"firstName": "Elbridge", "lastName": "Gerry", "startDate": "1813-03-04", "endDate": "1814-11-23"}
+      ]
+    },
+    {
+      "number": 5,
+      "president": {
+        "firstName": "James",
+        "lastName": "Monroe",
+        "birthDate": "1758-04-28",
+        "deathDate": "1831-07-04",
+        "birthPlace": "Monroe Hall, Virginia"
+      },
+      "party": "Democratic-Republican",
+      "startDate": "1817-03-04",
+      "endDate": "1825-03-04",
+      "electionYear": 1816,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Daniel", "lastName": "Tompkins", "startDate": "1817-03-04", "endDate": "1825-03-04"}
+      ]
+    },
+    {
+      "number": 6,
+      "president": {
+        "firstName": "John",
+        "lastName": "Quincy Adams",
+        "birthDate": "1767-07-11",
+        "deathDate": "1848-02-23",
+        "birthPlace": "Braintree, Massachusetts"
+      },
+      "party": "Democratic-Republican",
+      "startDate": "1825-03-04",
+      "endDate": "1829-03-04",
+      "electionYear": 1824,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Calhoun", "startDate": "1825-03-04", "endDate": "1829-03-04"}
+      ]
+    },
+    {
+      "number": 7,
+      "president": {
+        "firstName": "Andrew",
+        "lastName": "Jackson",
+        "birthDate": "1767-03-15",
+        "deathDate": "1845-06-08",
+        "birthPlace": "Waxhaws Region, Carolinas"
+      },
+      "party": "Democratic",
+      "startDate": "1829-03-04",
+      "endDate": "1837-03-04",
+      "electionYear": 1828,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Calhoun", "startDate": "1829-03-04", "endDate": "1832-12-28"},
+        {"firstName": "Martin", "lastName": "Van Buren", "startDate": "1833-03-04", "endDate": "1837-03-04"}
+      ]
+    },
+    {
+      "number": 8,
+      "president": {
+        "firstName": "Martin",
+        "lastName": "Van Buren",
+        "birthDate": "1782-12-05",
+        "deathDate": "1862-07-24",
+        "birthPlace": "Kinderhook, New York"
+      },
+      "party": "Democratic",
+      "startDate": "1837-03-04",
+      "endDate": "1841-03-04",
+      "electionYear": 1836,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Richard", "lastName": "Johnson", "startDate": "1837-03-04", "endDate": "1841-03-04"}
+      ]
+    },
+    {
+      "number": 9,
+      "president": {
+        "firstName": "William",
+        "lastName": "Harrison",
+        "middleName": "Henry",
+        "birthDate": "1773-02-09",
+        "deathDate": "1841-04-04",
+        "birthPlace": "Charles City County, Virginia"
+      },
+      "party": "Whig",
+      "startDate": "1841-03-04",
+      "endDate": "1841-04-04",
+      "electionYear": 1840,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Tyler", "startDate": "1841-03-04", "endDate": "1841-04-04"}
+      ]
+    },
+    {
+      "number": 10,
+      "president": {
+        "firstName": "John",
+        "lastName": "Tyler",
+        "birthDate": "1790-03-29",
+        "deathDate": "1862-01-18",
+        "birthPlace": "Charles City County, Virginia"
+      },
+      "party": "Whig",
+      "startDate": "1841-04-04",
+      "endDate": "1845-03-04",
+      "electionYear": null,
+      "endReason": "TERM_END",
+      "vicePresidents": []
+    },
+    {
+      "number": 11,
+      "president": {
+        "firstName": "James",
+        "lastName": "Polk",
+        "middleName": "K.",
+        "birthDate": "1795-11-02",
+        "deathDate": "1849-06-15",
+        "birthPlace": "Pineville, North Carolina"
+      },
+      "party": "Democratic",
+      "startDate": "1845-03-04",
+      "endDate": "1849-03-04",
+      "electionYear": 1844,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "George", "lastName": "Dallas", "startDate": "1845-03-04", "endDate": "1849-03-04"}
+      ]
+    },
+    {
+      "number": 12,
+      "president": {
+        "firstName": "Zachary",
+        "lastName": "Taylor",
+        "birthDate": "1784-11-24",
+        "deathDate": "1850-07-09",
+        "birthPlace": "Barboursville, Virginia"
+      },
+      "party": "Whig",
+      "startDate": "1849-03-04",
+      "endDate": "1850-07-09",
+      "electionYear": 1848,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Millard", "lastName": "Fillmore", "startDate": "1849-03-04", "endDate": "1850-07-09"}
+      ]
+    },
+    {
+      "number": 13,
+      "president": {
+        "firstName": "Millard",
+        "lastName": "Fillmore",
+        "birthDate": "1800-01-07",
+        "deathDate": "1874-03-08",
+        "birthPlace": "Moravia, New York"
+      },
+      "party": "Whig",
+      "startDate": "1850-07-09",
+      "endDate": "1853-03-04",
+      "electionYear": null,
+      "endReason": "TERM_END",
+      "vicePresidents": []
+    },
+    {
+      "number": 14,
+      "president": {
+        "firstName": "Franklin",
+        "lastName": "Pierce",
+        "birthDate": "1804-11-23",
+        "deathDate": "1869-10-08",
+        "birthPlace": "Hillsborough, New Hampshire"
+      },
+      "party": "Democratic",
+      "startDate": "1853-03-04",
+      "endDate": "1857-03-04",
+      "electionYear": 1852,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "William", "lastName": "King", "startDate": "1853-03-04", "endDate": "1853-04-18"}
+      ]
+    },
+    {
+      "number": 15,
+      "president": {
+        "firstName": "James",
+        "lastName": "Buchanan",
+        "birthDate": "1791-04-23",
+        "deathDate": "1868-06-01",
+        "birthPlace": "Cove Gap, Pennsylvania"
+      },
+      "party": "Democratic",
+      "startDate": "1857-03-04",
+      "endDate": "1861-03-04",
+      "electionYear": 1856,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Breckinridge", "startDate": "1857-03-04", "endDate": "1861-03-04"}
+      ]
+    },
+    {
+      "number": 16,
+      "president": {
+        "firstName": "Abraham",
+        "lastName": "Lincoln",
+        "birthDate": "1809-02-12",
+        "deathDate": "1865-04-15",
+        "birthPlace": "Hodgenville, Kentucky"
+      },
+      "party": "Republican",
+      "startDate": "1861-03-04",
+      "endDate": "1865-04-15",
+      "electionYear": 1860,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Hannibal", "lastName": "Hamlin", "startDate": "1861-03-04", "endDate": "1865-03-04"},
+        {"firstName": "Andrew", "lastName": "Johnson", "startDate": "1865-03-04", "endDate": "1865-04-15"}
+      ]
+    },
+    {
+      "number": 17,
+      "president": {
+        "firstName": "Andrew",
+        "lastName": "Johnson",
+        "birthDate": "1808-12-29",
+        "deathDate": "1875-07-31",
+        "birthPlace": "Raleigh, North Carolina"
+      },
+      "party": "Democratic",
+      "startDate": "1865-04-15",
+      "endDate": "1869-03-04",
+      "electionYear": null,
+      "endReason": "TERM_END",
+      "vicePresidents": []
+    },
+    {
+      "number": 18,
+      "president": {
+        "firstName": "Ulysses",
+        "lastName": "Grant",
+        "middleName": "S.",
+        "birthDate": "1822-04-27",
+        "deathDate": "1885-07-23",
+        "birthPlace": "Point Pleasant, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1869-03-04",
+      "endDate": "1877-03-04",
+      "electionYear": 1868,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Schuyler", "lastName": "Colfax", "startDate": "1869-03-04", "endDate": "1873-03-04"},
+        {"firstName": "Henry", "lastName": "Wilson", "startDate": "1873-03-04", "endDate": "1875-11-22"}
+      ]
+    },
+    {
+      "number": 19,
+      "president": {
+        "firstName": "Rutherford",
+        "lastName": "Hayes",
+        "middleName": "B.",
+        "birthDate": "1822-10-04",
+        "deathDate": "1893-01-17",
+        "birthPlace": "Delaware, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1877-03-04",
+      "endDate": "1881-03-04",
+      "electionYear": 1876,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "William", "lastName": "Wheeler", "startDate": "1877-03-04", "endDate": "1881-03-04"}
+      ]
+    },
+    {
+      "number": 20,
+      "president": {
+        "firstName": "James",
+        "lastName": "Garfield",
+        "middleName": "A.",
+        "birthDate": "1831-11-19",
+        "deathDate": "1881-09-19",
+        "birthPlace": "Moreland Hills, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1881-03-04",
+      "endDate": "1881-09-19",
+      "electionYear": 1880,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Chester", "lastName": "Arthur", "startDate": "1881-03-04", "endDate": "1881-09-19"}
+      ]
+    },
+    {
+      "number": 21,
+      "president": {
+        "firstName": "Chester",
+        "lastName": "Arthur",
+        "middleName": "A.",
+        "birthDate": "1829-10-05",
+        "deathDate": "1886-11-18",
+        "birthPlace": "Fairfield, Vermont"
+      },
+      "party": "Republican",
+      "startDate": "1881-09-19",
+      "endDate": "1885-03-04",
+      "electionYear": null,
+      "endReason": "TERM_END",
+      "vicePresidents": []
+    },
+    {
+      "number": 22,
+      "president": {
+        "firstName": "Grover",
+        "lastName": "Cleveland",
+        "birthDate": "1837-03-18",
+        "deathDate": "1908-06-24",
+        "birthPlace": "Caldwell, New Jersey"
+      },
+      "party": "Democratic",
+      "startDate": "1885-03-04",
+      "endDate": "1889-03-04",
+      "electionYear": 1884,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Thomas", "lastName": "Hendricks", "startDate": "1885-03-04", "endDate": "1885-11-25"}
+      ]
+    },
+    {
+      "number": 23,
+      "president": {
+        "firstName": "Benjamin",
+        "lastName": "Harrison",
+        "birthDate": "1833-08-20",
+        "deathDate": "1901-03-13",
+        "birthPlace": "North Bend, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1889-03-04",
+      "endDate": "1893-03-04",
+      "electionYear": 1888,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Levi", "lastName": "Morton", "startDate": "1889-03-04", "endDate": "1893-03-04"}
+      ]
+    },
+    {
+      "number": 24,
+      "president": {
+        "firstName": "Grover",
+        "lastName": "Cleveland",
+        "birthDate": "1837-03-18",
+        "deathDate": "1908-06-24",
+        "birthPlace": "Caldwell, New Jersey"
+      },
+      "party": "Democratic",
+      "startDate": "1893-03-04",
+      "endDate": "1897-03-04",
+      "electionYear": 1892,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Adlai", "lastName": "Stevenson", "startDate": "1893-03-04", "endDate": "1897-03-04"}
+      ]
+    },
+    {
+      "number": 25,
+      "president": {
+        "firstName": "William",
+        "lastName": "McKinley",
+        "birthDate": "1843-01-29",
+        "deathDate": "1901-09-14",
+        "birthPlace": "Niles, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1897-03-04",
+      "endDate": "1901-09-14",
+      "electionYear": 1896,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Garret", "lastName": "Hobart", "startDate": "1897-03-04", "endDate": "1899-11-21"},
+        {"firstName": "Theodore", "lastName": "Roosevelt", "startDate": "1901-03-04", "endDate": "1901-09-14"}
+      ]
+    },
+    {
+      "number": 26,
+      "president": {
+        "firstName": "Theodore",
+        "lastName": "Roosevelt",
+        "birthDate": "1858-10-27",
+        "deathDate": "1919-01-06",
+        "birthPlace": "New York City, New York"
+      },
+      "party": "Republican",
+      "startDate": "1901-09-14",
+      "endDate": "1909-03-04",
+      "electionYear": 1904,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Charles", "lastName": "Fairbanks", "startDate": "1905-03-04", "endDate": "1909-03-04"}
+      ]
+    },
+    {
+      "number": 27,
+      "president": {
+        "firstName": "William",
+        "lastName": "Taft",
+        "middleName": "Howard",
+        "birthDate": "1857-09-15",
+        "deathDate": "1930-03-08",
+        "birthPlace": "Cincinnati, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1909-03-04",
+      "endDate": "1913-03-04",
+      "electionYear": 1908,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "James", "lastName": "Sherman", "startDate": "1909-03-04", "endDate": "1912-10-30"}
+      ]
+    },
+    {
+      "number": 28,
+      "president": {
+        "firstName": "Woodrow",
+        "lastName": "Wilson",
+        "birthDate": "1856-12-28",
+        "deathDate": "1924-02-03",
+        "birthPlace": "Staunton, Virginia"
+      },
+      "party": "Democratic",
+      "startDate": "1913-03-04",
+      "endDate": "1921-03-04",
+      "electionYear": 1912,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Thomas", "lastName": "Marshall", "startDate": "1913-03-04", "endDate": "1921-03-04"}
+      ]
+    },
+    {
+      "number": 29,
+      "president": {
+        "firstName": "Warren",
+        "lastName": "Harding",
+        "middleName": "G.",
+        "birthDate": "1865-11-02",
+        "deathDate": "1923-08-02",
+        "birthPlace": "Blooming Grove, Ohio"
+      },
+      "party": "Republican",
+      "startDate": "1921-03-04",
+      "endDate": "1923-08-02",
+      "electionYear": 1920,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Calvin", "lastName": "Coolidge", "startDate": "1921-03-04", "endDate": "1923-08-02"}
+      ]
+    },
+    {
+      "number": 30,
+      "president": {
+        "firstName": "Calvin",
+        "lastName": "Coolidge",
+        "birthDate": "1872-07-04",
+        "deathDate": "1933-01-05",
+        "birthPlace": "Plymouth, Vermont"
+      },
+      "party": "Republican",
+      "startDate": "1923-08-02",
+      "endDate": "1929-03-04",
+      "electionYear": 1924,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Charles", "lastName": "Dawes", "startDate": "1925-03-04", "endDate": "1929-03-04"}
+      ]
+    },
+    {
+      "number": 31,
+      "president": {
+        "firstName": "Herbert",
+        "lastName": "Hoover",
+        "birthDate": "1874-08-10",
+        "deathDate": "1964-10-20",
+        "birthPlace": "West Branch, Iowa"
+      },
+      "party": "Republican",
+      "startDate": "1929-03-04",
+      "endDate": "1933-03-04",
+      "electionYear": 1928,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Charles", "lastName": "Curtis", "startDate": "1929-03-04", "endDate": "1933-03-04"}
+      ]
+    },
+    {
+      "number": 32,
+      "president": {
+        "firstName": "Franklin",
+        "lastName": "Roosevelt",
+        "middleName": "D.",
+        "birthDate": "1882-01-30",
+        "deathDate": "1945-04-12",
+        "birthPlace": "Hyde Park, New York"
+      },
+      "party": "Democratic",
+      "startDate": "1933-03-04",
+      "endDate": "1945-04-12",
+      "electionYear": 1932,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "John", "lastName": "Garner", "startDate": "1933-03-04", "endDate": "1941-01-20"},
+        {"firstName": "Henry", "lastName": "Wallace", "startDate": "1941-01-20", "endDate": "1945-01-20"},
+        {"firstName": "Harry", "lastName": "Truman", "startDate": "1945-01-20", "endDate": "1945-04-12"}
+      ]
+    },
+    {
+      "number": 33,
+      "president": {
+        "firstName": "Harry",
+        "lastName": "Truman",
+        "middleName": "S.",
+        "birthDate": "1884-05-08",
+        "deathDate": "1972-12-26",
+        "birthPlace": "Lamar, Missouri"
+      },
+      "party": "Democratic",
+      "startDate": "1945-04-12",
+      "endDate": "1953-01-20",
+      "electionYear": 1948,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Alben", "lastName": "Barkley", "startDate": "1949-01-20", "endDate": "1953-01-20"}
+      ]
+    },
+    {
+      "number": 34,
+      "president": {
+        "firstName": "Dwight",
+        "lastName": "Eisenhower",
+        "middleName": "D.",
+        "birthDate": "1890-10-14",
+        "deathDate": "1969-03-28",
+        "birthPlace": "Denison, Texas"
+      },
+      "party": "Republican",
+      "startDate": "1953-01-20",
+      "endDate": "1961-01-20",
+      "electionYear": 1952,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Richard", "lastName": "Nixon", "startDate": "1953-01-20", "endDate": "1961-01-20"}
+      ]
+    },
+    {
+      "number": 35,
+      "president": {
+        "firstName": "John",
+        "lastName": "Kennedy",
+        "middleName": "F.",
+        "birthDate": "1917-05-29",
+        "deathDate": "1963-11-22",
+        "birthPlace": "Brookline, Massachusetts"
+      },
+      "party": "Democratic",
+      "startDate": "1961-01-20",
+      "endDate": "1963-11-22",
+      "electionYear": 1960,
+      "endReason": "DEATH",
+      "vicePresidents": [
+        {"firstName": "Lyndon", "lastName": "Johnson", "startDate": "1961-01-20", "endDate": "1963-11-22"}
+      ]
+    },
+    {
+      "number": 36,
+      "president": {
+        "firstName": "Lyndon",
+        "lastName": "Johnson",
+        "middleName": "B.",
+        "birthDate": "1908-08-27",
+        "deathDate": "1973-01-22",
+        "birthPlace": "Stonewall, Texas"
+      },
+      "party": "Democratic",
+      "startDate": "1963-11-22",
+      "endDate": "1969-01-20",
+      "electionYear": 1964,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Hubert", "lastName": "Humphrey", "startDate": "1965-01-20", "endDate": "1969-01-20"}
+      ]
+    },
+    {
+      "number": 37,
+      "president": {
+        "firstName": "Richard",
+        "lastName": "Nixon",
+        "middleName": "M.",
+        "birthDate": "1913-01-09",
+        "deathDate": "1994-04-22",
+        "birthPlace": "Yorba Linda, California"
+      },
+      "party": "Republican",
+      "startDate": "1969-01-20",
+      "endDate": "1974-08-09",
+      "electionYear": 1968,
+      "endReason": "RESIGNATION",
+      "vicePresidents": [
+        {"firstName": "Spiro", "lastName": "Agnew", "startDate": "1969-01-20", "endDate": "1973-10-10"},
+        {"firstName": "Gerald", "lastName": "Ford", "startDate": "1973-12-06", "endDate": "1974-08-09"}
+      ]
+    },
+    {
+      "number": 38,
+      "president": {
+        "firstName": "Gerald",
+        "lastName": "Ford",
+        "middleName": "R.",
+        "birthDate": "1913-07-14",
+        "deathDate": "2006-12-26",
+        "birthPlace": "Omaha, Nebraska"
+      },
+      "party": "Republican",
+      "startDate": "1974-08-09",
+      "endDate": "1977-01-20",
+      "electionYear": null,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Nelson", "lastName": "Rockefeller", "startDate": "1974-12-19", "endDate": "1977-01-20"}
+      ]
+    },
+    {
+      "number": 39,
+      "president": {
+        "firstName": "Jimmy",
+        "lastName": "Carter",
+        "birthDate": "1924-10-01",
+        "birthPlace": "Plains, Georgia"
+      },
+      "party": "Democratic",
+      "startDate": "1977-01-20",
+      "endDate": "1981-01-20",
+      "electionYear": 1976,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Walter", "lastName": "Mondale", "startDate": "1977-01-20", "endDate": "1981-01-20"}
+      ]
+    },
+    {
+      "number": 40,
+      "president": {
+        "firstName": "Ronald",
+        "lastName": "Reagan",
+        "birthDate": "1911-02-06",
+        "deathDate": "2004-06-05",
+        "birthPlace": "Tampico, Illinois"
+      },
+      "party": "Republican",
+      "startDate": "1981-01-20",
+      "endDate": "1989-01-20",
+      "electionYear": 1980,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "George", "lastName": "Bush", "middleName": "H. W.", "startDate": "1981-01-20", "endDate": "1989-01-20"}
+      ]
+    },
+    {
+      "number": 41,
+      "president": {
+        "firstName": "George",
+        "lastName": "Bush",
+        "middleName": "H. W.",
+        "birthDate": "1924-06-12",
+        "deathDate": "2018-11-30",
+        "birthPlace": "Milton, Massachusetts"
+      },
+      "party": "Republican",
+      "startDate": "1989-01-20",
+      "endDate": "1993-01-20",
+      "electionYear": 1988,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Dan", "lastName": "Quayle", "startDate": "1989-01-20", "endDate": "1993-01-20"}
+      ]
+    },
+    {
+      "number": 42,
+      "president": {
+        "firstName": "Bill",
+        "lastName": "Clinton",
+        "birthDate": "1946-08-19",
+        "birthPlace": "Hope, Arkansas"
+      },
+      "party": "Democratic",
+      "startDate": "1993-01-20",
+      "endDate": "2001-01-20",
+      "electionYear": 1992,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Al", "lastName": "Gore", "startDate": "1993-01-20", "endDate": "2001-01-20"}
+      ]
+    },
+    {
+      "number": 43,
+      "president": {
+        "firstName": "George",
+        "lastName": "Bush",
+        "middleName": "W.",
+        "birthDate": "1946-07-06",
+        "birthPlace": "New Haven, Connecticut"
+      },
+      "party": "Republican",
+      "startDate": "2001-01-20",
+      "endDate": "2009-01-20",
+      "electionYear": 2000,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Dick", "lastName": "Cheney", "startDate": "2001-01-20", "endDate": "2009-01-20"}
+      ]
+    },
+    {
+      "number": 44,
+      "president": {
+        "firstName": "Barack",
+        "lastName": "Obama",
+        "birthDate": "1961-08-04",
+        "birthPlace": "Honolulu, Hawaii"
+      },
+      "party": "Democratic",
+      "startDate": "2009-01-20",
+      "endDate": "2017-01-20",
+      "electionYear": 2008,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Joe", "lastName": "Biden", "startDate": "2009-01-20", "endDate": "2017-01-20"}
+      ]
+    },
+    {
+      "number": 45,
+      "president": {
+        "firstName": "Donald",
+        "lastName": "Trump",
+        "middleName": "J.",
+        "birthDate": "1946-06-14",
+        "birthPlace": "Queens, New York"
+      },
+      "party": "Republican",
+      "startDate": "2017-01-20",
+      "endDate": "2021-01-20",
+      "electionYear": 2016,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Mike", "lastName": "Pence", "startDate": "2017-01-20", "endDate": "2021-01-20"}
+      ]
+    },
+    {
+      "number": 46,
+      "president": {
+        "firstName": "Joe",
+        "lastName": "Biden",
+        "birthDate": "1942-11-20",
+        "birthPlace": "Scranton, Pennsylvania"
+      },
+      "party": "Democratic",
+      "startDate": "2021-01-20",
+      "endDate": "2025-01-20",
+      "electionYear": 2020,
+      "endReason": "TERM_END",
+      "vicePresidents": [
+        {"firstName": "Kamala", "lastName": "Harris", "startDate": "2021-01-20", "endDate": "2025-01-20"}
+      ]
+    },
+    {
+      "number": 47,
+      "president": {
+        "firstName": "Donald",
+        "lastName": "Trump",
+        "middleName": "J.",
+        "birthDate": "1946-06-14",
+        "birthPlace": "Queens, New York"
+      },
+      "party": "Republican",
+      "startDate": "2025-01-20",
+      "endDate": null,
+      "electionYear": 2024,
+      "endReason": null,
+      "vicePresidents": [
+        {"firstName": "JD", "lastName": "Vance", "startDate": "2025-01-20", "endDate": null}
+      ]
+    }
+  ]
+}

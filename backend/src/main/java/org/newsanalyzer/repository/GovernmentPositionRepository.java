@@ -156,6 +156,11 @@ public interface GovernmentPositionRepository extends JpaRepository<GovernmentPo
      */
     Optional<GovernmentPosition> findByTitleAndOrganizationId(String title, UUID organizationId);
 
+    /**
+     * Find position by title only (for unique positions like VP)
+     */
+    Optional<GovernmentPosition> findByTitle(String title);
+
     // =====================================================================
     // Appointee Lookup queries (FB-2.4)
     // =====================================================================

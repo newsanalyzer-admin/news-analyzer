@@ -248,7 +248,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |----|-------|----------|----------|--------|
 | KB-1.0 | Extend PositionHolding and DataSource for Presidency Support | P0 (Blocker) | 1 pt | Complete |
 | KB-1.1 | Create Presidency and ExecutiveOrder Entities | P0 | 4 pts | Complete |
-| KB-1.2 | Implement Presidential Data Sync Service | P0 | 5 pts | Draft |
+| KB-1.2 | Implement Presidential Data Sync Service | P0 | 5 pts | Complete |
 | KB-1.3 | Create Presidency API Endpoints | P0 | 3 pts | Draft |
 | KB-1.4 | Build Admin Sync UI for President Page | P1 | 2 pts | Draft |
 | KB-1.5 | Implement KB President Page with Historical Table | P1 | 6 pts | Draft |
@@ -367,7 +367,7 @@ public interface PresidencyRepository extends JpaRepository<Presidency, UUID> {
 
 ### KB-1.2: Implement Presidential Data Sync Service
 
-**Status:** Draft | **Estimate:** 5 pts | **Priority:** P0
+**Status:** Complete | **Estimate:** 5 pts | **Priority:** P0
 
 **As a** system administrator,
 **I want** a service that syncs presidential data from seed file and APIs,
@@ -619,7 +619,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 
 - [x] KB-1.0: PositionHolding and DataSource extended
 - [x] KB-1.1: Entities and migrations deployed
-- [ ] KB-1.2: All 47 presidencies synced successfully
+- [x] KB-1.2: All 47 presidencies synced successfully
 - [ ] KB-1.3: API endpoints tested and documented
 - [ ] KB-1.4: Admin sync UI functional
 - [ ] KB-1.5: KB President page displays data correctly
@@ -645,6 +645,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | 2026-01-06 | 1.1 | Architect review: Added KB-1.0 story, updated data model (VP via PositionHolding), added DataSource enum extension, updated estimates (21→24 pts) | Winston (Architect) |
 | 2026-01-06 | 1.2 | KB-1.0 completed: Extended PositionHolding with presidencyId, extended DataSource enum, created V30 migration. All 590 tests pass. | James (Dev) |
 | 2026-01-06 | 1.3 | KB-1.1 completed: Created Presidency, ExecutiveOrder entities with enums and repositories. Extended Person with death_date/birth_place. Created V31-V33 migrations. All 590 tests pass. | James (Dev) |
+| 2026-01-07 | 1.4 | KB-1.2 completed: Created PresidentialSyncService, PresidencySeedData DTOs, presidencies-seed.json (all 47 presidencies with VPs). Idempotent sync handles non-consecutive terms (Cleveland 22/24, Trump 45/47). All 601 tests pass. | James (Dev) |
 
 ## Approval
 
@@ -652,7 +653,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-06 | DRAFTED |
 | Architect | Winston | 2026-01-06 | **APPROVED WITH MODIFICATIONS** |
-| Developer | James (Dev) | 2026-01-06 | KB-1.0, KB-1.1 COMPLETE |
+| Developer | James (Dev) | 2026-01-07 | KB-1.0, KB-1.1, KB-1.2 COMPLETE |
 
 ### Architect Review Notes
 
