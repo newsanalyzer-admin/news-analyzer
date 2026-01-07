@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.dto.PlumImportResult;
 import org.newsanalyzer.dto.UsCodeImportResult;
 import org.newsanalyzer.service.PlumCsvImportService;
+import org.newsanalyzer.service.PresidentialSyncService;
 import org.newsanalyzer.service.UsCodeImportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ public class AdminSyncController {
 
     private final PlumCsvImportService plumImportService;
     private final UsCodeImportService usCodeImportService;
+    private final PresidentialSyncService presidentialSyncService;
 
     // Track ongoing imports to prevent concurrent runs
     private volatile boolean plumImportInProgress = false;
@@ -49,10 +51,15 @@ public class AdminSyncController {
     private volatile boolean usCodeImportInProgress = false;
     private UsCodeImportResult lastUsCodeResult = null;
 
+    private volatile boolean presidentialSyncInProgress = false;
+    private PresidentialSyncService.SyncResult lastPresidentialResult = null;
+
     public AdminSyncController(PlumCsvImportService plumImportService,
-                               UsCodeImportService usCodeImportService) {
+                               UsCodeImportService usCodeImportService,
+                               PresidentialSyncService presidentialSyncService) {
         this.plumImportService = plumImportService;
         this.usCodeImportService = usCodeImportService;
+        this.presidentialSyncService = presidentialSyncService;
     }
 
     // =====================================================================
@@ -275,6 +282,88 @@ public class AdminSyncController {
     }
 
     // =====================================================================
+    // Presidential Data Sync Endpoints
+    // =====================================================================
+
+    @PostMapping("/presidencies")
+    @Operation(summary = "Sync presidential data",
+               description = "Imports all 47 U.S. presidencies from seed data including presidents, " +
+                       "vice presidents, and related position holdings. Idempotent - safe to run multiple times.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Sync completed successfully"),
+        @ApiResponse(responseCode = "409", description = "Sync already in progress"),
+        @ApiResponse(responseCode = "500", description = "Sync failed")
+    })
+    public ResponseEntity<PresidentialSyncService.SyncResult> syncPresidencies() {
+        if (presidentialSyncInProgress) {
+            log.warn("Presidential sync already in progress");
+            return ResponseEntity.status(409).build();
+        }
+
+        log.info("Presidential sync triggered via API");
+        presidentialSyncInProgress = true;
+
+        try {
+            PresidentialSyncService.SyncResult result = presidentialSyncService.syncFromSeedFile();
+            lastPresidentialResult = result;
+
+            if (result.getErrors() > 0) {
+                log.warn("Presidential sync completed with {} errors", result.getErrors());
+            } else {
+                log.info("Presidential sync completed successfully: {}", result);
+            }
+
+            return ResponseEntity.ok(result);
+
+        } finally {
+            presidentialSyncInProgress = false;
+        }
+    }
+
+    @GetMapping("/presidencies/status")
+    @Operation(summary = "Get presidential sync status",
+               description = "Check if a presidential sync is currently running and get current data counts")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Status returned")
+    })
+    public ResponseEntity<Map<String, Object>> getPresidenciesStatus() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("inProgress", presidentialSyncInProgress);
+        status.put("totalPresidencies", presidentialSyncService.getPresidencyCount());
+
+        if (lastPresidentialResult != null) {
+            Map<String, Object> lastSync = new HashMap<>();
+            lastSync.put("presidenciesAdded", lastPresidentialResult.getPresidenciesAdded());
+            lastSync.put("presidenciesUpdated", lastPresidentialResult.getPresidenciesUpdated());
+            lastSync.put("totalPresidencies", lastPresidentialResult.getTotalPresidencies());
+            lastSync.put("personsAdded", lastPresidentialResult.getPersonsAdded());
+            lastSync.put("personsUpdated", lastPresidentialResult.getPersonsUpdated());
+            lastSync.put("vpHoldingsAdded", lastPresidentialResult.getVpHoldingsAdded());
+            lastSync.put("errors", lastPresidentialResult.getErrors());
+            if (!lastPresidentialResult.getErrorMessages().isEmpty()) {
+                lastSync.put("errorMessages", lastPresidentialResult.getErrorMessages());
+            }
+            status.put("lastSync", lastSync);
+        }
+
+        return ResponseEntity.ok(status);
+    }
+
+    @GetMapping("/presidencies/last-result")
+    @Operation(summary = "Get last presidential sync result",
+               description = "Returns the full result from the last presidential sync including error details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Last result returned"),
+        @ApiResponse(responseCode = "404", description = "No previous sync found")
+    })
+    public ResponseEntity<PresidentialSyncService.SyncResult> getLastPresidenciesResult() {
+        if (lastPresidentialResult == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(lastPresidentialResult);
+    }
+
+    // =====================================================================
     // General Admin Endpoints
     // =====================================================================
 
@@ -287,18 +376,23 @@ public class AdminSyncController {
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "UP");
-        health.put("services", Map.of(
-                "plumImport", Map.of(
-                        "available", true,
-                        "inProgress", plumImportInProgress,
-                        "csvUrl", plumImportService.getPlumCsvUrl()
-                ),
-                "usCodeImport", Map.of(
-                        "available", true,
-                        "inProgress", usCodeImportInProgress,
-                        "totalStatutes", usCodeImportService.getTotalStatuteCount()
-                )
+        Map<String, Object> services = new HashMap<>();
+        services.put("plumImport", Map.of(
+                "available", true,
+                "inProgress", plumImportInProgress,
+                "csvUrl", plumImportService.getPlumCsvUrl()
         ));
+        services.put("usCodeImport", Map.of(
+                "available", true,
+                "inProgress", usCodeImportInProgress,
+                "totalStatutes", usCodeImportService.getTotalStatuteCount()
+        ));
+        services.put("presidentialSync", Map.of(
+                "available", true,
+                "inProgress", presidentialSyncInProgress,
+                "totalPresidencies", presidentialSyncService.getPresidencyCount()
+        ));
+        health.put("services", services);
         return ResponseEntity.ok(health);
     }
 }
