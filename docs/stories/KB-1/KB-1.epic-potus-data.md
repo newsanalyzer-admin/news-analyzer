@@ -251,7 +251,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | KB-1.2 | Implement Presidential Data Sync Service | P0 | 5 pts | Complete |
 | KB-1.3 | Create Presidency API Endpoints | P0 | 3 pts | Complete |
 | KB-1.4 | Build Admin Sync UI for President Page | P1 | 2 pts | Complete |
-| KB-1.5 | Implement KB President Page with Historical Table | P1 | 6 pts | Draft |
+| KB-1.5 | Implement KB President Page with Historical Table | P1 | 6 pts | Complete |
 | KB-1.6 | Integrate Executive Orders Sync | P2 | 3 pts | Draft |
 
 **Epic Total:** 24 story points
@@ -520,7 +520,7 @@ public record PresidencyDTO(
 
 ### KB-1.5: Implement KB President Page with Historical Table
 
-**Status:** Draft | **Estimate:** 6 pts | **Priority:** P1
+**Status:** Complete | **Estimate:** 6 pts | **Priority:** P1
 
 **As a** Knowledge Base user,
 **I want** the President page to show current president and historical list,
@@ -622,7 +622,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 - [x] KB-1.2: All 47 presidencies synced successfully
 - [x] KB-1.3: API endpoints tested and documented
 - [x] KB-1.4: Admin sync UI functional
-- [ ] KB-1.5: KB President page displays data correctly
+- [x] KB-1.5: KB President page displays data correctly
 - [ ] KB-1.6: Executive Orders linked to presidencies
 - [ ] All tests pass (backend + frontend)
 - [ ] Non-consecutive terms verified (Cleveland, Trump)
@@ -648,6 +648,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | 2026-01-07 | 1.4 | KB-1.2 completed: Created PresidentialSyncService, PresidencySeedData DTOs, presidencies-seed.json (all 47 presidencies with VPs). Idempotent sync handles non-consecutive terms (Cleveland 22/24, Trump 45/47). All 601 tests pass. | James (Dev) |
 | 2026-01-07 | 1.5 | KB-1.3 completed: Created PresidencyController, PresidencyService, PresidencyDTO, PresidencyAdministrationDTO, ExecutiveOrderDTO. Added /api/admin/sync/presidencies endpoint to AdminSyncController. All 613 tests pass. | James (Dev) |
 | 2026-01-07 | 1.6 | KB-1.4 completed: Created usePresidencySync.ts hook, PresidencySyncCard.tsx component with sync status display and confirmation dialog. Updated admin president page with presidencies table and pagination. 16 frontend tests. | James (Dev) |
+| 2026-01-07 | 1.7 | KB-1.5 completed: Created PresidentCard, PresidencyTable, PresidencyExpandedRow components. Added useAllPresidencies and usePresidencyAdministration hooks. KB page shows current president card, sortable historical table with expandable rows. 49 frontend tests. | James (Dev) |
 
 ## Approval
 
@@ -655,7 +656,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-06 | DRAFTED |
 | Architect | Winston | 2026-01-06 | **APPROVED WITH MODIFICATIONS** |
-| Developer | James (Dev) | 2026-01-07 | KB-1.0, KB-1.1, KB-1.2, KB-1.3, KB-1.4 COMPLETE |
+| Developer | James (Dev) | 2026-01-07 | KB-1.0, KB-1.1, KB-1.2, KB-1.3, KB-1.4, KB-1.5 COMPLETE |
 
 ### Architect Review Notes
 

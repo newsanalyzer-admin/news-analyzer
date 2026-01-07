@@ -82,6 +82,39 @@ export interface PresidencyPage {
   number: number;
 }
 
+export interface OfficeholderDTO {
+  holdingId: string;
+  personId: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  positionTitle: string;
+  startDate: string;
+  endDate: string | null;
+  termLabel: string;
+  imageUrl: string | null;
+}
+
+export interface CabinetMemberDTO {
+  holdingId: string;
+  personId: string;
+  fullName: string;
+  positionTitle: string;
+  departmentName: string;
+  departmentId: string;
+  startDate: string;
+  endDate: string | null;
+}
+
+export interface PresidencyAdministrationDTO {
+  presidencyId: string;
+  presidencyNumber: number;
+  presidencyLabel: string;
+  vicePresidents: OfficeholderDTO[];
+  chiefsOfStaff: OfficeholderDTO[];
+  cabinetMembers: CabinetMemberDTO[];
+}
+
 // ============================================================================
 // Query Keys
 // ============================================================================
@@ -94,6 +127,7 @@ export const presidencyKeys = {
   current: () => [...presidencyKeys.all, 'current'] as const,
   detail: (id: string) => [...presidencyKeys.all, 'detail', id] as const,
   byNumber: (number: number) => [...presidencyKeys.all, 'number', number] as const,
+  administration: (id: string) => [...presidencyKeys.all, 'administration', id] as const,
 };
 
 // ============================================================================
@@ -150,6 +184,24 @@ async function fetchCurrentPresidency(): Promise<PresidencyDTO | null> {
     throw new Error('Failed to fetch current presidency');
   }
   return response.json();
+}
+
+async function fetchPresidencyAdministration(id: string): Promise<PresidencyAdministrationDTO> {
+  const response = await fetch(`${API_BASE}/api/presidencies/${id}/administration`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch presidency administration');
+  }
+  return response.json();
+}
+
+async function fetchAllPresidencies(): Promise<PresidencyDTO[]> {
+  // Fetch all presidencies (use large page size)
+  const response = await fetch(`${API_BASE}/api/presidencies?page=0&size=100`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch presidencies');
+  }
+  const page: PresidencyPage = await response.json();
+  return page.content;
 }
 
 // ============================================================================
@@ -220,6 +272,29 @@ export function useCurrentPresidency() {
   return useQuery({
     queryKey: presidencyKeys.current(),
     queryFn: fetchCurrentPresidency,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch all presidencies (non-paginated)
+ */
+export function useAllPresidencies() {
+  return useQuery({
+    queryKey: [...presidencyKeys.all, 'all-list'] as const,
+    queryFn: fetchAllPresidencies,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch presidency administration (VP, CoS, Cabinet)
+ */
+export function usePresidencyAdministration(presidencyId: string | null) {
+  return useQuery({
+    queryKey: presidencyKeys.administration(presidencyId || ''),
+    queryFn: () => fetchPresidencyAdministration(presidencyId!),
+    enabled: !!presidencyId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
