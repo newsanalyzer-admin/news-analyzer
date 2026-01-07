@@ -26,7 +26,8 @@ import java.util.UUID;
                 @Index(name = "idx_holding_person", columnList = "person_id"),
                 @Index(name = "idx_holding_position", columnList = "position_id"),
                 @Index(name = "idx_holding_dates", columnList = "start_date, end_date"),
-                @Index(name = "idx_holding_congress", columnList = "congress")
+                @Index(name = "idx_holding_congress", columnList = "congress"),
+                @Index(name = "idx_holding_presidency", columnList = "presidency_id")
         })
 @Data
 @NoArgsConstructor
@@ -61,6 +62,15 @@ public class PositionHolding {
     @JoinColumn(name = "position_id", insertable = false, updatable = false)
     @JsonIgnore
     private GovernmentPosition position;
+
+    /**
+     * Optional link to a specific presidency.
+     * Used for executive branch appointments (VP, Cabinet, CoS) to track
+     * which presidential administration the position was held under.
+     * Enables queries like "all VPs during the 37th presidency".
+     */
+    @Column(name = "presidency_id")
+    private UUID presidencyId;
 
     // =====================================================================
     // Temporal Information

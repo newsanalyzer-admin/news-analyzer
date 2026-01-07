@@ -15,7 +15,10 @@ public enum DataSource {
     LEGISLATORS_REPO("legislators_repo"),
     PLUM_CSV("plum_csv"),
     FJC("fjc"),
-    MANUAL("manual");
+    MANUAL("manual"),
+    USA_GOV("usa_gov"),
+    FEDERAL_REGISTER("federal_register"),
+    WHITE_HOUSE_HISTORICAL("white_house_historical");
 
     private final String value;
 

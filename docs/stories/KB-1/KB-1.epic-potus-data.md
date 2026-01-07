@@ -246,7 +246,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 
 | ID | Story | Priority | Estimate | Status |
 |----|-------|----------|----------|--------|
-| KB-1.0 | Extend PositionHolding and DataSource for Presidency Support | P0 (Blocker) | 1 pt | Draft |
+| KB-1.0 | Extend PositionHolding and DataSource for Presidency Support | P0 (Blocker) | 1 pt | Complete |
 | KB-1.1 | Create Presidency and ExecutiveOrder Entities | P0 | 4 pts | Draft |
 | KB-1.2 | Implement Presidential Data Sync Service | P0 | 5 pts | Draft |
 | KB-1.3 | Create Presidency API Endpoints | P0 | 3 pts | Draft |
@@ -277,7 +277,7 @@ KB-1.6 (EO Sync)         KB-1.4 (Admin Sync UI)
 
 ### KB-1.0: Extend PositionHolding and DataSource for Presidency Support
 
-**Status:** Draft | **Estimate:** 1 pt | **Priority:** P0 (Blocker)
+**Status:** Complete | **Estimate:** 1 pt | **Priority:** P0 (Blocker)
 
 **As a** developer,
 **I want** PositionHolding to support presidency linking and new data sources,
@@ -617,7 +617,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 
 ## Definition of Done
 
-- [ ] KB-1.0: PositionHolding and DataSource extended
+- [x] KB-1.0: PositionHolding and DataSource extended
 - [ ] KB-1.1: Entities and migrations deployed
 - [ ] KB-1.2: All 47 presidencies synced successfully
 - [ ] KB-1.3: API endpoints tested and documented
@@ -643,6 +643,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|---------|-------------|--------|
 | 2026-01-06 | 1.0 | Initial epic creation | Sarah (PO) |
 | 2026-01-06 | 1.1 | Architect review: Added KB-1.0 story, updated data model (VP via PositionHolding), added DataSource enum extension, updated estimates (21→24 pts) | Winston (Architect) |
+| 2026-01-06 | 1.2 | KB-1.0 completed: Extended PositionHolding with presidencyId, extended DataSource enum, created V30 migration. All 590 tests pass. | James (Dev) |
 
 ## Approval
 
@@ -650,7 +651,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-06 | DRAFTED |
 | Architect | Winston | 2026-01-06 | **APPROVED WITH MODIFICATIONS** |
-| Developer | - | - | Pending |
+| Developer | James (Dev) | 2026-01-06 | KB-1.0 COMPLETE |
 
 ### Architect Review Notes
 
