@@ -247,7 +247,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | ID | Story | Priority | Estimate | Status |
 |----|-------|----------|----------|--------|
 | KB-1.0 | Extend PositionHolding and DataSource for Presidency Support | P0 (Blocker) | 1 pt | Complete |
-| KB-1.1 | Create Presidency and ExecutiveOrder Entities | P0 | 4 pts | Draft |
+| KB-1.1 | Create Presidency and ExecutiveOrder Entities | P0 | 4 pts | Complete |
 | KB-1.2 | Implement Presidential Data Sync Service | P0 | 5 pts | Draft |
 | KB-1.3 | Create Presidency API Endpoints | P0 | 3 pts | Draft |
 | KB-1.4 | Build Admin Sync UI for President Page | P1 | 2 pts | Draft |
@@ -317,7 +317,7 @@ ALTER TYPE data_source ADD VALUE IF NOT EXISTS 'white_house_historical';
 
 ### KB-1.1: Create Presidency and ExecutiveOrder Entities
 
-**Status:** Draft | **Estimate:** 4 pts | **Priority:** P0
+**Status:** Complete | **Estimate:** 4 pts | **Priority:** P0
 
 **As a** developer,
 **I want** Presidency and ExecutiveOrder JPA entities with proper relationships,
@@ -618,7 +618,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 ## Definition of Done
 
 - [x] KB-1.0: PositionHolding and DataSource extended
-- [ ] KB-1.1: Entities and migrations deployed
+- [x] KB-1.1: Entities and migrations deployed
 - [ ] KB-1.2: All 47 presidencies synced successfully
 - [ ] KB-1.3: API endpoints tested and documented
 - [ ] KB-1.4: Admin sync UI functional
@@ -644,6 +644,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | 2026-01-06 | 1.0 | Initial epic creation | Sarah (PO) |
 | 2026-01-06 | 1.1 | Architect review: Added KB-1.0 story, updated data model (VP via PositionHolding), added DataSource enum extension, updated estimates (21→24 pts) | Winston (Architect) |
 | 2026-01-06 | 1.2 | KB-1.0 completed: Extended PositionHolding with presidencyId, extended DataSource enum, created V30 migration. All 590 tests pass. | James (Dev) |
+| 2026-01-06 | 1.3 | KB-1.1 completed: Created Presidency, ExecutiveOrder entities with enums and repositories. Extended Person with death_date/birth_place. Created V31-V33 migrations. All 590 tests pass. | James (Dev) |
 
 ## Approval
 
@@ -651,7 +652,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-06 | DRAFTED |
 | Architect | Winston | 2026-01-06 | **APPROVED WITH MODIFICATIONS** |
-| Developer | James (Dev) | 2026-01-06 | KB-1.0 COMPLETE |
+| Developer | James (Dev) | 2026-01-06 | KB-1.0, KB-1.1 COMPLETE |
 
 ### Architect Review Notes
 

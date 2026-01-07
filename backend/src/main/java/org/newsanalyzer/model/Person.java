@@ -93,6 +93,14 @@ public class Person {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
+    @Column(name = "death_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate deathDate;
+
+    @Column(name = "birth_place", length = 200)
+    @Size(max = 200, message = "Birth place must be less than 200 characters")
+    private String birthPlace;
+
     @Column(name = "gender", length = 10)
     @Size(max = 10, message = "Gender must be less than 10 characters")
     private String gender;
@@ -222,6 +230,13 @@ public class Person {
      */
     public boolean isRepresentative() {
         return chamber == Chamber.HOUSE;
+    }
+
+    /**
+     * Check if person is living (no death date)
+     */
+    public boolean isLiving() {
+        return deathDate == null;
     }
 
     // =====================================================================
