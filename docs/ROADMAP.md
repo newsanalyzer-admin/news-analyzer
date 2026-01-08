@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 4.1
+**Document Version:** 4.2
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-07
 **Status:** Active
 
 ---
@@ -40,6 +40,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **FB-2** | Complete | 100% | Executive Branch Data (PLUM Appointees) |
 | **FB-3** | Complete | 100% | Regulatory Data (Federal Register) |
 | **ADMIN-1** | Complete | 100% | Admin Dashboard & Data Import (Supersedes FB-4, FB-5, FB-6) |
+| **KB-1** | Complete | 100% | President of the United States Data |
 
 ### Quality Assurance Track
 
@@ -622,6 +623,39 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 **Quality Gates:** All 13 stories passed QA review with average score 93/100. 150+ unit tests added.
 
+#### KB-1: President of the United States Data ✅
+
+**Status:** COMPLETE
+**Completion Date:** 2026-01-07
+**Documentation:** [`docs/stories/KB-1/KB-1.epic-potus-data.md`](stories/KB-1/KB-1.epic-potus-data.md)
+**Depends On:** UI-6 Complete (Executive Branch sub-pages exist)
+
+**Deliverables:**
+- New `Presidency` entity with Person/term separation (handles non-consecutive terms: Cleveland 22/24, Trump 45/47)
+- New `ExecutiveOrder` entity linked to Presidency
+- Extended `Person` entity with death_date, birth_place fields
+- Extended `PositionHolding` with presidency_id for VP/Cabinet tracking
+- Static seed data for all 47 presidencies with VP information
+- Federal Register API integration for Executive Orders sync
+- PresidentialSyncService with idempotent sync
+- ExecutiveOrderSyncService with rate-limited API calls
+- 7 Presidency API endpoints (list, current, by-id, by-number, EOs, administration)
+- 4 Executive Order sync endpoints
+- Admin sync UI (PresidencySyncCard component)
+- KB President page with current president card, sortable historical table, expandable rows
+- V30-V33 database migrations
+
+**Stories (6 total, 24 points - all complete):**
+- KB-1.0: Extend PositionHolding and DataSource (1 pt) ✅
+- KB-1.1: Create Presidency and ExecutiveOrder Entities (4 pts) ✅
+- KB-1.2: Implement Presidential Data Sync Service (5 pts) ✅
+- KB-1.3: Create Presidency API Endpoints (3 pts) ✅
+- KB-1.4: Build Admin Sync UI for President Page (2 pts) ✅
+- KB-1.5: Implement KB President Page with Historical Table (6 pts) ✅
+- KB-1.6: Integrate Executive Orders Sync (3 pts) ✅
+
+**Quality Gates:** All 6 stories passed development. 18 backend tests for EO sync, 49 frontend tests for KB page.
+
 ### Planned Epics
 
 *All planned Factbase Expansion work is complete. Future epics may include state-level regulatory data or additional government data sources.*
@@ -1004,6 +1038,7 @@ Based on business requirements document objectives:
 | FB-2 | `docs/stories/FB-2/FB-2.epic-executive-branch-data.md` | ✅ Complete |
 | FB-3 | `docs/stories/FB-3/FB-3.epic-regulatory-data.md` | ✅ Complete |
 | ADMIN-1 | `docs/stories/ADMIN-1/ADMIN-1.epic-admin-dashboard-improvements.md` | ✅ Complete |
+| KB-1 | `docs/stories/KB-1/KB-1.epic-potus-data.md` | ✅ Complete |
 
 ### Quality Assurance Epics
 
@@ -1085,6 +1120,7 @@ Based on business requirements document objectives:
 | 2026-01-03 | 3.9 | **UI-5 Epic COMPLETE**: All 2 stories done - KB sidebar reorganization ("Government" → "U.S. Federal Government", "Branches" grouping), public U.S. Code browse page with hierarchical tree view; 19 new tests; 585 frontend tests passing |
 | 2026-01-04 | 4.0 | **UI-6 Epic APPROVED**: Executive Branch Hierarchical Navigation - 4 stories (12 pts) adding 6 sub-sections (President, VP, EOP, Cabinet, Independent Agencies, Corporations); includes backend enum extension for GOVERNMENT_CORPORATION; User Experience Track status updated to IN PROGRESS |
 | 2026-01-05 | 4.1 | **UI-6 Epic COMPLETE**: All 4 stories done - Backend GOVERNMENT_CORPORATION enum (V29 migration), sidebar expansion (6 sub-sections with icons), Executive Branch hub page (Article II reference, 6 nav cards), 6 sub-section pages (President, VP, EOP, Cabinet, Independent Agencies, Corporations); 54 new tests; 623 frontend tests passing, 590 backend tests passing |
+| 2026-01-07 | 4.2 | **KB-1 Epic COMPLETE**: All 6 stories done - Presidency and ExecutiveOrder entities (V30-V33 migrations), Person/term separation for non-consecutive terms (Cleveland 22/24, Trump 45/47), Presidential data sync from seed file (47 presidencies), Executive Orders sync from Federal Register API, Admin sync UI, KB President page with historical table; 18 backend tests for EO sync, 49 frontend tests for KB page |
 
 ---
 
