@@ -66,6 +66,17 @@ public class FederalRegisterDocument {
     private LocalDate signingDate;
 
     /**
+     * Executive Order number (only for EO documents).
+     */
+    @JsonProperty("executive_order_number")
+    private Integer executiveOrderNumber;
+
+    /**
+     * Citation for the document (e.g., "89 FR 12345").
+     */
+    private String citation;
+
+    /**
      * List of agencies associated with this document.
      */
     private List<FederalRegisterAgency> agencies;

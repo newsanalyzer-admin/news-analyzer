@@ -252,7 +252,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | KB-1.3 | Create Presidency API Endpoints | P0 | 3 pts | Complete |
 | KB-1.4 | Build Admin Sync UI for President Page | P1 | 2 pts | Complete |
 | KB-1.5 | Implement KB President Page with Historical Table | P1 | 6 pts | Complete |
-| KB-1.6 | Integrate Executive Orders Sync | P2 | 3 pts | Draft |
+| KB-1.6 | Integrate Executive Orders Sync | P2 | 3 pts | Complete |
 
 **Epic Total:** 24 story points
 
@@ -562,7 +562,7 @@ public record PresidencyDTO(
 
 ### KB-1.6: Integrate Executive Orders Sync
 
-**Status:** Draft | **Estimate:** 3 pts | **Priority:** P2
+**Status:** Complete | **Estimate:** 3 pts | **Priority:** P2
 
 **As a** system administrator,
 **I want** Executive Orders synced from Federal Register,
@@ -592,11 +592,15 @@ GET https://www.federalregister.gov/api/v1/documents.json
 &per_page=100
 ```
 
-**Files to Create:**
-- `backend/src/main/java/org/newsanalyzer/service/FederalRegisterClient.java`
+**Files Created:**
 - `backend/src/main/java/org/newsanalyzer/service/ExecutiveOrderSyncService.java`
-- `backend/src/main/java/org/newsanalyzer/service/dto/FederalRegisterResponse.java`
 - `backend/src/test/java/org/newsanalyzer/service/ExecutiveOrderSyncServiceTest.java`
+
+**Files Modified:**
+- `backend/src/main/java/org/newsanalyzer/dto/DocumentQueryParams.java` (added presidentialDocumentType, president fields)
+- `backend/src/main/java/org/newsanalyzer/dto/FederalRegisterDocument.java` (added executiveOrderNumber, citation fields)
+- `backend/src/main/java/org/newsanalyzer/service/FederalRegisterClient.java` (updated fetchAllDocuments to pass new fields)
+- `backend/src/main/java/org/newsanalyzer/controller/AdminSyncController.java` (added EO sync endpoints)
 
 **Rate Limit Handling:**
 - Federal Register API: 1000 requests/hour
@@ -623,8 +627,8 @@ GET https://www.federalregister.gov/api/v1/documents.json
 - [x] KB-1.3: API endpoints tested and documented
 - [x] KB-1.4: Admin sync UI functional
 - [x] KB-1.5: KB President page displays data correctly
-- [ ] KB-1.6: Executive Orders linked to presidencies
-- [ ] All tests pass (backend + frontend)
+- [x] KB-1.6: Executive Orders linked to presidencies
+- [x] All tests pass (backend + frontend)
 - [ ] Non-consecutive terms verified (Cleveland, Trump)
 - [ ] VP mid-term changes verified (Ford/Agnew under Nixon)
 - [ ] ROADMAP.md updated with KB-1 entry
@@ -649,6 +653,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 | 2026-01-07 | 1.5 | KB-1.3 completed: Created PresidencyController, PresidencyService, PresidencyDTO, PresidencyAdministrationDTO, ExecutiveOrderDTO. Added /api/admin/sync/presidencies endpoint to AdminSyncController. All 613 tests pass. | James (Dev) |
 | 2026-01-07 | 1.6 | KB-1.4 completed: Created usePresidencySync.ts hook, PresidencySyncCard.tsx component with sync status display and confirmation dialog. Updated admin president page with presidencies table and pagination. 16 frontend tests. | James (Dev) |
 | 2026-01-07 | 1.7 | KB-1.5 completed: Created PresidentCard, PresidencyTable, PresidencyExpandedRow components. Added useAllPresidencies and usePresidencyAdministration hooks. KB page shows current president card, sortable historical table with expandable rows. 49 frontend tests. | James (Dev) |
+| 2026-01-07 | 1.8 | KB-1.6 completed: Created ExecutiveOrderSyncService with Federal Register API integration. Extended DocumentQueryParams and FederalRegisterDocument DTOs for EO queries. Added executive-orders sync endpoints to AdminSyncController. President name mapping for FDR onwards. 18 backend tests. | James (Dev) |
 
 ## Approval
 
@@ -656,7 +661,7 @@ GET https://www.federalregister.gov/api/v1/documents.json
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-06 | DRAFTED |
 | Architect | Winston | 2026-01-06 | **APPROVED WITH MODIFICATIONS** |
-| Developer | James (Dev) | 2026-01-07 | KB-1.0, KB-1.1, KB-1.2, KB-1.3, KB-1.4, KB-1.5 COMPLETE |
+| Developer | James (Dev) | 2026-01-07 | KB-1.0, KB-1.1, KB-1.2, KB-1.3, KB-1.4, KB-1.5, KB-1.6 COMPLETE |
 
 ### Architect Review Notes
 

@@ -41,6 +41,18 @@ public class DocumentQueryParams {
     private List<Integer> agencyIds;
 
     /**
+     * Presidential document type (executive_order, proclamation, etc.).
+     * Only used when documentTypes includes PRESDOCU.
+     */
+    private String presidentialDocumentType;
+
+    /**
+     * President identifier (e.g., "donald-trump", "joe-biden").
+     * Used to filter presidential documents by signing president.
+     */
+    private String president;
+
+    /**
      * Number of results per page.
      */
     @Builder.Default
@@ -85,6 +97,18 @@ public class DocumentQueryParams {
             }
         }
 
+        if (presidentialDocumentType != null && !presidentialDocumentType.isEmpty()) {
+            url.append("conditions[presidential_document_type][]=")
+               .append(presidentialDocumentType)
+               .append("&");
+        }
+
+        if (president != null && !president.isEmpty()) {
+            url.append("conditions[president][]=")
+               .append(president)
+               .append("&");
+        }
+
         url.append("per_page=").append(perPage);
         url.append("&page=").append(page);
 
@@ -96,6 +120,8 @@ public class DocumentQueryParams {
         url.append("&fields[]=publication_date");
         url.append("&fields[]=effective_on");
         url.append("&fields[]=signing_date");
+        url.append("&fields[]=executive_order_number");
+        url.append("&fields[]=citation");
         url.append("&fields[]=agencies");
         url.append("&fields[]=cfr_references");
         url.append("&fields[]=docket_ids");

@@ -158,6 +158,8 @@ public class FederalRegisterClient {
                 .publicationDateLte(params.getPublicationDateLte())
                 .documentTypes(params.getDocumentTypes())
                 .agencyIds(params.getAgencyIds())
+                .presidentialDocumentType(params.getPresidentialDocumentType())
+                .president(params.getPresident())
                 .perPage(params.getPerPage());
 
         while (currentPage <= maxPages) {

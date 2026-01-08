@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.dto.PlumImportResult;
 import org.newsanalyzer.dto.UsCodeImportResult;
+import org.newsanalyzer.service.ExecutiveOrderSyncService;
 import org.newsanalyzer.service.PlumCsvImportService;
 import org.newsanalyzer.service.PresidentialSyncService;
 import org.newsanalyzer.service.UsCodeImportService;
@@ -43,6 +44,7 @@ public class AdminSyncController {
     private final PlumCsvImportService plumImportService;
     private final UsCodeImportService usCodeImportService;
     private final PresidentialSyncService presidentialSyncService;
+    private final ExecutiveOrderSyncService executiveOrderSyncService;
 
     // Track ongoing imports to prevent concurrent runs
     private volatile boolean plumImportInProgress = false;
@@ -54,12 +56,17 @@ public class AdminSyncController {
     private volatile boolean presidentialSyncInProgress = false;
     private PresidentialSyncService.SyncResult lastPresidentialResult = null;
 
+    private volatile boolean eoSyncInProgress = false;
+    private ExecutiveOrderSyncService.SyncResult lastEoResult = null;
+
     public AdminSyncController(PlumCsvImportService plumImportService,
                                UsCodeImportService usCodeImportService,
-                               PresidentialSyncService presidentialSyncService) {
+                               PresidentialSyncService presidentialSyncService,
+                               ExecutiveOrderSyncService executiveOrderSyncService) {
         this.plumImportService = plumImportService;
         this.usCodeImportService = usCodeImportService;
         this.presidentialSyncService = presidentialSyncService;
+        this.executiveOrderSyncService = executiveOrderSyncService;
     }
 
     // =====================================================================
@@ -364,6 +371,131 @@ public class AdminSyncController {
     }
 
     // =====================================================================
+    // Executive Order Sync Endpoints
+    // =====================================================================
+
+    @PostMapping("/executive-orders")
+    @Operation(summary = "Sync all Executive Orders from Federal Register",
+               description = "Fetches Executive Order data for all presidencies from the Federal Register API. " +
+                       "Links EOs to their respective presidencies. Only modern presidents (FDR onwards) have " +
+                       "EOs available in the Federal Register database.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Sync completed"),
+        @ApiResponse(responseCode = "409", description = "Sync already in progress"),
+        @ApiResponse(responseCode = "500", description = "Sync failed")
+    })
+    public ResponseEntity<ExecutiveOrderSyncService.SyncResult> syncAllExecutiveOrders() {
+        if (eoSyncInProgress) {
+            log.warn("Executive Order sync already in progress");
+            return ResponseEntity.status(409).build();
+        }
+
+        log.info("Executive Order sync triggered via API");
+        eoSyncInProgress = true;
+
+        try {
+            ExecutiveOrderSyncService.SyncResult result = executiveOrderSyncService.syncAllExecutiveOrders();
+            lastEoResult = result;
+
+            if (result.getErrors() > 0) {
+                log.warn("Executive Order sync completed with {} errors", result.getErrors());
+            } else {
+                log.info("Executive Order sync completed successfully: {}", result);
+            }
+
+            return ResponseEntity.ok(result);
+
+        } finally {
+            eoSyncInProgress = false;
+        }
+    }
+
+    @PostMapping("/executive-orders/{presidencyNumber}")
+    @Operation(summary = "Sync Executive Orders for a specific presidency",
+               description = "Fetches Executive Order data for a specific presidency from the Federal Register API.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Sync completed"),
+        @ApiResponse(responseCode = "409", description = "Sync already in progress"),
+        @ApiResponse(responseCode = "400", description = "Invalid presidency number"),
+        @ApiResponse(responseCode = "500", description = "Sync failed")
+    })
+    public ResponseEntity<ExecutiveOrderSyncService.SyncResult> syncExecutiveOrdersForPresidency(
+            @PathVariable int presidencyNumber) {
+
+        if (presidencyNumber < 1 || presidencyNumber > 47) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (eoSyncInProgress) {
+            log.warn("Executive Order sync already in progress");
+            return ResponseEntity.status(409).build();
+        }
+
+        log.info("Executive Order sync for presidency #{} triggered via API", presidencyNumber);
+        eoSyncInProgress = true;
+
+        try {
+            ExecutiveOrderSyncService.SyncResult result =
+                    executiveOrderSyncService.syncExecutiveOrdersForPresidency(presidencyNumber);
+            lastEoResult = result;
+
+            if (result.getErrors() > 0) {
+                log.warn("Executive Order sync for presidency #{} completed with {} errors",
+                        presidencyNumber, result.getErrors());
+            } else {
+                log.info("Executive Order sync for presidency #{} completed: {}", presidencyNumber, result);
+            }
+
+            return ResponseEntity.ok(result);
+
+        } finally {
+            eoSyncInProgress = false;
+        }
+    }
+
+    @GetMapping("/executive-orders/status")
+    @Operation(summary = "Get Executive Order sync status",
+               description = "Check if an EO sync is currently running and get last sync results")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Status returned")
+    })
+    public ResponseEntity<Map<String, Object>> getExecutiveOrdersStatus() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("inProgress", eoSyncInProgress);
+        status.put("eoCounts", executiveOrderSyncService.getExecutiveOrderCounts());
+
+        if (lastEoResult != null) {
+            Map<String, Object> lastSync = new HashMap<>();
+            lastSync.put("executiveOrdersAdded", lastEoResult.getExecutiveOrdersAdded());
+            lastSync.put("executiveOrdersUpdated", lastEoResult.getExecutiveOrdersUpdated());
+            lastSync.put("executiveOrdersSkipped", lastEoResult.getExecutiveOrdersSkipped());
+            lastSync.put("totalExecutiveOrders", lastEoResult.getTotalExecutiveOrders());
+            lastSync.put("presidenciesProcessed", lastEoResult.getPresidenciesProcessed());
+            lastSync.put("errors", lastEoResult.getErrors());
+            if (!lastEoResult.getErrorMessages().isEmpty()) {
+                lastSync.put("errorMessages", lastEoResult.getErrorMessages());
+            }
+            status.put("lastSync", lastSync);
+        }
+
+        return ResponseEntity.ok(status);
+    }
+
+    @GetMapping("/executive-orders/last-result")
+    @Operation(summary = "Get last Executive Order sync result",
+               description = "Returns the full result from the last EO sync including error details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Last result returned"),
+        @ApiResponse(responseCode = "404", description = "No previous sync found")
+    })
+    public ResponseEntity<ExecutiveOrderSyncService.SyncResult> getLastExecutiveOrdersResult() {
+        if (lastEoResult == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(lastEoResult);
+    }
+
+    // =====================================================================
     // General Admin Endpoints
     // =====================================================================
 
@@ -391,6 +523,10 @@ public class AdminSyncController {
                 "available", true,
                 "inProgress", presidentialSyncInProgress,
                 "totalPresidencies", presidentialSyncService.getPresidencyCount()
+        ));
+        services.put("executiveOrderSync", Map.of(
+                "available", true,
+                "inProgress", eoSyncInProgress
         ));
         health.put("services", services);
         return ResponseEntity.ok(health);
