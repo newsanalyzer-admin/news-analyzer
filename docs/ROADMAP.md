@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 4.2
+**Document Version:** 4.3
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-07
+**Last Updated:** 2026-01-08
 **Status:** Active
 
 ---
@@ -40,7 +40,6 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **FB-2** | Complete | 100% | Executive Branch Data (PLUM Appointees) |
 | **FB-3** | Complete | 100% | Regulatory Data (Federal Register) |
 | **ADMIN-1** | Complete | 100% | Admin Dashboard & Data Import (Supersedes FB-4, FB-5, FB-6) |
-| **KB-1** | Complete | 100% | President of the United States Data |
 
 ### Quality Assurance Track
 
@@ -59,6 +58,19 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **UI-4** | Complete | 100% | Public Sidebar Integration |
 | **UI-5** | Complete | 100% | KB Sidebar Reorganization & U.S. Code |
 | **UI-6** | Complete | 100% | Executive Branch Hierarchical Navigation |
+
+### Architecture Track
+
+| Epic | Status | Progress | Description |
+|------|--------|----------|-------------|
+| **ARCH-1** | Ready for Sprint | 0% | Individual Table Refactor (Person → Individual + CongressionalMember) |
+
+### Knowledge Base Track
+
+| Epic | Status | Progress | Description |
+|------|--------|----------|-------------|
+| **KB-1** | Complete | 100% | President of the United States Data |
+| **KB-2** | Draft (Blocked) | 0% | Presidential Administrations (blocked by ARCH-1) |
 
 ### Overall MVP Status
 
@@ -82,11 +94,13 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 7. [Factbase Expansion Track](#factbase-expansion-track)
 8. [Quality Assurance Track](#quality-assurance-track)
 9. [User Experience Track](#user-experience-track)
+10. [Architecture Track](#architecture-track-1)
+11. [Knowledge Base Track](#knowledge-base-track-1)
 
 ### Reference
-10. [Future Vision](#future-vision)
-11. [Architecture Overview](#architecture-overview)
-12. [Documentation Index](#documentation-index)
+12. [Future Vision](#future-vision)
+13. [Architecture Overview](#architecture-overview)
+14. [Documentation Index](#documentation-index)
 
 ---
 
@@ -940,6 +954,90 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ---
 
+## Architecture Track
+
+### Epic ARCH-1: Individual Table Refactor
+
+**Status:** APPROVED
+**Priority:** HIGH (Foundational)
+**Estimate:** 36 story points (9 stories)
+**Blocks:** KB-2
+
+#### Overview
+
+Refactor the data model to establish a clean separation between **universal individual data** (name, birth date, biographical info) and **role-specific data** (Congressional membership, judicial appointments, etc.). This creates a true "single point of reference" for any person in the system, regardless of their roles.
+
+**Current Problem:** The `persons` table serves dual purposes - both as general person storage and Congress-specific member tracking. This causes:
+- Congress-specific fields (bioguide_id, chamber, state) are nullable noise for non-Congress persons
+- Default dataSource is CONGRESS_GOV even for presidents
+- No clean extension point for future person types (CEOs, journalists, etc.)
+
+**Target Architecture:**
+```
+individuals (master table)
+    ├── congressional_members (Congress-specific, FK to individuals)
+    ├── presidencies (FK to individuals)
+    └── position_holdings (FK to individuals)
+```
+
+#### Stories
+
+| ID | Story | Est | Priority |
+|----|-------|-----|----------|
+| ARCH-1.1 | Create Individual Entity and Table | 3 pts | P0 |
+| ARCH-1.2 | Create CongressionalMember Entity | 4 pts | P0 |
+| ARCH-1.3 | Migrate Existing Data | 7 pts | P0 |
+| ARCH-1.4 | Update Presidency/PositionHolding References | 5 pts | P0 |
+| ARCH-1.5 | Update CommitteeMembership Reference | 2 pts | P1 |
+| ARCH-1.6 | Update Services Layer | 5 pts | P1 |
+| ARCH-1.7 | Update DTOs and Controllers | 4 pts | P1 |
+| ARCH-1.8 | Update Frontend Types | 3 pts | P1 |
+| ARCH-1.9 | Verification and Cleanup | 2 pts | P2 |
+
+**Epic Document:** `docs/stories/ARCH-1/ARCH-1.epic-individual-table-refactor.md`
+
+---
+
+## Knowledge Base Track
+
+### Epic KB-1: President of the United States Data
+
+**Status:** COMPLETE ✅
+**Completed:** 2026-01-07
+
+See Factbase Expansion Track for details.
+
+### Epic KB-2: Presidential Administrations
+
+**Status:** DRAFT (Blocked by ARCH-1)
+**Priority:** HIGH
+**Estimate:** 24 story points (7 stories)
+**Blocked By:** ARCH-1
+
+#### Overview
+
+Consolidate the separate President and Vice President pages into a unified **Presidential Administrations** experience. The new KB page provides administration-centric navigation (President, VP, staff, Executive Orders) with the ability to explore any historical administration.
+
+**Key Features:**
+- **KB Page:** Current administration at top (President, VP, Staff, EOs), historical administrations below (clickable to view details)
+- **Admin Page:** Unified sync and CRUD controls for presidential data
+
+#### Stories
+
+| ID | Story | Est | Priority |
+|----|-------|-----|----------|
+| KB-2.1 | Create KB Presidential Administrations Page Shell | 3 pts | P0 |
+| KB-2.2 | Implement Current Administration Section | 5 pts | P0 |
+| KB-2.3 | Implement Historical Administrations List | 4 pts | P0 |
+| KB-2.4 | Create Admin Presidential Administrations Page | 5 pts | P1 |
+| KB-2.5 | Implement Admin CRUD API Endpoints | 4 pts | P1 |
+| KB-2.6 | Navigation Updates & Route Redirects | 2 pts | P1 |
+| KB-2.7 | Cleanup Deprecated Pages | 1 pt | P2 |
+
+**Epic Document:** `docs/stories/KB-2/KB-2.epic-presidential-administrations.md`
+
+---
+
 ## Future Vision
 
 ### Long-Term Goals (Year 2-3)
@@ -1038,7 +1136,6 @@ Based on business requirements document objectives:
 | FB-2 | `docs/stories/FB-2/FB-2.epic-executive-branch-data.md` | ✅ Complete |
 | FB-3 | `docs/stories/FB-3/FB-3.epic-regulatory-data.md` | ✅ Complete |
 | ADMIN-1 | `docs/stories/ADMIN-1/ADMIN-1.epic-admin-dashboard-improvements.md` | ✅ Complete |
-| KB-1 | `docs/stories/KB-1/KB-1.epic-potus-data.md` | ✅ Complete |
 
 ### Quality Assurance Epics
 
@@ -1057,6 +1154,19 @@ Based on business requirements document objectives:
 | UI-4 | `docs/stories/UI-4/UI-4.epic-sidebar-integration.md` | ✅ Complete |
 | UI-5 | `docs/stories/UI-5/UI-5.epic-kb-sidebar-uscode.md` | ✅ Complete |
 | UI-6 | `docs/stories/UI-6/UI-6.epic-executive-branch-hierarchy.md` | ✅ Complete |
+
+### Architecture Epics
+
+| Epic | Document | Status |
+|------|----------|--------|
+| ARCH-1 | `docs/stories/ARCH-1/ARCH-1.epic-individual-table-refactor.md` | 🚀 Ready for Sprint |
+
+### Knowledge Base Epics
+
+| Epic | Document | Status |
+|------|----------|--------|
+| KB-1 | `docs/stories/KB-1/KB-1.epic-potus-data.md` | ✅ Complete |
+| KB-2 | `docs/stories/KB-2/KB-2.epic-presidential-administrations.md` | 📋 Draft (Blocked by ARCH-1) |
 
 ### Phase Completion Summaries
 
@@ -1121,6 +1231,7 @@ Based on business requirements document objectives:
 | 2026-01-04 | 4.0 | **UI-6 Epic APPROVED**: Executive Branch Hierarchical Navigation - 4 stories (12 pts) adding 6 sub-sections (President, VP, EOP, Cabinet, Independent Agencies, Corporations); includes backend enum extension for GOVERNMENT_CORPORATION; User Experience Track status updated to IN PROGRESS |
 | 2026-01-05 | 4.1 | **UI-6 Epic COMPLETE**: All 4 stories done - Backend GOVERNMENT_CORPORATION enum (V29 migration), sidebar expansion (6 sub-sections with icons), Executive Branch hub page (Article II reference, 6 nav cards), 6 sub-section pages (President, VP, EOP, Cabinet, Independent Agencies, Corporations); 54 new tests; 623 frontend tests passing, 590 backend tests passing |
 | 2026-01-07 | 4.2 | **KB-1 Epic COMPLETE**: All 6 stories done - Presidency and ExecutiveOrder entities (V30-V33 migrations), Person/term separation for non-consecutive terms (Cleveland 22/24, Trump 45/47), Presidential data sync from seed file (47 presidencies), Executive Orders sync from Federal Register API, Admin sync UI, KB President page with historical table; 18 backend tests for EO sync, 49 frontend tests for KB page |
+| 2026-01-08 | 4.3 | **New Tracks Added**: Architecture Track (ARCH-1) and Knowledge Base Track (KB-1, KB-2). **ARCH-1 Epic APPROVED**: Individual Table Refactor (36 pts, 9 stories) - separates universal person data from role-specific data (Person → Individual + CongressionalMember); approved by Winston with 7 modifications. **KB-2 Epic DRAFTED**: Presidential Administrations (24 pts, 7 stories) - consolidates President/VP pages into unified administrations view; blocked by ARCH-1. KB-1 moved from Factbase Expansion to Knowledge Base Track. |
 
 ---
 
