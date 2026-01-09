@@ -2,7 +2,7 @@
 
 ## Status
 
-**Status:** Draft
+**Status:** Complete
 **Priority:** P0 (Critical Path)
 **Estimate:** 3 story points
 **Phase:** 1
@@ -17,51 +17,51 @@
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| AC1 | `Individual` JPA entity created with all core biographical fields | |
-| AC2 | Flyway migration `V34__create_individuals_table.sql` creates table | |
-| AC3 | `IndividualRepository` with standard CRUD + `findByFirstNameAndLastName` | |
-| AC4 | Indexes on `(first_name, last_name)` and `birth_date` | |
-| AC5 | Entity includes `external_ids` JSONB for cross-referencing | |
-| AC6 | Entity includes `party` field for current/primary affiliation (MOD-2) | |
-| AC7 | Entity includes `primary_data_source` for provenance tracking (MOD-3) | |
-| AC8 | Composite unique constraint on `(first_name, last_name, birth_date)` for deduplication (MOD-1) | |
-| AC9 | Unit tests for entity and repository | |
+| AC1 | `Individual` JPA entity created with all core biographical fields | ✅ |
+| AC2 | Flyway migration `V34__create_individuals_table.sql` creates table | ✅ |
+| AC3 | `IndividualRepository` with standard CRUD + `findByFirstNameAndLastName` | ✅ |
+| AC4 | Indexes on `(first_name, last_name)` and `birth_date` | ✅ |
+| AC5 | Entity includes `external_ids` JSONB for cross-referencing | ✅ |
+| AC6 | Entity includes `party` field for current/primary affiliation (MOD-2) | ✅ |
+| AC7 | Entity includes `primary_data_source` for provenance tracking (MOD-3) | ✅ |
+| AC8 | Composite unique constraint on `(first_name, last_name, birth_date)` for deduplication (MOD-1) | ✅ |
+| AC9 | Unit tests for entity and repository | ✅ |
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Create Individual Entity** (AC1, AC5, AC6, AC7)
-  - [ ] Create `backend/src/main/java/org/newsanalyzer/model/Individual.java`
-  - [ ] Add core biographical fields: `firstName`, `lastName`, `middleName`, `suffix`
-  - [ ] Add date fields: `birthDate`, `deathDate`
-  - [ ] Add other fields: `birthPlace`, `gender`, `imageUrl`
-  - [ ] Add `party` field (VARCHAR 50, nullable) for current/primary affiliation
-  - [ ] Add `externalIds` JSONB field for cross-referencing
-  - [ ] Add `socialMedia` JSONB field
-  - [ ] Add `primaryDataSource` enum field (DataSource)
-  - [ ] Add audit fields: `createdAt`, `updatedAt`
-  - [ ] Add `@PrePersist` and `@PreUpdate` lifecycle callbacks
-  - [ ] Add helper methods: `getFullName()`, `isLiving()`
+- [x] **Task 1: Create Individual Entity** (AC1, AC5, AC6, AC7)
+  - [x] Create `backend/src/main/java/org/newsanalyzer/model/Individual.java`
+  - [x] Add core biographical fields: `firstName`, `lastName`, `middleName`, `suffix`
+  - [x] Add date fields: `birthDate`, `deathDate`
+  - [x] Add other fields: `birthPlace`, `gender`, `imageUrl`
+  - [x] Add `party` field (VARCHAR 50, nullable) for current/primary affiliation
+  - [x] Add `externalIds` JSONB field for cross-referencing
+  - [x] Add `socialMedia` JSONB field
+  - [x] Add `primaryDataSource` enum field (DataSource)
+  - [x] Add audit fields: `createdAt`, `updatedAt`
+  - [x] Add `@PrePersist` and `@PreUpdate` lifecycle callbacks
+  - [x] Add helper methods: `getFullName()`, `isLiving()`
 
-- [ ] **Task 2: Create Flyway Migration** (AC2, AC4, AC8)
-  - [ ] Create `backend/src/main/resources/db/migration/V34__create_individuals_table.sql`
-  - [ ] Define table with all columns and proper types
-  - [ ] Add index `idx_individuals_name` on `(first_name, last_name)`
-  - [ ] Add index `idx_individuals_birth_date` on `birth_date`
-  - [ ] Add partial unique index `idx_individuals_unique_person` on `(LOWER(first_name), LOWER(last_name), birth_date)` WHERE `birth_date IS NOT NULL`
+- [x] **Task 2: Create Flyway Migration** (AC2, AC4, AC8)
+  - [x] Create `backend/src/main/resources/db/migration/V34__create_individuals_table.sql`
+  - [x] Define table with all columns and proper types
+  - [x] Add index `idx_individuals_name` on `(first_name, last_name)`
+  - [x] Add index `idx_individuals_birth_date` on `birth_date`
+  - [x] Add partial unique index `idx_individuals_unique_person` on `(LOWER(first_name), LOWER(last_name), birth_date)` WHERE `birth_date IS NOT NULL`
 
-- [ ] **Task 3: Create Repository** (AC3)
-  - [ ] Create `backend/src/main/java/org/newsanalyzer/repository/IndividualRepository.java`
-  - [ ] Extend `JpaRepository<Individual, UUID>`
-  - [ ] Add `findByFirstNameAndLastName(String firstName, String lastName)` method
-  - [ ] Add `findByFirstNameAndLastNameAndBirthDate(String firstName, String lastName, LocalDate birthDate)` method
-  - [ ] Add `findByFirstNameIgnoreCaseAndLastNameIgnoreCase(String firstName, String lastName)` method
+- [x] **Task 3: Create Repository** (AC3)
+  - [x] Create `backend/src/main/java/org/newsanalyzer/repository/IndividualRepository.java`
+  - [x] Extend `JpaRepository<Individual, UUID>`
+  - [x] Add `findByFirstNameAndLastName(String firstName, String lastName)` method
+  - [x] Add `findByFirstNameAndLastNameAndBirthDate(String firstName, String lastName, LocalDate birthDate)` method
+  - [x] Add `findByFirstNameIgnoreCaseAndLastNameIgnoreCase(String firstName, String lastName)` method
 
-- [ ] **Task 4: Write Tests** (AC9)
-  - [ ] Create `IndividualRepositoryTest.java` with Testcontainers
-  - [ ] Test entity persistence and retrieval
-  - [ ] Test `findByFirstNameAndLastName` query
-  - [ ] Test unique constraint violation handling
-  - [ ] Test JSONB field storage/retrieval
+- [x] **Task 4: Write Tests** (AC9)
+  - [x] Create `IndividualRepositoryTest.java` with Testcontainers
+  - [x] Test entity persistence and retrieval
+  - [x] Test `findByFirstNameAndLastName` query
+  - [x] Test unique constraint violation handling
+  - [x] Test JSONB field storage/retrieval
 
 ## Dev Notes
 
@@ -145,16 +145,26 @@ WHERE birth_date IS NOT NULL;
 ## Dev Agent Record
 
 ### Agent Model Used
-*To be populated during implementation*
+Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-*To be populated during implementation*
+- Fixed pre-existing Lombok annotation processing issues by adding maven-compiler-plugin config
+- Fixed `@Entity` annotation conflict with `org.newsanalyzer.model.Entity` class
 
 ### Completion Notes List
-*To be populated during implementation*
+- All 27 repository tests pass
+- Entity uses `@jakarta.persistence.Entity` to avoid conflict with Entity model class
+- Partial unique index uses LOWER() for case-insensitive deduplication
+- Added additional repository methods: `searchByName`, `findByBioguideId`, `findByExternalId`
 
 ### File List
-*To be populated during implementation*
+| File | Action |
+|------|--------|
+| `backend/src/main/java/org/newsanalyzer/model/Individual.java` | Created |
+| `backend/src/main/resources/db/migration/V34__create_individuals_table.sql` | Created |
+| `backend/src/main/java/org/newsanalyzer/repository/IndividualRepository.java` | Created |
+| `backend/src/test/java/org/newsanalyzer/repository/IndividualRepositoryTest.java` | Created |
+| `backend/pom.xml` | Modified (added maven-compiler-plugin for Lombok) |
 
 ## QA Results
 *To be populated after QA review*
