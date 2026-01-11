@@ -26,11 +26,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Entity representing a committee membership - the link between a Person and a Committee.
+ * Entity representing a committee membership - the link between a CongressionalMember and a Committee.
  *
  * Tracks which members serve on which committees, with their role and congressional session.
  *
  * Data Source: Congress.gov API
+ *
+ * Part of ARCH-1.5: Updated to reference CongressionalMember instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -39,8 +41,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "committee_memberships",
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_person_committee_congress",
-                columnNames = {"person_id", "committee_code", "congress"}
+                name = "uq_member_committee_congress",
+                columnNames = {"congressional_member_id", "committee_code", "congress"}
         ))
 @Data
 @NoArgsConstructor
@@ -59,11 +61,11 @@ public class CommitteeMembership {
     // =====================================================================
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "person_id", nullable = false)
-    @NotNull(message = "Person is required")
+    @JoinColumn(name = "congressional_member_id", nullable = false)
+    @NotNull(message = "Congressional member is required")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Person person;
+    private CongressionalMember congressionalMember;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "committee_code", nullable = false)
@@ -173,10 +175,10 @@ public class CommitteeMembership {
     }
 
     /**
-     * Get person's BioGuide ID (convenience method)
+     * Get member's BioGuide ID (convenience method)
      */
-    public String getPersonBioguideId() {
-        return person != null ? person.getBioguideId() : null;
+    public String getMemberBioguideId() {
+        return congressionalMember != null ? congressionalMember.getBioguideId() : null;
     }
 
     /**

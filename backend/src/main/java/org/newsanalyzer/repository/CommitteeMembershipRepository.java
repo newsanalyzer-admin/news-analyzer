@@ -16,7 +16,7 @@ import java.util.UUID;
 /**
  * Repository for CommitteeMembership entity.
  *
- * Provides queries for the person-committee join table.
+ * Provides queries for the congressional member-committee join table.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -29,45 +29,45 @@ public interface CommitteeMembershipRepository extends JpaRepository<CommitteeMe
     // =====================================================================
 
     /**
-     * Find membership by person, committee, and congress
+     * Find membership by congressional member, committee, and congress
      */
-    Optional<CommitteeMembership> findByPerson_IdAndCommittee_CommitteeCodeAndCongress(
-            UUID personId, String committeeCode, Integer congress);
+    Optional<CommitteeMembership> findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(
+            UUID congressionalMemberId, String committeeCode, Integer congress);
 
     /**
      * Check if membership exists
      */
-    boolean existsByPerson_IdAndCommittee_CommitteeCodeAndCongress(
-            UUID personId, String committeeCode, Integer congress);
+    boolean existsByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(
+            UUID congressionalMemberId, String committeeCode, Integer congress);
 
     // =====================================================================
-    // By Person
+    // By Congressional Member
     // =====================================================================
 
     /**
-     * Find all memberships for a person
+     * Find all memberships for a congressional member
      */
-    List<CommitteeMembership> findByPerson_Id(UUID personId);
+    List<CommitteeMembership> findByCongressionalMember_Id(UUID congressionalMemberId);
 
     /**
-     * Find all memberships for a person by BioGuide ID
+     * Find all memberships for a member by BioGuide ID
      */
-    List<CommitteeMembership> findByPerson_BioguideId(String bioguideId);
+    List<CommitteeMembership> findByCongressionalMember_BioguideId(String bioguideId);
 
     /**
-     * Find all memberships for a person by BioGuide ID with pagination
+     * Find all memberships for a member by BioGuide ID with pagination
      */
-    Page<CommitteeMembership> findByPerson_BioguideId(String bioguideId, Pageable pageable);
+    Page<CommitteeMembership> findByCongressionalMember_BioguideId(String bioguideId, Pageable pageable);
 
     /**
-     * Find memberships for a person in a specific congress
+     * Find memberships for a member in a specific congress
      */
-    List<CommitteeMembership> findByPerson_BioguideIdAndCongress(String bioguideId, Integer congress);
+    List<CommitteeMembership> findByCongressionalMember_BioguideIdAndCongress(String bioguideId, Integer congress);
 
     /**
-     * Count committees a person serves on in a congress
+     * Count committees a member serves on in a congress
      */
-    long countByPerson_BioguideIdAndCongress(String bioguideId, Integer congress);
+    long countByCongressionalMember_BioguideIdAndCongress(String bioguideId, Integer congress);
 
     // =====================================================================
     // By Committee
@@ -115,9 +115,9 @@ public interface CommitteeMembershipRepository extends JpaRepository<CommitteeMe
             String committeeCode, MembershipRole role, Integer congress);
 
     /**
-     * Find all leadership roles for a person
+     * Find all leadership roles for a member
      */
-    @Query("SELECT m FROM CommitteeMembership m WHERE m.person.bioguideId = :bioguideId " +
+    @Query("SELECT m FROM CommitteeMembership m WHERE m.congressionalMember.bioguideId = :bioguideId " +
            "AND m.role IN (org.newsanalyzer.model.MembershipRole.CHAIR, " +
            "org.newsanalyzer.model.MembershipRole.VICE_CHAIR, " +
            "org.newsanalyzer.model.MembershipRole.RANKING_MEMBER)")
@@ -157,9 +157,9 @@ public interface CommitteeMembershipRepository extends JpaRepository<CommitteeMe
             @Param("congress") Integer congress);
 
     /**
-     * Get committees a person chairs in a congress
+     * Get committees a member chairs in a congress
      */
-    @Query("SELECT m FROM CommitteeMembership m WHERE m.person.bioguideId = :bioguideId " +
+    @Query("SELECT m FROM CommitteeMembership m WHERE m.congressionalMember.bioguideId = :bioguideId " +
            "AND m.congress = :congress AND m.role = org.newsanalyzer.model.MembershipRole.CHAIR")
     List<CommitteeMembership> findChairPositionsByBioguideIdAndCongress(
             @Param("bioguideId") String bioguideId,
