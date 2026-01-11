@@ -53,24 +53,24 @@ public interface PresidencyRepository extends JpaRepository<Presidency, UUID> {
     List<Presidency> findByEndDateIsNull();
 
     // =====================================================================
-    // By Person (for non-consecutive terms)
+    // By Individual (for non-consecutive terms)
     // =====================================================================
 
     /**
-     * Find all presidencies for a given person (handles non-consecutive terms).
+     * Find all presidencies for a given individual (handles non-consecutive terms).
      * E.g., Cleveland (22nd & 24th) or Trump (45th & 47th).
      */
-    List<Presidency> findByPersonId(UUID personId);
+    List<Presidency> findByIndividualId(UUID individualId);
 
     /**
-     * Find all presidencies for a given person ordered by number.
+     * Find all presidencies for a given individual ordered by number.
      */
-    List<Presidency> findByPersonIdOrderByNumberAsc(UUID personId);
+    List<Presidency> findByIndividualIdOrderByNumberAsc(UUID individualId);
 
     /**
-     * Count presidencies for a given person.
+     * Count presidencies for a given individual.
      */
-    long countByPersonId(UUID personId);
+    long countByIndividualId(UUID individualId);
 
     // =====================================================================
     // Ordered Lists

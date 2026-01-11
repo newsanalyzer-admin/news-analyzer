@@ -1,7 +1,7 @@
 package org.newsanalyzer.repository;
 
+import org.newsanalyzer.model.CongressionalMember.Chamber;
 import org.newsanalyzer.model.DataSource;
-import org.newsanalyzer.model.Person.Chamber;
 import org.newsanalyzer.model.PositionHolding;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,14 +25,14 @@ import java.util.UUID;
 public interface PositionHoldingRepository extends JpaRepository<PositionHolding, UUID> {
 
     // =====================================================================
-    // Person-based queries
+    // Individual-based queries
     // =====================================================================
 
-    List<PositionHolding> findByPersonId(UUID personId);
+    List<PositionHolding> findByIndividualId(UUID individualId);
 
-    Page<PositionHolding> findByPersonId(UUID personId, Pageable pageable);
+    Page<PositionHolding> findByIndividualId(UUID individualId, Pageable pageable);
 
-    List<PositionHolding> findByPersonIdOrderByStartDateDesc(UUID personId);
+    List<PositionHolding> findByIndividualIdOrderByStartDateDesc(UUID individualId);
 
     // =====================================================================
     // Position-based queries
@@ -57,12 +57,12 @@ public interface PositionHoldingRepository extends JpaRepository<PositionHolding
     // =====================================================================
 
     /**
-     * Find all holdings for a person that were active on a specific date
+     * Find all holdings for an individual that were active on a specific date
      */
-    @Query("SELECT h FROM PositionHolding h WHERE h.personId = :personId " +
+    @Query("SELECT h FROM PositionHolding h WHERE h.individualId = :individualId " +
             "AND h.startDate <= :date AND (h.endDate IS NULL OR h.endDate >= :date)")
-    List<PositionHolding> findByPersonIdAndActiveOnDate(
-            @Param("personId") UUID personId,
+    List<PositionHolding> findByIndividualIdAndActiveOnDate(
+            @Param("individualId") UUID individualId,
             @Param("date") LocalDate date);
 
     /**
@@ -112,20 +112,20 @@ public interface PositionHoldingRepository extends JpaRepository<PositionHolding
     // =====================================================================
 
     /**
-     * Check if a holding exists for person, position, and congress
+     * Check if a holding exists for individual, position, and congress
      */
     @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM PositionHolding h " +
-            "WHERE h.personId = :personId AND h.positionId = :positionId AND h.congress = :congress")
-    boolean existsByPersonPositionCongress(
-            @Param("personId") UUID personId,
+            "WHERE h.individualId = :individualId AND h.positionId = :positionId AND h.congress = :congress")
+    boolean existsByIndividualPositionCongress(
+            @Param("individualId") UUID individualId,
             @Param("positionId") UUID positionId,
             @Param("congress") Integer congress);
 
     /**
      * Find existing holding for upsert
      */
-    Optional<PositionHolding> findByPersonIdAndPositionIdAndCongress(
-            UUID personId, UUID positionId, Integer congress);
+    Optional<PositionHolding> findByIndividualIdAndPositionIdAndCongress(
+            UUID individualId, UUID positionId, Integer congress);
 
     // =====================================================================
     // Chamber-based queries (via position join)
@@ -176,25 +176,25 @@ public interface PositionHoldingRepository extends JpaRepository<PositionHolding
     // =====================================================================
 
     /**
-     * Find current holding for a person in a position (no end date)
+     * Find current holding for an individual in a position (no end date)
      * Used for PLUM upsert - executive positions don't have congress numbers
      */
-    @Query("SELECT h FROM PositionHolding h WHERE h.personId = :personId " +
+    @Query("SELECT h FROM PositionHolding h WHERE h.individualId = :individualId " +
             "AND h.positionId = :positionId AND h.endDate IS NULL")
-    Optional<PositionHolding> findCurrentByPersonIdAndPositionId(
-            @Param("personId") UUID personId,
+    Optional<PositionHolding> findCurrentByIndividualIdAndPositionId(
+            @Param("individualId") UUID individualId,
             @Param("positionId") UUID positionId);
 
     /**
-     * Find all holdings by person and position
+     * Find all holdings by individual and position
      */
-    List<PositionHolding> findByPersonIdAndPositionId(UUID personId, UUID positionId);
+    List<PositionHolding> findByIndividualIdAndPositionId(UUID individualId, UUID positionId);
 
     /**
-     * Find holding by person, position, and start date (for FJC upsert)
+     * Find holding by individual, position, and start date (for FJC upsert)
      */
-    Optional<PositionHolding> findByPersonIdAndPositionIdAndStartDate(
-            UUID personId, UUID positionId, LocalDate startDate);
+    Optional<PositionHolding> findByIndividualIdAndPositionIdAndStartDate(
+            UUID individualId, UUID positionId, LocalDate startDate);
 
     /**
      * Find holdings by data source

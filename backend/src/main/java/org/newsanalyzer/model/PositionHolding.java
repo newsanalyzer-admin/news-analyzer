@@ -23,7 +23,7 @@ import java.util.UUID;
 @jakarta.persistence.Entity
 @Table(name = "position_holdings",
         indexes = {
-                @Index(name = "idx_holding_person", columnList = "person_id"),
+                @Index(name = "idx_holding_individual", columnList = "individual_id"),
                 @Index(name = "idx_holding_position", columnList = "position_id"),
                 @Index(name = "idx_holding_dates", columnList = "start_date, end_date"),
                 @Index(name = "idx_holding_congress", columnList = "congress"),
@@ -45,14 +45,14 @@ public class PositionHolding {
     // Relationships
     // =====================================================================
 
-    @Column(name = "person_id", nullable = false)
-    @NotNull(message = "Person ID is required")
-    private UUID personId;
+    @Column(name = "individual_id", nullable = false)
+    @NotNull(message = "Individual ID is required")
+    private UUID individualId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", insertable = false, updatable = false)
+    @JoinColumn(name = "individual_id", insertable = false, updatable = false)
     @JsonIgnore
-    private Person person;
+    private Individual individual;
 
     @Column(name = "position_id", nullable = false)
     @NotNull(message = "Position ID is required")

@@ -24,7 +24,7 @@ import java.util.UUID;
 @jakarta.persistence.Entity
 @Table(name = "presidencies",
         indexes = {
-                @Index(name = "idx_presidency_person", columnList = "person_id"),
+                @Index(name = "idx_presidency_individual", columnList = "individual_id"),
                 @Index(name = "idx_presidency_number", columnList = "number"),
                 @Index(name = "idx_presidency_dates", columnList = "start_date, end_date")
         },
@@ -47,14 +47,14 @@ public class Presidency {
     // Relationships
     // =====================================================================
 
-    @Column(name = "person_id", nullable = false)
-    @NotNull(message = "Person ID is required")
-    private UUID personId;
+    @Column(name = "individual_id", nullable = false)
+    @NotNull(message = "Individual ID is required")
+    private UUID individualId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", insertable = false, updatable = false)
+    @JoinColumn(name = "individual_id", insertable = false, updatable = false)
     @JsonIgnore
-    private Person person;
+    private Individual individual;
 
     /**
      * Reference to the previous presidency (null for #1 Washington).
