@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.newsanalyzer.dto.MemberDTO;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CongressionalMember;
@@ -16,10 +17,12 @@ import org.newsanalyzer.service.MemberSyncService;
 import org.newsanalyzer.service.LegislatorsEnrichmentService;
 import org.newsanalyzer.service.TermSyncService;
 import org.newsanalyzer.scheduler.EnrichmentScheduler;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST Controller for Congressional Member lookup.
@@ -59,19 +63,22 @@ public class MemberController {
     private final EnrichmentScheduler enrichmentScheduler;
     private final TermSyncService termSyncService;
     private final PositionHoldingRepository positionHoldingRepository;
+    private final CongressionalMemberRepository congressionalMemberRepository;
 
     public MemberController(MemberService memberService,
                            MemberSyncService memberSyncService,
                            CommitteeService committeeService,
                            EnrichmentScheduler enrichmentScheduler,
                            TermSyncService termSyncService,
-                           PositionHoldingRepository positionHoldingRepository) {
+                           PositionHoldingRepository positionHoldingRepository,
+                           CongressionalMemberRepository congressionalMemberRepository) {
         this.memberService = memberService;
         this.memberSyncService = memberSyncService;
         this.committeeService = committeeService;
         this.enrichmentScheduler = enrichmentScheduler;
         this.termSyncService = termSyncService;
         this.positionHoldingRepository = positionHoldingRepository;
+        this.congressionalMemberRepository = congressionalMemberRepository;
     }
 
     // =====================================================================
@@ -84,9 +91,20 @@ public class MemberController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List of members returned")
     })
-    public ResponseEntity<Page<CongressionalMember>> listAll(Pageable pageable) {
-        Page<CongressionalMember> members = memberService.findAll(pageable);
-        return ResponseEntity.ok(members);
+    public ResponseEntity<Page<MemberDTO>> listAll(Pageable pageable) {
+        // Get all members with individuals eagerly loaded, then paginate
+        List<CongressionalMember> allMembers = memberService.findAllWithIndividual();
+        List<MemberDTO> dtos = allMembers.stream()
+                .map(MemberDTO::from)
+                .collect(Collectors.toList());
+
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), dtos.size());
+        List<MemberDTO> pageContent = start < dtos.size() ? dtos.subList(start, end) : List.of();
+
+        Page<MemberDTO> page = new PageImpl<>(pageContent, pageable, dtos.size());
+        return ResponseEntity.ok(page);
     }
 
     // =====================================================================
@@ -100,10 +118,11 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Member found"),
         @ApiResponse(responseCode = "404", description = "Member not found")
     })
-    public ResponseEntity<CongressionalMember> getByBioguideId(
+    public ResponseEntity<MemberDTO> getByBioguideId(
             @Parameter(description = "BioGuide ID (e.g., S000033 for Bernie Sanders)")
             @PathVariable String bioguideId) {
-        return memberService.findByBioguideId(bioguideId)
+        return memberService.findByBioguideIdWithIndividual(bioguideId)
+                .map(MemberDTO::from)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found: " + bioguideId));
     }
@@ -118,7 +137,7 @@ public class MemberController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search results returned")
     })
-    public ResponseEntity<Page<CongressionalMember>> searchByName(
+    public ResponseEntity<Page<MemberDTO>> searchByName(
             @Parameter(description = "Name to search for")
             @RequestParam String name,
             Pageable pageable) {
@@ -126,7 +145,13 @@ public class MemberController {
             return ResponseEntity.badRequest().build();
         }
         Page<CongressionalMember> members = memberService.searchByName(name.trim(), pageable);
-        return ResponseEntity.ok(members);
+        // Convert to DTOs - need to load individuals
+        List<MemberDTO> dtos = members.getContent().stream()
+                .map(m -> congressionalMemberRepository.findByIdWithIndividual(m.getId()).orElse(m))
+                .map(MemberDTO::from)
+                .collect(Collectors.toList());
+        Page<MemberDTO> dtoPage = new PageImpl<>(dtos, pageable, members.getTotalElements());
+        return ResponseEntity.ok(dtoPage);
     }
 
     // =====================================================================
@@ -140,15 +165,26 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Members from state returned"),
         @ApiResponse(responseCode = "400", description = "Invalid state code")
     })
-    public ResponseEntity<Page<CongressionalMember>> getByState(
+    public ResponseEntity<Page<MemberDTO>> getByState(
             @Parameter(description = "2-letter state code (e.g., CA, TX, NY)")
             @PathVariable String state,
             Pageable pageable) {
         if (state == null || state.length() != 2) {
             return ResponseEntity.badRequest().build();
         }
-        Page<CongressionalMember> members = memberService.findByState(state.toUpperCase(), pageable);
-        return ResponseEntity.ok(members);
+        // Use eager loading query
+        List<CongressionalMember> members = congressionalMemberRepository.findByStateWithIndividual(state.toUpperCase());
+        List<MemberDTO> dtos = members.stream()
+                .map(MemberDTO::from)
+                .collect(Collectors.toList());
+
+        // Apply pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), dtos.size());
+        List<MemberDTO> pageContent = start < dtos.size() ? dtos.subList(start, end) : List.of();
+
+        Page<MemberDTO> page = new PageImpl<>(pageContent, pageable, dtos.size());
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/by-chamber/{chamber}")
@@ -158,14 +194,25 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Members from chamber returned"),
         @ApiResponse(responseCode = "400", description = "Invalid chamber")
     })
-    public ResponseEntity<Page<CongressionalMember>> getByChamber(
+    public ResponseEntity<Page<MemberDTO>> getByChamber(
             @Parameter(description = "Chamber: SENATE or HOUSE")
             @PathVariable String chamber,
             Pageable pageable) {
         try {
             Chamber chamberEnum = Chamber.valueOf(chamber.toUpperCase());
-            Page<CongressionalMember> members = memberService.findByChamber(chamberEnum, pageable);
-            return ResponseEntity.ok(members);
+            // Use eager loading query
+            List<CongressionalMember> members = congressionalMemberRepository.findByChamberWithIndividual(chamberEnum);
+            List<MemberDTO> dtos = members.stream()
+                    .map(MemberDTO::from)
+                    .collect(Collectors.toList());
+
+            // Apply pagination
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), dtos.size());
+            List<MemberDTO> pageContent = start < dtos.size() ? dtos.subList(start, end) : List.of();
+
+            Page<MemberDTO> page = new PageImpl<>(pageContent, pageable, dtos.size());
+            return ResponseEntity.ok(page);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid chamber: {}", chamber);
             return ResponseEntity.badRequest().build();
@@ -209,7 +256,7 @@ public class MemberController {
         @ApiResponse(responseCode = "400", description = "Invalid ID type"),
         @ApiResponse(responseCode = "404", description = "Member not found")
     })
-    public ResponseEntity<CongressionalMember> getByExternalId(
+    public ResponseEntity<MemberDTO> getByExternalId(
             @Parameter(description = "External ID type: fec, govtrack, opensecrets, votesmart")
             @PathVariable String type,
             @Parameter(description = "External ID value")
@@ -217,6 +264,8 @@ public class MemberController {
         log.debug("Looking up member by external ID: type={}, id={}", type, id);
 
         return memberService.findByExternalId(type, id)
+                .map(m -> congressionalMemberRepository.findByIdWithIndividual(m.getId()).orElse(m))
+                .map(MemberDTO::from)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("Member not found with %s ID: %s", type, id)));

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.model.*;
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Person.Chamber;
 import org.newsanalyzer.repository.GovernmentPositionRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;
 import org.springframework.stereotype.Service;

@@ -11,11 +11,13 @@ import java.util.UUID;
 /**
  * DTO for federal judge information.
  *
- * Combines data from Person, GovernmentPosition, PositionHolding, and GovernmentOrganization
+ * Combines data from Individual, GovernmentPosition, PositionHolding, and GovernmentOrganization
  * to provide a complete view of a federal judge.
  *
+ * Part of ARCH-1.7: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
- * @since 2.0.0
+ * @since 3.0.0
  */
 @Data
 @Builder
@@ -77,26 +79,27 @@ public class JudgeDTO {
     /**
      * Create JudgeDTO from entity objects.
      *
-     * @param person The person (judge)
+     * @param individual The individual (judge biographical data)
      * @param position The government position (judgeship)
      * @param holding The position holding record
      * @param court The court organization
      * @return JudgeDTO
      */
-    public static JudgeDTO from(Person person, GovernmentPosition position,
+    public static JudgeDTO from(Individual individual, GovernmentPosition position,
                                 PositionHolding holding, GovernmentOrganization court) {
         JudgeDTOBuilder builder = JudgeDTO.builder();
 
-        // Person fields
-        if (person != null) {
-            builder.id(person.getId())
-                   .firstName(person.getFirstName())
-                   .middleName(person.getMiddleName())
-                   .lastName(person.getLastName())
-                   .suffix(person.getSuffix())
-                   .fullName(person.getFullName())
-                   .gender(person.getGender())
-                   .birthDate(person.getBirthDate());
+        // Individual fields (biographical)
+        if (individual != null) {
+            builder.id(individual.getId())
+                   .firstName(individual.getFirstName())
+                   .middleName(individual.getMiddleName())
+                   .lastName(individual.getLastName())
+                   .suffix(individual.getSuffix())
+                   .fullName(individual.getFullName())
+                   .gender(individual.getGender())
+                   .birthDate(individual.getBirthDate())
+                   .deathDate(individual.getDeathDate());
         }
 
         // Position/Court fields

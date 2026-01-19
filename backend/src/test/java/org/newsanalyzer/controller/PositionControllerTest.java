@@ -71,7 +71,7 @@ class PositionControllerTest {
 
         testHolding = PositionHolding.builder()
                 .id(UUID.randomUUID())
-                .personId(UUID.randomUUID())
+                .individualId(UUID.randomUUID())
                 .positionId(testPosition.getId())
                 .startDate(LocalDate.of(2023, 1, 3))
                 .endDate(null)

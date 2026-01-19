@@ -318,8 +318,7 @@ class IndividualServiceTest {
         when(individualRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndBirthDate(
                 "John", "Smith", testBirthDate))
                 .thenReturn(Optional.empty());
-        when(individualRepository.findByFirstNameIgnoreCaseAndLastNameIgnoreCase("John", "Smith"))
-                .thenReturn(Collections.emptyList());
+        // Note: findByFirstNameIgnoreCaseAndLastNameIgnoreCase not stubbed because birthDate is provided
 
         Individual newIndividual = Individual.builder()
                 .firstName("John")

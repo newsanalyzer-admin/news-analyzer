@@ -6,8 +6,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.dto.*;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.model.Person;
 import org.newsanalyzer.model.Regulation;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.RegulationRepository;
 import org.newsanalyzer.service.FederalRegisterImportService;
@@ -41,6 +44,7 @@ public class AdminImportController {
     private static final Logger log = LoggerFactory.getLogger(AdminImportController.class);
 
     private final MemberSyncService memberSyncService;
+    private final CongressionalMemberRepository congressionalMemberRepository;
     private final PersonRepository personRepository;
     private final FederalRegisterImportService federalRegisterImportService;
     private final RegulationRepository regulationRepository;
@@ -48,12 +52,14 @@ public class AdminImportController {
     private final LegislatorsSearchService legislatorsSearchService;
 
     public AdminImportController(MemberSyncService memberSyncService,
+                                  CongressionalMemberRepository congressionalMemberRepository,
                                   PersonRepository personRepository,
                                   FederalRegisterImportService federalRegisterImportService,
                                   RegulationRepository regulationRepository,
                                   LegislatorEnrichmentImportService legislatorEnrichmentImportService,
                                   LegislatorsSearchService legislatorsSearchService) {
         this.memberSyncService = memberSyncService;
+        this.congressionalMemberRepository = congressionalMemberRepository;
         this.personRepository = personRepository;
         this.federalRegisterImportService = federalRegisterImportService;
         this.regulationRepository = regulationRepository;
@@ -92,17 +98,21 @@ public class AdminImportController {
                 bioguideId, request.isForceOverwrite());
 
         // Check if already exists
-        Optional<Person> existing = personRepository.findByBioguideId(bioguideId);
+        Optional<CongressionalMember> existing = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
         boolean wasNew = existing.isEmpty();
 
         if (existing.isPresent() && !request.isForceOverwrite()) {
             // Return existing record info
-            Person person = existing.get();
+            CongressionalMember member = existing.get();
+            Individual individual = member.getIndividual();
+            String name = individual != null
+                    ? individual.getFirstName() + " " + individual.getLastName()
+                    : "Unknown";
             return ResponseEntity.ok(
                     CongressImportResult.builder()
-                            .id(person.getId().toString())
-                            .bioguideId(person.getBioguideId())
-                            .name(person.getFirstName() + " " + person.getLastName())
+                            .id(member.getId().toString())
+                            .bioguideId(member.getBioguideId())
+                            .name(name)
                             .created(false)
                             .updated(false)
                             .error("Record already exists. Set forceOverwrite=true to update.")
@@ -111,9 +121,9 @@ public class AdminImportController {
         }
 
         // Sync from Congress.gov
-        Optional<Person> syncedPerson = memberSyncService.syncMemberByBioguideId(bioguideId);
+        Optional<CongressionalMember> syncedMember = memberSyncService.syncMemberByBioguideId(bioguideId);
 
-        if (syncedPerson.isEmpty()) {
+        if (syncedMember.isEmpty()) {
             return ResponseEntity.status(404).body(
                     CongressImportResult.builder()
                             .bioguideId(bioguideId)
@@ -122,12 +132,16 @@ public class AdminImportController {
             );
         }
 
-        Person person = syncedPerson.get();
+        CongressionalMember member = syncedMember.get();
+        Individual individual = member.getIndividual();
+        String name = individual != null
+                ? individual.getFirstName() + " " + individual.getLastName()
+                : "Unknown";
         return ResponseEntity.ok(
                 CongressImportResult.builder()
-                        .id(person.getId().toString())
-                        .bioguideId(person.getBioguideId())
-                        .name(person.getFirstName() + " " + person.getLastName())
+                        .id(member.getId().toString())
+                        .bioguideId(member.getBioguideId())
+                        .name(name)
                         .created(wasNew)
                         .updated(!wasNew)
                         .build()
@@ -144,14 +158,18 @@ public class AdminImportController {
             @Parameter(description = "BioGuide ID to check")
             @PathVariable String bioguideId
     ) {
-        Optional<Person> existing = personRepository.findByBioguideId(bioguideId);
+        Optional<CongressionalMember> existing = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
 
         if (existing.isPresent()) {
-            Person person = existing.get();
+            CongressionalMember member = existing.get();
+            Individual individual = member.getIndividual();
+            String name = individual != null
+                    ? individual.getFirstName() + " " + individual.getLastName()
+                    : "Unknown";
             return ResponseEntity.ok(new ExistsResponse(
                     true,
-                    person.getId().toString(),
-                    person.getFirstName() + " " + person.getLastName()
+                    member.getId().toString(),
+                    name
             ));
         }
 

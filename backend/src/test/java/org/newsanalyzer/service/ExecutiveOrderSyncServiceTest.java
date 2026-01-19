@@ -12,7 +12,7 @@ import org.newsanalyzer.dto.DocumentQueryParams;
 import org.newsanalyzer.dto.FederalRegisterDocument;
 import org.newsanalyzer.model.*;
 import org.newsanalyzer.repository.ExecutiveOrderRepository;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.repository.IndividualRepository;
 import org.newsanalyzer.repository.PresidencyRepository;
 
 import java.time.LocalDate;
@@ -25,8 +25,10 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for ExecutiveOrderSyncService.
  *
+ * Part of ARCH-1.7: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
- * @since 2.0.0
+ * @since 3.0.0
  */
 @ExtendWith(MockitoExtension.class)
 class ExecutiveOrderSyncServiceTest {
@@ -41,7 +43,7 @@ class ExecutiveOrderSyncServiceTest {
     private PresidencyRepository presidencyRepository;
 
     @Mock
-    private PersonRepository personRepository;
+    private IndividualRepository individualRepository;
 
     private ExecutiveOrderSyncService syncService;
 
@@ -51,7 +53,7 @@ class ExecutiveOrderSyncServiceTest {
                 federalRegisterClient,
                 executiveOrderRepository,
                 presidencyRepository,
-                personRepository
+                individualRepository
         );
     }
 
@@ -130,10 +132,10 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_processesAllPresidencies() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            // Setup 3 test presidencies
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            // Setup test presidency with Individual
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Donald")
                     .lastName("Trump")
                     .build();
@@ -142,12 +144,12 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(45)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(Collections.emptyList());
@@ -165,9 +167,9 @@ class ExecutiveOrderSyncServiceTest {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
             // Pre-FDR president (before 1933)
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Abraham")
                     .lastName("Lincoln")
                     .build();
@@ -176,12 +178,12 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(16)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
 
             ExecutiveOrderSyncService.SyncResult result = syncService.syncAllExecutiveOrders();
@@ -196,9 +198,9 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_createsNewEOs() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Joe")
                     .lastName("Biden")
                     .build();
@@ -207,7 +209,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(46)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             FederalRegisterDocument eoDoc = new FederalRegisterDocument();
@@ -221,7 +223,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(eoDoc));
@@ -251,9 +253,9 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_updatesExistingEOs() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Barack")
                     .lastName("Obama")
                     .build();
@@ -262,7 +264,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(44)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             FederalRegisterDocument eoDoc = new FederalRegisterDocument();
@@ -280,7 +282,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(eoDoc));
@@ -303,9 +305,9 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_skipsDocumentsWithoutEoNumber() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Donald")
                     .lastName("Trump")
                     .build();
@@ -314,7 +316,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(45)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             FederalRegisterDocument docWithoutEoNumber = new FederalRegisterDocument();
@@ -324,7 +326,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(docWithoutEoNumber));
@@ -362,9 +364,9 @@ class ExecutiveOrderSyncServiceTest {
         @Test
         @DisplayName("Should sync EOs for valid presidency")
         void syncForPresidency_validPresidency_syncsEOs() {
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Donald")
                     .lastName("Trump")
                     .build();
@@ -373,7 +375,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(45)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             FederalRegisterDocument eoDoc = new FederalRegisterDocument();
@@ -384,7 +386,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findByNumber(45))
                     .thenReturn(Optional.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(eoDoc));
@@ -404,9 +406,9 @@ class ExecutiveOrderSyncServiceTest {
         @Test
         @DisplayName("Should use correct Federal Register president identifier")
         void syncForPresidency_usesCorrectFederalRegisterName() {
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Joe")
                     .lastName("Biden")
                     .build();
@@ -415,12 +417,12 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(46)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             when(presidencyRepository.findByNumber(46))
                     .thenReturn(Optional.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(Collections.emptyList());
@@ -491,23 +493,23 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_handlesIndividualErrors() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId1 = UUID.randomUUID();
-            UUID personId2 = UUID.randomUUID();
+            UUID individualId1 = UUID.randomUUID();
+            UUID individualId2 = UUID.randomUUID();
 
             Presidency presidency1 = Presidency.builder()
                     .id(UUID.randomUUID())
                     .number(45)
-                    .personId(personId1)
+                    .individualId(individualId1)
                     .build();
 
             Presidency presidency2 = Presidency.builder()
                     .id(UUID.randomUUID())
                     .number(46)
-                    .personId(personId2)
+                    .individualId(individualId2)
                     .build();
 
-            Person president2 = Person.builder()
-                    .id(personId2)
+            Individual president2 = Individual.builder()
+                    .id(individualId2)
                     .firstName("Joe")
                     .lastName("Biden")
                     .build();
@@ -515,10 +517,10 @@ class ExecutiveOrderSyncServiceTest {
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(Arrays.asList(presidency1, presidency2));
             // First presidency throws error
-            when(personRepository.findById(personId1))
+            when(individualRepository.findById(individualId1))
                     .thenThrow(new RuntimeException("Database error"));
             // Second presidency succeeds
-            when(personRepository.findById(personId2))
+            when(individualRepository.findById(individualId2))
                     .thenReturn(Optional.of(president2));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(Collections.emptyList());
@@ -536,9 +538,9 @@ class ExecutiveOrderSyncServiceTest {
         void syncAllExecutiveOrders_handlesEoProcessingErrors() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Donald")
                     .lastName("Trump")
                     .build();
@@ -547,7 +549,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(45)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             FederalRegisterDocument eoDoc1 = new FederalRegisterDocument();
@@ -560,7 +562,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(Arrays.asList(eoDoc1, eoDoc2));
@@ -582,20 +584,20 @@ class ExecutiveOrderSyncServiceTest {
         }
 
         @Test
-        @DisplayName("Should skip presidency when person not found")
-        void syncAllExecutiveOrders_personNotFound_skipsPresidency() {
+        @DisplayName("Should skip presidency when individual not found")
+        void syncAllExecutiveOrders_individualNotFound_skipsPresidency() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
+            UUID individualId = UUID.randomUUID();
             Presidency presidency = Presidency.builder()
                     .id(UUID.randomUUID())
                     .number(45)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.empty());
 
             ExecutiveOrderSyncService.SyncResult result = syncService.syncAllExecutiveOrders();
@@ -619,9 +621,9 @@ class ExecutiveOrderSyncServiceTest {
         void createExecutiveOrder_truncatesLongTitles() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Barack")
                     .lastName("Obama")
                     .build();
@@ -630,7 +632,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(44)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             // Create a title longer than 500 chars
@@ -644,7 +646,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(eoDoc));
@@ -668,9 +670,9 @@ class ExecutiveOrderSyncServiceTest {
         void createExecutiveOrder_usesPublicationDateWhenSigningDateNull() {
             when(federalRegisterClient.isApiAvailable()).thenReturn(true);
 
-            UUID personId = UUID.randomUUID();
-            Person president = Person.builder()
-                    .id(personId)
+            UUID individualId = UUID.randomUUID();
+            Individual president = Individual.builder()
+                    .id(individualId)
                     .firstName("Joe")
                     .lastName("Biden")
                     .build();
@@ -679,7 +681,7 @@ class ExecutiveOrderSyncServiceTest {
             Presidency presidency = Presidency.builder()
                     .id(presidencyId)
                     .number(46)
-                    .personId(personId)
+                    .individualId(individualId)
                     .build();
 
             LocalDate pubDate = LocalDate.of(2021, 1, 22);
@@ -693,7 +695,7 @@ class ExecutiveOrderSyncServiceTest {
 
             when(presidencyRepository.findAllByOrderByNumberAsc())
                     .thenReturn(List.of(presidency));
-            when(personRepository.findById(personId))
+            when(individualRepository.findById(individualId))
                     .thenReturn(Optional.of(president));
             when(federalRegisterClient.fetchAllDocuments(any(DocumentQueryParams.class), anyInt()))
                     .thenReturn(List.of(eoDoc));

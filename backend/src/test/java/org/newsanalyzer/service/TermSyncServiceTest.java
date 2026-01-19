@@ -10,9 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsanalyzer.model.*;
-import org.newsanalyzer.model.Person.Chamber;
 import org.newsanalyzer.repository.GovernmentPositionRepository;
-import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;
 
 import java.time.LocalDate;
@@ -25,7 +23,10 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for TermSyncService.
  *
+ * Part of ARCH-1.7: Updated to use CongressionalMemberService instead of PersonRepository.
+ *
  * @author James (Dev Agent)
+ * @since 3.0.0
  */
 @ExtendWith(MockitoExtension.class)
 class TermSyncServiceTest {
@@ -34,7 +35,7 @@ class TermSyncServiceTest {
     private CongressApiClient congressApiClient;
 
     @Mock
-    private PersonRepository personRepository;
+    private CongressionalMemberService congressionalMemberService;
 
     @Mock
     private GovernmentPositionRepository positionRepository;
@@ -49,25 +50,24 @@ class TermSyncServiceTest {
     private TermSyncService termSyncService;
 
     private ObjectMapper objectMapper;
-    private Person testPerson;
+    private CongressionalMember testMember;
     private GovernmentPosition testPosition;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
 
-        testPerson = new Person();
-        testPerson.setId(UUID.randomUUID());
-        testPerson.setBioguideId("S000033");
-        testPerson.setFirstName("Bernard");
-        testPerson.setLastName("Sanders");
-        testPerson.setState("VT");
-        testPerson.setChamber(Chamber.SENATE);
+        testMember = new CongressionalMember();
+        testMember.setId(UUID.randomUUID());
+        testMember.setBioguideId("S000033");
+        testMember.setIndividualId(UUID.randomUUID());
+        testMember.setState("VT");
+        testMember.setChamber(CongressionalMember.Chamber.SENATE);
 
         testPosition = new GovernmentPosition();
         testPosition.setId(UUID.randomUUID());
         testPosition.setTitle("Senator");
-        testPosition.setChamber(Chamber.SENATE);
+        testPosition.setChamber(Person.Chamber.SENATE);
         testPosition.setState("VT");
         testPosition.setSenateClass(1);
         testPosition.setPositionType(PositionType.ELECTED);
@@ -97,11 +97,11 @@ class TermSyncServiceTest {
             """;
         JsonNode responseNode = objectMapper.readTree(apiResponse);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
-        when(holdingRepository.findByPersonIdAndPositionIdAndCongress(any(), any(), eq(118)))
+        when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
                 .thenReturn(Optional.empty());
         when(holdingRepository.save(any(PositionHolding.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -150,15 +150,15 @@ class TermSyncServiceTest {
 
         GovernmentPosition housePosition = new GovernmentPosition();
         housePosition.setId(UUID.randomUUID());
-        housePosition.setChamber(Chamber.HOUSE);
+        housePosition.setChamber(Person.Chamber.HOUSE);
         housePosition.setState("VT");
         housePosition.setDistrict(0);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndStateAndDistrict(Chamber.HOUSE, "VT", 0))
+        when(positionRepository.findByChamberAndStateAndDistrict(Person.Chamber.HOUSE, "VT", 0))
                 .thenReturn(Optional.of(housePosition));
-        when(holdingRepository.findByPersonIdAndPositionIdAndCongress(any(), any(), eq(102)))
+        when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(102)))
                 .thenReturn(Optional.empty());
         when(holdingRepository.save(any(PositionHolding.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -197,7 +197,7 @@ class TermSyncServiceTest {
 
         PositionHolding existingHolding = PositionHolding.builder()
                 .id(UUID.randomUUID())
-                .personId(testPerson.getId())
+                .individualId(testMember.getIndividualId())
                 .positionId(testPosition.getId())
                 .startDate(LocalDate.of(2023, 1, 3))
                 .endDate(null)  // Was current, now has end date
@@ -205,11 +205,11 @@ class TermSyncServiceTest {
                 .dataSource(DataSource.CONGRESS_GOV)
                 .build();
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
-        when(holdingRepository.findByPersonIdAndPositionIdAndCongress(any(), any(), eq(118)))
+        when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
                 .thenReturn(Optional.of(existingHolding));
         when(holdingRepository.save(any(PositionHolding.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -224,10 +224,10 @@ class TermSyncServiceTest {
     }
 
     @Test
-    @DisplayName("syncTermsForMember - Should return empty when person not found")
-    void syncTermsForMember_personNotFound_returnsEmpty() {
+    @DisplayName("syncTermsForMember - Should return empty when member not found")
+    void syncTermsForMember_memberNotFound_returnsEmpty() {
         // Given
-        when(personRepository.findByBioguideId("INVALID")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findByBioguideId("INVALID")).thenReturn(Optional.empty());
 
         // When
         TermSyncService.TermResult result = termSyncService.syncTermsForMember("INVALID");
@@ -242,7 +242,7 @@ class TermSyncServiceTest {
     @DisplayName("syncTermsForMember - Should return empty when API returns no data")
     void syncTermsForMember_apiEmpty_returnsEmpty() {
         // Given
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.empty());
 
         // When
@@ -257,16 +257,15 @@ class TermSyncServiceTest {
     @DisplayName("syncAllCurrentMemberTerms - Should process all members")
     void syncAllCurrentMemberTerms_processesAllMembers() throws Exception {
         // Given
-        Person member2 = new Person();
+        CongressionalMember member2 = new CongressionalMember();
         member2.setId(UUID.randomUUID());
         member2.setBioguideId("P000197");
-        member2.setFirstName("Nancy");
-        member2.setLastName("Pelosi");
+        member2.setIndividualId(UUID.randomUUID());
         member2.setState("CA");
-        member2.setChamber(Chamber.HOUSE);
+        member2.setChamber(CongressionalMember.Chamber.HOUSE);
 
-        when(personRepository.findAll()).thenReturn(List.of(testPerson, member2));
-        when(personRepository.findByBioguideId(anyString())).thenReturn(Optional.empty());
+        when(congressionalMemberService.findAll()).thenReturn(List.of(testMember, member2));
+        when(congressionalMemberService.findByBioguideId(anyString())).thenReturn(Optional.empty());
 
         // When
         TermSyncService.SyncResult result = termSyncService.syncAllCurrentMemberTerms();
@@ -300,11 +299,11 @@ class TermSyncServiceTest {
             """;
         JsonNode responseNode = objectMapper.readTree(apiResponse);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
-        when(holdingRepository.findByPersonIdAndPositionIdAndCongress(any(), any(), eq(119)))
+        when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(119)))
                 .thenReturn(Optional.empty());
         when(holdingRepository.save(any(PositionHolding.class)))
                 .thenAnswer(invocation -> {

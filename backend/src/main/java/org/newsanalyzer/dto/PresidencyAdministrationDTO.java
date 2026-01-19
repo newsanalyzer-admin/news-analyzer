@@ -37,6 +37,7 @@ public class PresidencyAdministrationDTO {
 
     /**
      * DTO for an officeholder (VP, CoS, etc.)
+     * Part of ARCH-1.7: Updated to use individualId instead of personId.
      */
     @Data
     @Builder
@@ -44,7 +45,7 @@ public class PresidencyAdministrationDTO {
     @AllArgsConstructor
     public static class OfficeholderDTO {
         private UUID holdingId;
-        private UUID personId;
+        private UUID individualId;
         private String fullName;
         private String firstName;
         private String lastName;
@@ -62,6 +63,7 @@ public class PresidencyAdministrationDTO {
 
     /**
      * DTO for Cabinet member information.
+     * Part of ARCH-1.7: Updated to use individualId instead of personId.
      */
     @Data
     @Builder
@@ -69,7 +71,7 @@ public class PresidencyAdministrationDTO {
     @AllArgsConstructor
     public static class CabinetMemberDTO {
         private UUID holdingId;
-        private UUID personId;
+        private UUID individualId;
         private String fullName;
         private String positionTitle;
         private String departmentName;

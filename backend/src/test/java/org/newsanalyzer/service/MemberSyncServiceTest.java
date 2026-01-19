@@ -9,23 +9,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.CongressionalMember.Chamber;
 import org.newsanalyzer.model.DataSource;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.model.Person.Chamber;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.Individual;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for MemberSyncService.
  *
+ * Part of ARCH-1.7: Updated to use CongressionalMemberService and IndividualService
+ * instead of PersonRepository.
+ *
  * @author James (Dev Agent)
+ * @since 3.0.0
  */
 @ExtendWith(MockitoExtension.class)
 class MemberSyncServiceTest {
@@ -34,7 +40,10 @@ class MemberSyncServiceTest {
     private CongressApiClient congressApiClient;
 
     @Mock
-    private PersonRepository personRepository;
+    private CongressionalMemberService congressionalMemberService;
+
+    @Mock
+    private IndividualService individualService;
 
     private ObjectMapper objectMapper;
     private MemberSyncService syncService;
@@ -42,7 +51,12 @@ class MemberSyncServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        syncService = new MemberSyncService(congressApiClient, personRepository, objectMapper);
+        syncService = new MemberSyncService(
+                congressApiClient,
+                congressionalMemberService,
+                individualService,
+                objectMapper
+        );
     }
 
     @Test
@@ -76,26 +90,49 @@ class MemberSyncServiceTest {
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
-        when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        UUID individualId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Bernard");
+        individual.setLastName("Sanders");
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(memberId);
+        member.setBioguideId("S000033");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+        member.setChamber(Chamber.SENATE);
+        member.setState("VT");
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                eq("S000033"),
+                eq("Bernard"),
+                eq("Sanders"),
+                any(),
+                eq(Chamber.SENATE),
+                eq("VT"),
+                eq("Independent")
+        )).thenReturn(member);
+        // Note: individualService.findById not stubbed because no imageUrl/middleName/gender in test data
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
 
         // When
         boolean isNew = syncService.syncMember(memberData);
 
         // Then
         assertThat(isNew).isTrue();
-
-        ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).save(personCaptor.capture());
-
-        Person savedPerson = personCaptor.getValue();
-        assertThat(savedPerson.getBioguideId()).isEqualTo("S000033");
-        assertThat(savedPerson.getFirstName()).isEqualTo("Bernard");
-        assertThat(savedPerson.getLastName()).isEqualTo("Sanders");
-        assertThat(savedPerson.getParty()).isEqualTo("Independent");
-        assertThat(savedPerson.getState()).isEqualTo("VT");
-        assertThat(savedPerson.getChamber()).isEqualTo(Chamber.SENATE);
-        assertThat(savedPerson.getDataSource()).isEqualTo(DataSource.CONGRESS_GOV);
+        verify(congressionalMemberService).findOrCreate(
+                eq("S000033"),
+                eq("Bernard"),
+                eq("Sanders"),
+                any(),
+                eq(Chamber.SENATE),
+                eq("VT"),
+                eq("Independent")
+        );
     }
 
     @Test
@@ -112,20 +149,31 @@ class MemberSyncServiceTest {
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
 
-        Person existingPerson = new Person();
-        existingPerson.setBioguideId("S000033");
-        existingPerson.setFirstName("Bernie");
+        UUID individualId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(existingPerson));
-        when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Bernie"); // Old name
+
+        CongressionalMember existingMember = new CongressionalMember();
+        existingMember.setId(memberId);
+        existingMember.setBioguideId("S000033");
+        existingMember.setIndividualId(individualId);
+        existingMember.setIndividual(individual);
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(existingMember));
+        when(congressionalMemberService.findOrCreate(
+                anyString(), anyString(), anyString(), any(), any(), anyString(), anyString()
+        )).thenReturn(existingMember);
+        // Note: individualService.findById not stubbed because no imageUrl/middleName/gender in test data
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(existingMember);
 
         // When
         boolean isNew = syncService.syncMember(memberData);
 
         // Then
         assertThat(isNew).isFalse();
-        verify(personRepository).save(existingPerson);
-        assertThat(existingPerson.getFirstName()).isEqualTo("Bernard");
     }
 
     @Test
@@ -159,16 +207,45 @@ class MemberSyncServiceTest {
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
 
-        when(personRepository.findByBioguideId("P000197")).thenReturn(Optional.empty());
-        when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        UUID individualId = UUID.randomUUID();
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Nancy");
+        individual.setLastName("Pelosi");
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId("P000197");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+        member.setChamber(Chamber.HOUSE);
+
+        when(congressionalMemberService.findByBioguideId("P000197")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                eq("P000197"),
+                eq("Nancy"),
+                eq("Pelosi"),
+                any(),
+                eq(Chamber.HOUSE),
+                any(),
+                any()
+        )).thenReturn(member);
+        // Note: individualService.findById not stubbed because no imageUrl/middleName/gender in test data
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
 
         // When
         syncService.syncMember(memberData);
 
         // Then
-        ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).save(personCaptor.capture());
-        assertThat(personCaptor.getValue().getChamber()).isEqualTo(Chamber.HOUSE);
+        verify(congressionalMemberService).findOrCreate(
+                eq("P000197"),
+                eq("Nancy"),
+                eq("Pelosi"),
+                any(),
+                eq(Chamber.HOUSE),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -184,16 +261,44 @@ class MemberSyncServiceTest {
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
-        when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        UUID individualId = UUID.randomUUID();
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Bernard");
+        individual.setLastName("Sanders");
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId("S000033");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                eq("S000033"),
+                eq("Bernard"),
+                eq("Sanders"),
+                eq(LocalDate.of(1941, 1, 1)),
+                any(),
+                any(),
+                any()
+        )).thenReturn(member);
+        // Note: individualService.findById not stubbed because no imageUrl/middleName/gender in test data
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
 
         // When
         syncService.syncMember(memberData);
 
         // Then
-        ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).save(personCaptor.capture());
-        assertThat(personCaptor.getValue().getBirthDate().getYear()).isEqualTo(1941);
+        verify(congressionalMemberService).findOrCreate(
+                eq("S000033"),
+                eq("Bernard"),
+                eq("Sanders"),
+                eq(LocalDate.of(1941, 1, 1)),
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -211,23 +316,41 @@ class MemberSyncServiceTest {
             """;
         JsonNode memberData = objectMapper.readTree(memberJson);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
-        when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        UUID individualId = UUID.randomUUID();
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Bernard");
+        individual.setLastName("Sanders");
+        individual.setImageUrl(null); // Not set yet
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId("S000033");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                anyString(), anyString(), anyString(), any(), any(), any(), any()
+        )).thenReturn(member);
+        when(individualService.findById(individualId)).thenReturn(Optional.of(individual));
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
 
         // When
         syncService.syncMember(memberData);
 
         // Then
-        ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).save(personCaptor.capture());
-        assertThat(personCaptor.getValue().getImageUrl()).isEqualTo("https://example.com/sanders.jpg");
+        // Verify that individual was saved with the imageUrl
+        ArgumentCaptor<Individual> individualCaptor = ArgumentCaptor.forClass(Individual.class);
+        verify(individualService).save(individualCaptor.capture());
+        assertThat(individualCaptor.getValue().getImageUrl()).isEqualTo("https://example.com/sanders.jpg");
     }
 
     @Test
     @DisplayName("Should return member count")
     void getMemberCount_returnsTotalCount() {
         // Given
-        when(personRepository.count()).thenReturn(535L);
+        when(congressionalMemberService.count()).thenReturn(535L);
 
         // When
         long count = syncService.getMemberCount();

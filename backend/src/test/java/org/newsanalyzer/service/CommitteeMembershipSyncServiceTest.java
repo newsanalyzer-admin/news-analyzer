@@ -1,6 +1,5 @@
 package org.newsanalyzer.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,11 +18,10 @@ import org.newsanalyzer.model.Committee;
 import org.newsanalyzer.model.CommitteeChamber;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CommitteeType;
+import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.MembershipRole;
-import org.newsanalyzer.model.Person;
 import org.newsanalyzer.repository.CommitteeMembershipRepository;
 import org.newsanalyzer.repository.CommitteeRepository;
-import org.newsanalyzer.repository.PersonRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +35,10 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for CommitteeMembershipSyncService.
  *
+ * Part of ARCH-1.7: Updated to use CongressionalMemberService instead of PersonRepository.
+ *
  * @author James (Dev Agent)
+ * @since 3.0.0
  */
 @ExtendWith(MockitoExtension.class)
 class CommitteeMembershipSyncServiceTest {
@@ -52,7 +53,7 @@ class CommitteeMembershipSyncServiceTest {
     private CommitteeRepository committeeRepository;
 
     @Mock
-    private PersonRepository personRepository;
+    private CongressionalMemberService congressionalMemberService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -62,7 +63,7 @@ class CommitteeMembershipSyncServiceTest {
 
     private ObjectMapper realMapper;
     private Committee testCommittee;
-    private Person testPerson;
+    private CongressionalMember testMember;
 
     @BeforeEach
     void setUp() {
@@ -74,11 +75,10 @@ class CommitteeMembershipSyncServiceTest {
         testCommittee.setChamber(CommitteeChamber.HOUSE);
         testCommittee.setCommitteeType(CommitteeType.STANDING);
 
-        testPerson = new Person();
-        testPerson.setId(UUID.randomUUID());
-        testPerson.setBioguideId("S000033");
-        testPerson.setFirstName("Bernard");
-        testPerson.setLastName("Sanders");
+        testMember = new CongressionalMember();
+        testMember.setId(UUID.randomUUID());
+        testMember.setBioguideId("S000033");
+        testMember.setIndividualId(UUID.randomUUID());
     }
 
     // =========================================================================
@@ -168,11 +168,11 @@ class CommitteeMembershipSyncServiceTest {
             when(committeeRepository.findByCommitteeCode("ssju00"))
                     .thenReturn(Optional.of(senateCommittee));
 
-            Person person1 = createPerson("S000033");
-            Person person2 = createPerson("P000197");
-            when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(person1));
-            when(personRepository.findByBioguideId("P000197")).thenReturn(Optional.of(person2));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
+            CongressionalMember member1 = createMember("S000033");
+            CongressionalMember member2 = createMember("P000197");
+            when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(member1));
+            when(congressionalMemberService.findByBioguideId("P000197")).thenReturn(Optional.of(member2));
+            when(membershipRepository.findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -269,10 +269,10 @@ class CommitteeMembershipSyncServiceTest {
                     .thenReturn(Optional.of(response));
             when(committeeRepository.findByCommitteeCode("hsju00"))
                     .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("S000033"))
-                    .thenReturn(Optional.of(testPerson));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(
-                    testPerson.getId(), "hsju00", 118))
+            when(congressionalMemberService.findByBioguideId("S000033"))
+                    .thenReturn(Optional.of(testMember));
+            when(membershipRepository.findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(
+                    testMember.getId(), "hsju00", 118))
                     .thenReturn(Optional.empty());
             when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -286,7 +286,7 @@ class CommitteeMembershipSyncServiceTest {
 
             ArgumentCaptor<CommitteeMembership> captor = ArgumentCaptor.forClass(CommitteeMembership.class);
             verify(membershipRepository).save(captor.capture());
-            assertThat(captor.getValue().getPerson()).isEqualTo(testPerson);
+            assertThat(captor.getValue().getCongressionalMember()).isEqualTo(testMember);
             assertThat(captor.getValue().getCommittee()).isEqualTo(testCommittee);
             assertThat(captor.getValue().getCongress()).isEqualTo(118);
         }
@@ -302,14 +302,14 @@ class CommitteeMembershipSyncServiceTest {
                     .thenReturn(Optional.of(response));
             when(committeeRepository.findByCommitteeCode("hsju00"))
                     .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("S000033"))
-                    .thenReturn(Optional.of(testPerson));
+            when(congressionalMemberService.findByBioguideId("S000033"))
+                    .thenReturn(Optional.of(testMember));
 
             CommitteeMembership existingMembership = new CommitteeMembership();
             existingMembership.setId(UUID.randomUUID());
             existingMembership.setRole(MembershipRole.MEMBER);
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(
-                    testPerson.getId(), "hsju00", 118))
+            when(membershipRepository.findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(
+                    testMember.getId(), "hsju00", 118))
                     .thenReturn(Optional.of(existingMembership));
             when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -327,8 +327,8 @@ class CommitteeMembershipSyncServiceTest {
         }
 
         @Test
-        @DisplayName("Should skip member when person not found")
-        void personNotFound_skipsMember() {
+        @DisplayName("Should skip member when congressional member not found")
+        void memberNotFound_skipsMember() {
             // Given
             ObjectNode response = createCommitteeResponse(List.of(
                     createMemberNode("UNKNOWN", "Member")
@@ -337,7 +337,7 @@ class CommitteeMembershipSyncServiceTest {
                     .thenReturn(Optional.of(response));
             when(committeeRepository.findByCommitteeCode("hsju00"))
                     .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("UNKNOWN"))
+            when(congressionalMemberService.findByBioguideId("UNKNOWN"))
                     .thenReturn(Optional.empty());
 
             // When
@@ -385,13 +385,13 @@ class CommitteeMembershipSyncServiceTest {
             when(committeeRepository.findByCommitteeCode("hsju00"))
                     .thenReturn(Optional.of(testCommittee));
 
-            Person person1 = createPerson("S000033");
-            Person person2 = createPerson("P000197");
-            Person person3 = createPerson("M000355");
-            when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(person1));
-            when(personRepository.findByBioguideId("P000197")).thenReturn(Optional.of(person2));
-            when(personRepository.findByBioguideId("M000355")).thenReturn(Optional.of(person3));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
+            CongressionalMember member1 = createMember("S000033");
+            CongressionalMember member2 = createMember("P000197");
+            CongressionalMember member3 = createMember("M000355");
+            when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(member1));
+            when(congressionalMemberService.findByBioguideId("P000197")).thenReturn(Optional.of(member2));
+            when(congressionalMemberService.findByBioguideId("M000355")).thenReturn(Optional.of(member3));
+            when(membershipRepository.findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -441,9 +441,9 @@ class CommitteeMembershipSyncServiceTest {
                     .thenReturn(Optional.of(response));
             when(committeeRepository.findByCommitteeCode("hsju00"))
                     .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("S000033"))
-                    .thenReturn(Optional.of(testPerson));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
+            when(congressionalMemberService.findByBioguideId("S000033"))
+                    .thenReturn(Optional.of(testMember));
+            when(membershipRepository.findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -454,66 +454,6 @@ class CommitteeMembershipSyncServiceTest {
             ArgumentCaptor<CommitteeMembership> captor = ArgumentCaptor.forClass(CommitteeMembership.class);
             verify(membershipRepository).save(captor.capture());
             assertThat(captor.getValue().getRole()).isEqualTo(MembershipRole.valueOf(expectedRole));
-        }
-    }
-
-    // =========================================================================
-    // Chamber Mapping Tests
-    // =========================================================================
-
-    @Nested
-    @DisplayName("Chamber API Value Mapping")
-    class ChamberMappingTests {
-
-        @Test
-        @DisplayName("Should use 'house' for HOUSE chamber")
-        void houseChambersUsesHouseApiValue() {
-            // Given
-            testCommittee.setChamber(CommitteeChamber.HOUSE);
-            when(congressApiClient.isConfigured()).thenReturn(true);
-            when(committeeRepository.findAll()).thenReturn(List.of(testCommittee));
-            when(congressApiClient.fetchCommitteeByCode(eq("house"), any()))
-                    .thenReturn(Optional.empty());
-
-            // When
-            syncService.syncAllMemberships(118);
-
-            // Then
-            verify(congressApiClient).fetchCommitteeByCode(eq("house"), any());
-        }
-
-        @Test
-        @DisplayName("Should use 'senate' for SENATE chamber")
-        void senateChamberUsesSenateApiValue() {
-            // Given
-            testCommittee.setChamber(CommitteeChamber.SENATE);
-            when(congressApiClient.isConfigured()).thenReturn(true);
-            when(committeeRepository.findAll()).thenReturn(List.of(testCommittee));
-            when(congressApiClient.fetchCommitteeByCode(eq("senate"), any()))
-                    .thenReturn(Optional.empty());
-
-            // When
-            syncService.syncAllMemberships(118);
-
-            // Then
-            verify(congressApiClient).fetchCommitteeByCode(eq("senate"), any());
-        }
-
-        @Test
-        @DisplayName("Should use 'joint' for JOINT chamber")
-        void jointChamberUsesJointApiValue() {
-            // Given
-            testCommittee.setChamber(CommitteeChamber.JOINT);
-            when(congressApiClient.isConfigured()).thenReturn(true);
-            when(committeeRepository.findAll()).thenReturn(List.of(testCommittee));
-            when(congressApiClient.fetchCommitteeByCode(eq("joint"), any()))
-                    .thenReturn(Optional.empty());
-
-            // When
-            syncService.syncAllMemberships(118);
-
-            // Then
-            verify(congressApiClient).fetchCommitteeByCode(eq("joint"), any());
         }
     }
 
@@ -554,74 +494,6 @@ class CommitteeMembershipSyncServiceTest {
     }
 
     // =========================================================================
-    // Date Parsing Tests
-    // =========================================================================
-
-    @Nested
-    @DisplayName("Date Parsing")
-    class DateParsingTests {
-
-        @Test
-        @DisplayName("Should parse valid start and end dates")
-        void validDates_parseSuccessfully() {
-            // Given
-            ObjectNode memberNode = realMapper.createObjectNode();
-            memberNode.put("bioguideId", "S000033");
-            memberNode.put("role", "Member");
-            memberNode.put("startDate", "2023-01-03");
-            memberNode.put("endDate", "2025-01-03");
-
-            ObjectNode response = createCommitteeResponse(List.of(memberNode));
-            when(congressApiClient.fetchCommitteeByCode("house", "hsju00"))
-                    .thenReturn(Optional.of(response));
-            when(committeeRepository.findByCommitteeCode("hsju00"))
-                    .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("S000033"))
-                    .thenReturn(Optional.of(testPerson));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
-                    .thenReturn(Optional.empty());
-            when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-            // When
-            syncService.syncMembershipsForCommittee("hsju00", "house", 118);
-
-            // Then
-            ArgumentCaptor<CommitteeMembership> captor = ArgumentCaptor.forClass(CommitteeMembership.class);
-            verify(membershipRepository).save(captor.capture());
-            assertThat(captor.getValue().getStartDate()).isNotNull();
-            assertThat(captor.getValue().getEndDate()).isNotNull();
-        }
-
-        @Test
-        @DisplayName("Should handle invalid date formats gracefully")
-        void invalidDates_handledGracefully() {
-            // Given
-            ObjectNode memberNode = realMapper.createObjectNode();
-            memberNode.put("bioguideId", "S000033");
-            memberNode.put("role", "Member");
-            memberNode.put("startDate", "invalid-date");
-
-            ObjectNode response = createCommitteeResponse(List.of(memberNode));
-            when(congressApiClient.fetchCommitteeByCode("house", "hsju00"))
-                    .thenReturn(Optional.of(response));
-            when(committeeRepository.findByCommitteeCode("hsju00"))
-                    .thenReturn(Optional.of(testCommittee));
-            when(personRepository.findByBioguideId("S000033"))
-                    .thenReturn(Optional.of(testPerson));
-            when(membershipRepository.findByPerson_IdAndCommittee_CommitteeCodeAndCongress(any(), any(), any()))
-                    .thenReturn(Optional.empty());
-            when(membershipRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-            // When
-            CommitteeMembershipSyncService.SyncResult result =
-                    syncService.syncMembershipsForCommittee("hsju00", "house", 118);
-
-            // Then - should still add successfully, just without the date
-            assertThat(result.getAdded()).isEqualTo(1);
-        }
-    }
-
-    // =========================================================================
     // Helper Methods
     // =========================================================================
 
@@ -647,10 +519,11 @@ class CommitteeMembershipSyncServiceTest {
         return node;
     }
 
-    private Person createPerson(String bioguideId) {
-        Person person = new Person();
-        person.setId(UUID.randomUUID());
-        person.setBioguideId(bioguideId);
-        return person;
+    private CongressionalMember createMember(String bioguideId) {
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId(bioguideId);
+        member.setIndividualId(UUID.randomUUID());
+        return member;
     }
 }

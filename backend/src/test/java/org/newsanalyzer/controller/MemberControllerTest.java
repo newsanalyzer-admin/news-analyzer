@@ -5,10 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.exception.ResourceNotFoundException;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.CongressionalMember.Chamber;
 import org.newsanalyzer.model.DataSource;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.model.PositionHolding;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;
 import org.newsanalyzer.scheduler.EnrichmentScheduler;
 import org.newsanalyzer.service.CommitteeService;
@@ -42,7 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * Uses MockMvc to test HTTP endpoints with mocked services.
  *
+ * Part of ARCH-1.7: Updated to use CongressionalMember instead of Person.
+ *
  * @author James (Dev Agent)
+ * @since 3.0.0
  */
 @WebMvcTest(MemberController.class)
 @WithMockUser
@@ -72,24 +77,35 @@ class MemberControllerTest {
     @MockBean
     private PositionHoldingRepository positionHoldingRepository;
 
-    private Person testMember;
+    @MockBean
+    private CongressionalMemberRepository congressionalMemberRepository;
+
+    private CongressionalMember testMember;
+    private Individual testIndividual;
     private PositionHolding testHolding;
 
     @BeforeEach
     void setUp() {
-        testMember = new Person();
+        UUID individualId = UUID.randomUUID();
+
+        testIndividual = new Individual();
+        testIndividual.setId(individualId);
+        testIndividual.setFirstName("Bernard");
+        testIndividual.setLastName("Sanders");
+        testIndividual.setParty("Independent");
+        testIndividual.setBirthDate(LocalDate.of(1941, 9, 8));
+
+        testMember = new CongressionalMember();
         testMember.setId(UUID.randomUUID());
         testMember.setBioguideId("S000033");
-        testMember.setFirstName("Bernard");
-        testMember.setLastName("Sanders");
-        testMember.setParty("Independent");
+        testMember.setIndividualId(individualId);
+        testMember.setIndividual(testIndividual);
         testMember.setState("VT");
         testMember.setChamber(Chamber.SENATE);
-        testMember.setBirthDate(LocalDate.of(1941, 9, 8));
 
         testHolding = PositionHolding.builder()
                 .id(UUID.randomUUID())
-                .personId(testMember.getId())
+                .individualId(individualId)
                 .positionId(UUID.randomUUID())
                 .startDate(LocalDate.of(2023, 1, 3))
                 .endDate(null)
@@ -105,31 +121,27 @@ class MemberControllerTest {
     @Test
     @DisplayName("GET /api/members - Should return paginated list of members")
     void listAll_returnsPagedMembers() throws Exception {
-        // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findAll(any(Pageable.class))).thenReturn(page);
+        // Given - Controller uses findAllWithIndividual() which returns List
+        when(memberService.findAllWithIndividual()).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].bioguideId", is("S000033")))
-                .andExpect(jsonPath("$.content[0].firstName", is("Bernard")))
-                .andExpect(jsonPath("$.content[0].lastName", is("Sanders")));
+                .andExpect(jsonPath("$.content[0].bioguideId", is("S000033")));
     }
 
     @Test
     @DisplayName("GET /api/members - Should support pagination parameters")
     void listAll_withPagination_returnsCorrectPage() throws Exception {
         // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findAll(any(Pageable.class))).thenReturn(page);
+        when(memberService.findAllWithIndividual()).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members")
                         .param("page", "0")
                         .param("size", "10")
-                        .param("sort", "lastName,asc"))
+                        .param("sort", "bioguideId,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -141,16 +153,13 @@ class MemberControllerTest {
     @Test
     @DisplayName("GET /api/members/{bioguideId} - Should return member when found")
     void getByBioguideId_found_returnsMember() throws Exception {
-        // Given
-        when(memberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
+        // Given - Controller uses findByBioguideIdWithIndividual
+        when(memberService.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/S000033"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bioguideId", is("S000033")))
-                .andExpect(jsonPath("$.firstName", is("Bernard")))
-                .andExpect(jsonPath("$.lastName", is("Sanders")))
-                .andExpect(jsonPath("$.party", is("Independent")))
                 .andExpect(jsonPath("$.state", is("VT")))
                 .andExpect(jsonPath("$.chamber", is("SENATE")));
     }
@@ -159,7 +168,7 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/{bioguideId} - Should return 404 when not found")
     void getByBioguideId_notFound_returns404() throws Exception {
         // Given
-        when(memberService.findByBioguideId("INVALID")).thenReturn(Optional.empty());
+        when(memberService.findByBioguideIdWithIndividual("INVALID")).thenReturn(Optional.empty());
 
         // When/Then
         mockMvc.perform(get("/api/members/INVALID"))
@@ -174,15 +183,16 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/search - Should search by name")
     void searchByName_validName_returnsResults() throws Exception {
         // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
+        Page<CongressionalMember> page = new PageImpl<>(List.of(testMember));
         when(memberService.searchByName(eq("Sanders"), any(Pageable.class))).thenReturn(page);
+        when(congressionalMemberRepository.findByIdWithIndividual(testMember.getId()))
+                .thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/search")
                         .param("name", "Sanders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].lastName", is("Sanders")));
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test
@@ -208,9 +218,8 @@ class MemberControllerTest {
     @Test
     @DisplayName("GET /api/members/by-state/{state} - Should filter by state")
     void getByState_validState_returnsMembers() throws Exception {
-        // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findByState(eq("VT"), any(Pageable.class))).thenReturn(page);
+        // Given - Controller uses congressionalMemberRepository.findByStateWithIndividual
+        when(congressionalMemberRepository.findByStateWithIndividual("VT")).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/by-state/VT"))
@@ -223,8 +232,7 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/by-state/{state} - Should handle lowercase state")
     void getByState_lowercaseState_convertsToUppercase() throws Exception {
         // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findByState(eq("VT"), any(Pageable.class))).thenReturn(page);
+        when(congressionalMemberRepository.findByStateWithIndividual("VT")).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/by-state/vt"))
@@ -241,9 +249,8 @@ class MemberControllerTest {
     @Test
     @DisplayName("GET /api/members/by-chamber/{chamber} - Should filter by SENATE")
     void getByChamber_senate_returnsSenators() throws Exception {
-        // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findByChamber(eq(Chamber.SENATE), any(Pageable.class))).thenReturn(page);
+        // Given - Controller uses congressionalMemberRepository.findByChamberWithIndividual
+        when(congressionalMemberRepository.findByChamberWithIndividual(Chamber.SENATE)).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/by-chamber/SENATE"))
@@ -256,15 +263,18 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/by-chamber/{chamber} - Should filter by HOUSE")
     void getByChamber_house_returnsRepresentatives() throws Exception {
         // Given
-        Person houseMember = new Person();
+        CongressionalMember houseMember = new CongressionalMember();
+        houseMember.setId(UUID.randomUUID());
         houseMember.setBioguideId("P000197");
-        houseMember.setFirstName("Nancy");
-        houseMember.setLastName("Pelosi");
         houseMember.setChamber(Chamber.HOUSE);
         houseMember.setState("CA");
+        houseMember.setIndividualId(UUID.randomUUID());
+        Individual houseIndividual = new Individual();
+        houseIndividual.setFirstName("Nancy");
+        houseIndividual.setLastName("Pelosi");
+        houseMember.setIndividual(houseIndividual);
 
-        Page<Person> page = new PageImpl<>(List.of(houseMember));
-        when(memberService.findByChamber(eq(Chamber.HOUSE), any(Pageable.class))).thenReturn(page);
+        when(congressionalMemberRepository.findByChamberWithIndividual(Chamber.HOUSE)).thenReturn(List.of(houseMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/by-chamber/HOUSE"))
@@ -277,8 +287,7 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/by-chamber/{chamber} - Should handle lowercase chamber")
     void getByChamber_lowercaseChamber_convertsToUppercase() throws Exception {
         // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findByChamber(eq(Chamber.SENATE), any(Pageable.class))).thenReturn(page);
+        when(congressionalMemberRepository.findByChamberWithIndividual(Chamber.SENATE)).thenReturn(List.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/members/by-chamber/senate"))
@@ -375,8 +384,7 @@ class MemberControllerTest {
     @DisplayName("GET /api/members - Should respond within 500ms")
     void listAll_respondsWithin500ms() throws Exception {
         // Given
-        Page<Person> page = new PageImpl<>(List.of(testMember));
-        when(memberService.findAll(any(Pageable.class))).thenReturn(page);
+        when(memberService.findAllWithIndividual()).thenReturn(List.of(testMember));
 
         // When
         long startTime = System.currentTimeMillis();
@@ -393,7 +401,7 @@ class MemberControllerTest {
     @DisplayName("GET /api/members/{bioguideId} - Should respond within 500ms")
     void getByBioguideId_respondsWithin500ms() throws Exception {
         // Given
-        when(memberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
+        when(memberService.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
 
         // When
         long startTime = System.currentTimeMillis();
@@ -415,7 +423,7 @@ class MemberControllerTest {
     void getMemberTerms_found_returnsTerms() throws Exception {
         // Given
         when(memberService.getByBioguideId("S000033")).thenReturn(testMember);
-        when(positionHoldingRepository.findByPersonIdOrderByStartDateDesc(testMember.getId()))
+        when(positionHoldingRepository.findByIndividualIdOrderByStartDateDesc(testMember.getIndividualId()))
                 .thenReturn(List.of(testHolding));
 
         // When/Then

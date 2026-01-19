@@ -66,11 +66,33 @@ public class MemberService {
     }
 
     /**
+     * Find member by BioGuide ID with Individual eagerly loaded.
+     */
+    public Optional<CongressionalMember> findByBioguideIdWithIndividual(String bioguideId) {
+        return congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
+    }
+
+    /**
      * Find member by BioGuide ID or throw exception.
      */
     public CongressionalMember getByBioguideId(String bioguideId) {
         return congressionalMemberRepository.findByBioguideId(bioguideId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with bioguideId: " + bioguideId));
+    }
+
+    /**
+     * Find member by BioGuide ID with Individual or throw exception.
+     */
+    public CongressionalMember getByBioguideIdWithIndividual(String bioguideId) {
+        return congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found with bioguideId: " + bioguideId));
+    }
+
+    /**
+     * Find all members with Individual eagerly loaded.
+     */
+    public List<CongressionalMember> findAllWithIndividual() {
+        return congressionalMemberRepository.findAllWithIndividual();
     }
 
     /**

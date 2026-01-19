@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 /**
  * Service for presidency data access and business logic.
  *
+ * Part of ARCH-1.7: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
- * @since 2.0.0
+ * @since 3.0.0
  */
 @Service
 @Transactional(readOnly = true)
@@ -37,7 +39,7 @@ public class PresidencyService {
     private static final String COS_POSITION_TITLE = "White House Chief of Staff";
 
     private final PresidencyRepository presidencyRepository;
-    private final PersonRepository personRepository;
+    private final IndividualRepository individualRepository;
     private final ExecutiveOrderRepository executiveOrderRepository;
     private final PositionHoldingRepository positionHoldingRepository;
     private final GovernmentPositionRepository positionRepository;
@@ -59,11 +61,11 @@ public class PresidencyService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "number"));
         Page<Presidency> presidencies = presidencyRepository.findAll(pageable);
 
-        // Batch load persons for efficiency
-        Set<UUID> personIds = presidencies.getContent().stream()
-                .map(Presidency::getPersonId)
+        // Batch load individuals for efficiency
+        Set<UUID> individualIds = presidencies.getContent().stream()
+                .map(Presidency::getIndividualId)
                 .collect(Collectors.toSet());
-        Map<UUID, Person> personMap = loadPersonMap(personIds);
+        Map<UUID, Individual> individualMap = loadIndividualMap(individualIds);
 
         // Batch load EO counts
         Map<UUID, Long> eoCounts = loadEoCounts(presidencies.getContent().stream()
@@ -72,7 +74,7 @@ public class PresidencyService {
 
         return presidencies.map(p -> PresidencyDTO.from(
                 p,
-                personMap.get(p.getPersonId()),
+                individualMap.get(p.getIndividualId()),
                 eoCounts.getOrDefault(p.getId(), 0L).intValue(),
                 null  // VPs loaded separately for detail view
         ));
@@ -178,11 +180,11 @@ public class PresidencyService {
      * Convert Presidency to detailed DTO with VP list.
      */
     private PresidencyDTO toDetailDTO(Presidency presidency) {
-        Person person = personRepository.findById(presidency.getPersonId()).orElse(null);
+        Individual individual = individualRepository.findById(presidency.getIndividualId()).orElse(null);
         int eoCount = (int) executiveOrderRepository.countByPresidencyId(presidency.getId());
         List<VicePresidentDTO> vps = getVicePresidents(presidency.getId());
 
-        return PresidencyDTO.from(presidency, person, eoCount, vps);
+        return PresidencyDTO.from(presidency, individual, eoCount, vps);
     }
 
     /**
@@ -203,21 +205,21 @@ public class PresidencyService {
                 .sorted(Comparator.comparing(PositionHolding::getStartDate))
                 .collect(Collectors.toList());
 
-        // Load persons
-        Set<UUID> personIds = holdings.stream()
-                .map(PositionHolding::getPersonId)
+        // Load individuals
+        Set<UUID> individualIds = holdings.stream()
+                .map(PositionHolding::getIndividualId)
                 .collect(Collectors.toSet());
-        Map<UUID, Person> personMap = loadPersonMap(personIds);
+        Map<UUID, Individual> individualMap = loadIndividualMap(individualIds);
 
         return holdings.stream()
                 .map(h -> {
-                    Person p = personMap.get(h.getPersonId());
+                    Individual ind = individualMap.get(h.getIndividualId());
                     String termLabel = formatTermLabel(h.getStartDate(), h.getEndDate());
                     return VicePresidentDTO.builder()
-                            .personId(h.getPersonId())
-                            .fullName(p != null ? buildFullName(p) : "Unknown")
-                            .firstName(p != null ? p.getFirstName() : null)
-                            .lastName(p != null ? p.getLastName() : null)
+                            .individualId(h.getIndividualId())
+                            .fullName(ind != null ? ind.getFullName() : "Unknown")
+                            .firstName(ind != null ? ind.getFirstName() : null)
+                            .lastName(ind != null ? ind.getLastName() : null)
                             .startDate(h.getStartDate())
                             .endDate(h.getEndDate())
                             .termLabel(termLabel)
@@ -242,25 +244,25 @@ public class PresidencyService {
                 .sorted(Comparator.comparing(PositionHolding::getStartDate))
                 .collect(Collectors.toList());
 
-        Set<UUID> personIds = holdings.stream()
-                .map(PositionHolding::getPersonId)
+        Set<UUID> individualIds = holdings.stream()
+                .map(PositionHolding::getIndividualId)
                 .collect(Collectors.toSet());
-        Map<UUID, Person> personMap = loadPersonMap(personIds);
+        Map<UUID, Individual> individualMap = loadIndividualMap(individualIds);
 
         return holdings.stream()
                 .map(h -> {
-                    Person p = personMap.get(h.getPersonId());
+                    Individual ind = individualMap.get(h.getIndividualId());
                     return OfficeholderDTO.builder()
                             .holdingId(h.getId())
-                            .personId(h.getPersonId())
-                            .fullName(p != null ? buildFullName(p) : "Unknown")
-                            .firstName(p != null ? p.getFirstName() : null)
-                            .lastName(p != null ? p.getLastName() : null)
+                            .individualId(h.getIndividualId())
+                            .fullName(ind != null ? ind.getFullName() : "Unknown")
+                            .firstName(ind != null ? ind.getFirstName() : null)
+                            .lastName(ind != null ? ind.getLastName() : null)
                             .positionTitle(positionTitle)
                             .startDate(h.getStartDate())
                             .endDate(h.getEndDate())
                             .termLabel(formatTermLabel(h.getStartDate(), h.getEndDate()))
-                            .imageUrl(p != null ? p.getImageUrl() : null)
+                            .imageUrl(ind != null ? ind.getImageUrl() : null)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -276,14 +278,14 @@ public class PresidencyService {
     }
 
     /**
-     * Batch load persons by IDs into a map.
+     * Batch load individuals by IDs into a map.
      */
-    private Map<UUID, Person> loadPersonMap(Set<UUID> personIds) {
-        if (personIds.isEmpty()) {
+    private Map<UUID, Individual> loadIndividualMap(Set<UUID> individualIds) {
+        if (individualIds.isEmpty()) {
             return Collections.emptyMap();
         }
-        return personRepository.findAllById(personIds).stream()
-                .collect(Collectors.toMap(Person::getId, p -> p));
+        return individualRepository.findAllById(individualIds).stream()
+                .collect(Collectors.toMap(Individual::getId, i -> i));
     }
 
     /**
@@ -298,28 +300,6 @@ public class PresidencyService {
             counts.put(id, executiveOrderRepository.countByPresidencyId(id));
         }
         return counts;
-    }
-
-    /**
-     * Build full name from Person entity.
-     */
-    private String buildFullName(Person person) {
-        if (person == null) return null;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(person.getFirstName());
-
-        if (person.getMiddleName() != null && !person.getMiddleName().isEmpty()) {
-            sb.append(" ").append(person.getMiddleName());
-        }
-
-        sb.append(" ").append(person.getLastName());
-
-        if (person.getSuffix() != null && !person.getSuffix().isEmpty()) {
-            sb.append(" ").append(person.getSuffix());
-        }
-
-        return sb.toString();
     }
 
     /**

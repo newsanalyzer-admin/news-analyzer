@@ -9,7 +9,7 @@ import org.newsanalyzer.model.CommitteeChamber;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CommitteeType;
 import org.newsanalyzer.model.MembershipRole;
-import org.newsanalyzer.model.Person;
+import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.service.CommitteeMembershipSyncService;
 import org.newsanalyzer.service.CommitteeService;
 import org.newsanalyzer.service.CommitteeSyncService;
@@ -79,15 +79,16 @@ class CommitteeControllerTest {
         testSubcommittee.setCommitteeType(CommitteeType.SUBCOMMITTEE);
         testSubcommittee.setParentCommittee(testCommittee);
 
-        Person testPerson = new Person();
-        testPerson.setId(UUID.randomUUID());
-        testPerson.setBioguideId("S000033");
-        testPerson.setFirstName("Bernard");
-        testPerson.setLastName("Sanders");
+        CongressionalMember testMember = new CongressionalMember();
+        testMember.setId(UUID.randomUUID());
+        testMember.setBioguideId("S000033");
+        testMember.setIndividualId(UUID.randomUUID());
+        testMember.setChamber(CongressionalMember.Chamber.SENATE);
+        testMember.setState("VT");
 
         testMembership = new CommitteeMembership();
         testMembership.setId(UUID.randomUUID());
-        testMembership.setPerson(testPerson);
+        testMembership.setCongressionalMember(testMember);
         testMembership.setCommittee(testCommittee);
         testMembership.setRole(MembershipRole.MEMBER);
         testMembership.setCongress(118);

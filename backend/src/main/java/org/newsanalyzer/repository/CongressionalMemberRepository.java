@@ -76,10 +76,26 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
 
     /**
      * Find all members by party.
+     * Note: Party is now on Individual, not CongressionalMember.
+     * This query joins to Individual to filter by party.
      * @param party the party name (e.g., "Democratic", "Republican")
      * @return list of members in that party
      */
-    List<CongressionalMember> findByParty(String party);
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE i.party = :party")
+    List<CongressionalMember> findByParty(@Param("party") String party);
+
+    /**
+     * Find all members by party with pagination.
+     * @param party the party name
+     * @param pageable pagination parameters
+     * @return page of members
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE i.party = :party")
+    Page<CongressionalMember> findByParty(@Param("party") String party, Pageable pageable);
 
     /**
      * Find all members by state and chamber.
@@ -143,6 +159,24 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
            "WHERE cm.state = :state")
     List<CongressionalMember> findByStateWithIndividual(@Param("state") String state);
 
+    /**
+     * Find all members with Individual eagerly loaded.
+     * @return list of all members with individual data
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN FETCH cm.individual")
+    List<CongressionalMember> findAllWithIndividual();
+
+    /**
+     * Find member by ID with Individual eagerly loaded.
+     * @param id the member UUID
+     * @return the member with individual data if found
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN FETCH cm.individual " +
+           "WHERE cm.id = :id")
+    Optional<CongressionalMember> findByIdWithIndividual(@Param("id") UUID id);
+
     // =====================================================================
     // Count queries
     // =====================================================================
@@ -167,4 +201,61 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
      * @return count of members
      */
     long countByState(String state);
+
+    // =====================================================================
+    // Statistics queries
+    // =====================================================================
+
+    /**
+     * Get party distribution (count by party).
+     * @return list of Object[] where [0]=party, [1]=count
+     */
+    @Query("SELECT i.party, COUNT(cm) FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "GROUP BY i.party ORDER BY COUNT(cm) DESC")
+    List<Object[]> getPartyDistribution();
+
+    /**
+     * Get state distribution (count by state).
+     * @return list of Object[] where [0]=state, [1]=count
+     */
+    @Query("SELECT cm.state, COUNT(cm) FROM CongressionalMember cm " +
+           "GROUP BY cm.state ORDER BY COUNT(cm) DESC")
+    List<Object[]> getStateDistribution();
+
+    // =====================================================================
+    // External ID lookups
+    // =====================================================================
+
+    /**
+     * Find member by FEC ID.
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE jsonb_extract_path_text(i.externalIds, 'fec') = :fecId")
+    Optional<CongressionalMember> findByFecId(@Param("fecId") String fecId);
+
+    /**
+     * Find member by GovTrack ID.
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE CAST(jsonb_extract_path_text(i.externalIds, 'govtrack') AS integer) = :govtrackId")
+    Optional<CongressionalMember> findByGovtrackId(@Param("govtrackId") Integer govtrackId);
+
+    /**
+     * Find member by OpenSecrets ID.
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE jsonb_extract_path_text(i.externalIds, 'opensecrets') = :opensecretsId")
+    Optional<CongressionalMember> findByOpensecretsId(@Param("opensecretsId") String opensecretsId);
+
+    /**
+     * Find member by VoteSmart ID.
+     */
+    @Query("SELECT cm FROM CongressionalMember cm " +
+           "LEFT JOIN cm.individual i " +
+           "WHERE CAST(jsonb_extract_path_text(i.externalIds, 'votesmart') AS integer) = :votesmartId")
+    Optional<CongressionalMember> findByVotesmartId(@Param("votesmartId") Integer votesmartId);
 }

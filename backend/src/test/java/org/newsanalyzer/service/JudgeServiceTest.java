@@ -34,15 +34,17 @@ import static org.mockito.Mockito.*;
  * - Search judges by name
  * - Get statistics
  *
+ * Part of ARCH-1.7: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
- * @since 2.0.0
+ * @since 3.0.0
  * @story UI-1.11
  */
 @ExtendWith(MockitoExtension.class)
 class JudgeServiceTest {
 
     @Mock
-    private PersonRepository personRepository;
+    private IndividualRepository individualRepository;
 
     @Mock
     private GovernmentPositionRepository positionRepository;
@@ -56,20 +58,19 @@ class JudgeServiceTest {
     @InjectMocks
     private JudgeService judgeService;
 
-    private Person samplePerson;
+    private Individual sampleIndividual;
     private GovernmentPosition samplePosition;
     private PositionHolding sampleHolding;
     private GovernmentOrganization sampleCourt;
 
     @BeforeEach
     void setUp() {
-        // Create sample person (judge)
-        samplePerson = new Person();
-        samplePerson.setId(UUID.randomUUID());
-        samplePerson.setFirstName("John");
-        samplePerson.setLastName("Roberts");
-        // fullName is computed from firstName + lastName
-        samplePerson.setDataSource(DataSource.FJC);
+        // Create sample individual (judge)
+        sampleIndividual = new Individual();
+        sampleIndividual.setId(UUID.randomUUID());
+        sampleIndividual.setFirstName("John");
+        sampleIndividual.setLastName("Roberts");
+        sampleIndividual.setPrimaryDataSource(DataSource.FJC);
 
         // Create sample court
         sampleCourt = new GovernmentOrganization();
@@ -86,7 +87,7 @@ class JudgeServiceTest {
         // Create sample holding
         sampleHolding = new PositionHolding();
         sampleHolding.setId(UUID.randomUUID());
-        sampleHolding.setPersonId(samplePerson.getId());
+        sampleHolding.setIndividualId(sampleIndividual.getId());
         sampleHolding.setPositionId(samplePosition.getId());
         sampleHolding.setStartDate(LocalDate.of(2005, 9, 29));
         sampleHolding.setEndDate(null); // Current
@@ -105,7 +106,7 @@ class JudgeServiceTest {
             Page<PositionHolding> holdingPage = new PageImpl<>(List.of(sampleHolding), pageable, 1);
             when(holdingRepository.findByDataSource(eq(DataSource.FJC), any(Pageable.class)))
                     .thenReturn(holdingPage);
-            when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
+            when(individualRepository.findById(sampleIndividual.getId())).thenReturn(Optional.of(sampleIndividual));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
 
@@ -147,7 +148,7 @@ class JudgeServiceTest {
             // findJudges now uses unpaged query and applies sorting/pagination in-memory
             when(holdingRepository.findByDataSource(DataSource.FJC))
                     .thenReturn(List.of(sampleHolding));
-            when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
+            when(individualRepository.findById(sampleIndividual.getId())).thenReturn(Optional.of(sampleIndividual));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
 
@@ -165,7 +166,7 @@ class JudgeServiceTest {
             Pageable pageable = PageRequest.of(0, 20);
             when(holdingRepository.findByDataSource(DataSource.FJC))
                     .thenReturn(List.of(sampleHolding));
-            when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
+            when(individualRepository.findById(sampleIndividual.getId())).thenReturn(Optional.of(sampleIndividual));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
 
@@ -183,7 +184,7 @@ class JudgeServiceTest {
             Pageable pageable = PageRequest.of(0, 20);
             when(holdingRepository.findByDataSource(DataSource.FJC))
                     .thenReturn(List.of(sampleHolding));
-            when(personRepository.findById(samplePerson.getId())).thenReturn(Optional.of(samplePerson));
+            when(individualRepository.findById(sampleIndividual.getId())).thenReturn(Optional.of(sampleIndividual));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
 
@@ -203,9 +204,9 @@ class JudgeServiceTest {
         @DisplayName("Should return judge when found")
         void findById_existingId_returnsJudge() {
             // Given
-            UUID judgeId = samplePerson.getId();
-            when(personRepository.findById(judgeId)).thenReturn(Optional.of(samplePerson));
-            when(holdingRepository.findByPersonIdOrderByStartDateDesc(judgeId))
+            UUID judgeId = sampleIndividual.getId();
+            when(individualRepository.findById(judgeId)).thenReturn(Optional.of(sampleIndividual));
+            when(holdingRepository.findByIndividualIdOrderByStartDateDesc(judgeId))
                     .thenReturn(List.of(sampleHolding));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
@@ -223,7 +224,7 @@ class JudgeServiceTest {
         void findById_nonExistingId_returnsEmpty() {
             // Given
             UUID nonExistingId = UUID.randomUUID();
-            when(personRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+            when(individualRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
             // When
             Optional<JudgeDTO> result = judgeService.findById(nonExistingId);
@@ -233,14 +234,14 @@ class JudgeServiceTest {
         }
 
         @Test
-        @DisplayName("Should return empty when person is not a judge (no FJC data source)")
-        void findById_personNotJudge_returnsEmpty() {
+        @DisplayName("Should return empty when individual is not a judge (no FJC data source)")
+        void findById_individualNotJudge_returnsEmpty() {
             // Given
-            Person nonJudge = new Person();
+            Individual nonJudge = new Individual();
             nonJudge.setId(UUID.randomUUID());
-            nonJudge.setDataSource(DataSource.MANUAL); // Not FJC
+            nonJudge.setPrimaryDataSource(DataSource.MANUAL); // Not FJC
 
-            when(personRepository.findById(nonJudge.getId())).thenReturn(Optional.of(nonJudge));
+            when(individualRepository.findById(nonJudge.getId())).thenReturn(Optional.of(nonJudge));
 
             // When
             Optional<JudgeDTO> result = judgeService.findById(nonJudge.getId());
@@ -258,8 +259,8 @@ class JudgeServiceTest {
         @DisplayName("Should find judges matching name")
         void searchByName_matchingName_returnsResults() {
             // Given
-            when(personRepository.searchByName("Roberts")).thenReturn(List.of(samplePerson));
-            when(holdingRepository.findByPersonIdOrderByStartDateDesc(samplePerson.getId()))
+            when(individualRepository.searchByName("Roberts")).thenReturn(List.of(sampleIndividual));
+            when(holdingRepository.findByIndividualIdOrderByStartDateDesc(sampleIndividual.getId()))
                     .thenReturn(List.of(sampleHolding));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
@@ -276,7 +277,7 @@ class JudgeServiceTest {
         @DisplayName("Should return empty list for no matches")
         void searchByName_noMatches_returnsEmptyList() {
             // Given
-            when(personRepository.searchByName("NonExistent")).thenReturn(Collections.emptyList());
+            when(individualRepository.searchByName("NonExistent")).thenReturn(Collections.emptyList());
 
             // When
             List<JudgeDTO> results = judgeService.searchByName("NonExistent");
@@ -289,8 +290,8 @@ class JudgeServiceTest {
         @DisplayName("Should perform case-insensitive search")
         void searchByName_caseInsensitive_findsMatches() {
             // Given
-            when(personRepository.searchByName("ROBERTS")).thenReturn(List.of(samplePerson));
-            when(holdingRepository.findByPersonIdOrderByStartDateDesc(samplePerson.getId()))
+            when(individualRepository.searchByName("ROBERTS")).thenReturn(List.of(sampleIndividual));
+            when(holdingRepository.findByIndividualIdOrderByStartDateDesc(sampleIndividual.getId()))
                     .thenReturn(List.of(sampleHolding));
             when(positionRepository.findById(samplePosition.getId())).thenReturn(Optional.of(samplePosition));
             when(orgRepository.findById(sampleCourt.getId())).thenReturn(Optional.of(sampleCourt));
@@ -311,7 +312,7 @@ class JudgeServiceTest {
         @DisplayName("Should return statistics")
         void getStatistics_returnsStats() {
             // Given
-            when(personRepository.countByDataSource(DataSource.FJC)).thenReturn(1200L);
+            when(individualRepository.countByPrimaryDataSource(DataSource.FJC)).thenReturn(1200L);
             when(holdingRepository.countByDataSource(DataSource.FJC)).thenReturn(1500L);
             // getStatistics() counts current judges manually by filtering holdings with endDate == null
             PositionHolding currentHolding = new PositionHolding();

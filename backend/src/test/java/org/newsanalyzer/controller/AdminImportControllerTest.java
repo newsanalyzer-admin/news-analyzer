@@ -5,8 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.dto.CongressMemberImportRequest;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.model.Person;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.RegulationRepository;
 import org.newsanalyzer.service.FederalRegisterImportService;
@@ -26,7 +28,6 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,8 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * Tests Congress.gov member import endpoints with mocked service layer.
  *
+ * Part of ARCH-1.7: Updated to use CongressionalMember instead of Person.
+ *
  * @author Quinn (QA Agent)
- * @since 2.0.0
+ * @since 3.0.0
  */
 @WebMvcTest(AdminImportController.class)
 @WithMockUser
@@ -53,6 +56,9 @@ class AdminImportControllerTest {
 
     @MockBean
     private MemberSyncService memberSyncService;
+
+    @MockBean
+    private CongressionalMemberRepository congressionalMemberRepository;
 
     @MockBean
     private PersonRepository personRepository;
@@ -69,21 +75,28 @@ class AdminImportControllerTest {
     @MockBean
     private LegislatorsSearchService legislatorsSearchService;
 
-    private Person testPerson;
-    private UUID testPersonId;
+    private CongressionalMember testMember;
+    private Individual testIndividual;
+    private UUID testMemberId;
 
     @BeforeEach
     void setUp() {
-        testPersonId = UUID.randomUUID();
-        testPerson = new Person();
-        testPerson.setId(testPersonId);
-        testPerson.setBioguideId("S000033");
-        testPerson.setFirstName("Bernard");
-        testPerson.setLastName("Sanders");
-        testPerson.setParty("Independent");
-        testPerson.setState("VT");
-        testPerson.setChamber(Chamber.SENATE);
-        testPerson.setBirthDate(LocalDate.of(1941, 9, 8));
+        testMemberId = UUID.randomUUID();
+
+        testIndividual = new Individual();
+        testIndividual.setId(UUID.randomUUID());
+        testIndividual.setFirstName("Bernard");
+        testIndividual.setLastName("Sanders");
+        testIndividual.setParty("Independent");
+        testIndividual.setBirthDate(LocalDate.of(1941, 9, 8));
+
+        testMember = new CongressionalMember();
+        testMember.setId(testMemberId);
+        testMember.setBioguideId("S000033");
+        testMember.setIndividualId(testIndividual.getId());
+        testMember.setIndividual(testIndividual);
+        testMember.setChamber(CongressionalMember.Chamber.SENATE);
+        testMember.setState("VT");
     }
 
     // =========================================================================
@@ -98,8 +111,8 @@ class AdminImportControllerTest {
         request.setBioguideId("S000033");
         request.setForceOverwrite(true);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
-        when(memberSyncService.syncMemberByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.empty());
+        when(memberSyncService.syncMemberByBioguideId("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(post("/api/admin/import/congress/member")
@@ -107,7 +120,7 @@ class AdminImportControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(testPersonId.toString())))
+                .andExpect(jsonPath("$.id", is(testMemberId.toString())))
                 .andExpect(jsonPath("$.bioguideId", is("S000033")))
                 .andExpect(jsonPath("$.name", is("Bernard Sanders")))
                 .andExpect(jsonPath("$.created", is(true)))
@@ -122,8 +135,8 @@ class AdminImportControllerTest {
         request.setBioguideId("S000033");
         request.setForceOverwrite(true);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
-        when(memberSyncService.syncMemberByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
+        when(memberSyncService.syncMemberByBioguideId("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(post("/api/admin/import/congress/member")
@@ -131,7 +144,7 @@ class AdminImportControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(testPersonId.toString())))
+                .andExpect(jsonPath("$.id", is(testMemberId.toString())))
                 .andExpect(jsonPath("$.created", is(false)))
                 .andExpect(jsonPath("$.updated", is(true)));
     }
@@ -144,7 +157,7 @@ class AdminImportControllerTest {
         request.setBioguideId("S000033");
         request.setForceOverwrite(false);
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(post("/api/admin/import/congress/member")
@@ -152,7 +165,7 @@ class AdminImportControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(testPersonId.toString())))
+                .andExpect(jsonPath("$.id", is(testMemberId.toString())))
                 .andExpect(jsonPath("$.created", is(false)))
                 .andExpect(jsonPath("$.updated", is(false)))
                 .andExpect(jsonPath("$.error", containsString("already exists")));
@@ -217,7 +230,7 @@ class AdminImportControllerTest {
         request.setBioguideId("INVALID123");
         request.setForceOverwrite(true);
 
-        when(personRepository.findByBioguideId("INVALID123")).thenReturn(Optional.empty());
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("INVALID123")).thenReturn(Optional.empty());
         when(memberSyncService.syncMemberByBioguideId("INVALID123")).thenReturn(Optional.empty());
 
         // When/Then
@@ -238,13 +251,13 @@ class AdminImportControllerTest {
     @DisplayName("GET /api/admin/import/congress/member/{bioguideId}/exists - Should return true when exists")
     void checkMemberExists_exists_returnsTrue() throws Exception {
         // Given
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then
         mockMvc.perform(get("/api/admin/import/congress/member/S000033/exists"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.exists", is(true)))
-                .andExpect(jsonPath("$.id", is(testPersonId.toString())))
+                .andExpect(jsonPath("$.id", is(testMemberId.toString())))
                 .andExpect(jsonPath("$.name", is("Bernard Sanders")));
     }
 
@@ -252,7 +265,7 @@ class AdminImportControllerTest {
     @DisplayName("GET /api/admin/import/congress/member/{bioguideId}/exists - Should return false when not exists")
     void checkMemberExists_notExists_returnsFalse() throws Exception {
         // Given
-        when(personRepository.findByBioguideId("NONEXISTENT")).thenReturn(Optional.empty());
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("NONEXISTENT")).thenReturn(Optional.empty());
 
         // When/Then
         mockMvc.perform(get("/api/admin/import/congress/member/NONEXISTENT/exists"))
@@ -272,7 +285,7 @@ class AdminImportControllerTest {
         // Given - request without setting forceOverwrite
         String requestJson = "{\"bioguideId\": \"S000033\"}";
 
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(testPerson));
+        when(congressionalMemberRepository.findByBioguideIdWithIndividual("S000033")).thenReturn(Optional.of(testMember));
 
         // When/Then - should behave as if forceOverwrite = false
         mockMvc.perform(post("/api/admin/import/congress/member")

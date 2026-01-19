@@ -21,14 +21,16 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for PresidentialSyncService.
  *
+ * Part of ARCH-1.7: Updated to use IndividualService instead of PersonRepository.
+ *
  * @author James (Dev Agent)
- * @since 2.0.0
+ * @since 3.0.0
  */
 @ExtendWith(MockitoExtension.class)
 class PresidentialSyncServiceTest {
 
     @Mock
-    private PersonRepository personRepository;
+    private IndividualService individualService;
 
     @Mock
     private PresidencyRepository presidencyRepository;
@@ -44,7 +46,7 @@ class PresidentialSyncServiceTest {
     @BeforeEach
     void setUp() {
         syncService = new PresidentialSyncService(
-                personRepository,
+                individualService,
                 presidencyRepository,
                 positionRepository,
                 positionHoldingRepository
@@ -98,7 +100,8 @@ class PresidentialSyncServiceTest {
             assertThat(result.getTotalPresidencies()).isEqualTo(0);
             assertThat(result.getPresidenciesAdded()).isEqualTo(0);
             assertThat(result.getPresidenciesUpdated()).isEqualTo(0);
-            assertThat(result.getPersonsAdded()).isEqualTo(0);
+            assertThat(result.getIndividualsAdded()).isEqualTo(0);
+            assertThat(result.getIndividualsUpdated()).isEqualTo(0);
             assertThat(result.getVpHoldingsAdded()).isEqualTo(0);
             assertThat(result.getErrors()).isEqualTo(0);
             assertThat(result.getErrorMessages()).isEmpty();
@@ -113,7 +116,7 @@ class PresidentialSyncServiceTest {
 
             assertThat(str).contains("SyncResult");
             assertThat(str).contains("presidencies=");
-            assertThat(str).contains("persons=");
+            assertThat(str).contains("individuals=");
             assertThat(str).contains("vpHoldings=");
             assertThat(str).contains("errors=");
         }
@@ -140,14 +143,20 @@ class PresidentialSyncServiceTest {
             when(positionRepository.findByTitle("Vice President of the United States"))
                     .thenReturn(Optional.of(vpPosition));
 
-            // Mock person saves
-            when(personRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            // Mock individual service - findByNameAndBirthDate returns empty (new individuals)
+            when(individualService.findByNameAndBirthDate(anyString(), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                return p;
-            });
+            // Mock findOrCreate to return new individuals
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Mock presidency saves
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
@@ -158,7 +167,7 @@ class PresidentialSyncServiceTest {
             });
 
             // Mock VP holding saves
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
@@ -198,20 +207,25 @@ class PresidentialSyncServiceTest {
             when(positionRepository.save(any(GovernmentPosition.class))).thenReturn(vpPosition);
 
             // Mock other saves
-            when(personRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            when(individualService.findByNameAndBirthDate(anyString(), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
             when(presidencyRepository.save(any(Presidency.class))).thenAnswer(invocation -> {
                 Presidency pres = invocation.getArgument(0);
                 pres.setId(UUID.randomUUID());
                 return pres;
             });
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
@@ -245,27 +259,33 @@ class PresidentialSyncServiceTest {
             when(positionRepository.findByTitle("Vice President of the United States"))
                     .thenReturn(Optional.of(vpPosition));
 
-            // Person already exists
-            Person existingPerson = Person.builder()
-                    .id(UUID.randomUUID())
+            // Individual for Washington already exists
+            UUID washingtonId = UUID.randomUUID();
+            Individual existingIndividual = Individual.builder()
+                    .id(washingtonId)
                     .firstName("George")
                     .lastName("Washington")
                     .build();
-            when(personRepository.findByFirstNameAndLastName("George", "Washington"))
-                    .thenReturn(Optional.of(existingPerson));
-            when(personRepository.findByFirstNameAndLastName(argThat(s -> !s.equals("George")), anyString()))
+            when(individualService.findByNameAndBirthDate("George", "Washington", LocalDate.of(1732, 2, 22)))
+                    .thenReturn(Optional.of(existingIndividual));
+            when(individualService.findByNameAndBirthDate(argThat(s -> !s.equals("George")), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                if (p.getId() == null) p.setId(UUID.randomUUID());
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Presidency #1 already exists
             Presidency existingPresidency = Presidency.builder()
                     .id(UUID.randomUUID())
                     .number(1)
-                    .personId(existingPerson.getId())
+                    .individualId(washingtonId)
                     .build();
             when(presidencyRepository.findByNumber(1)).thenReturn(Optional.of(existingPresidency));
             when(presidencyRepository.findByNumber(argThat(n -> n != 1))).thenReturn(Optional.empty());
@@ -276,7 +296,7 @@ class PresidentialSyncServiceTest {
             });
 
             // VP holdings
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
@@ -305,13 +325,18 @@ class PresidentialSyncServiceTest {
                     .thenReturn(Optional.of(vpPosition));
 
             // Setup mock saves
-            when(personRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            when(individualService.findByNameAndBirthDate(anyString(), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
             // Only set ID if null - preserve test presidency IDs during chain linking
             when(presidencyRepository.save(any(Presidency.class))).thenAnswer(invocation -> {
@@ -321,7 +346,7 @@ class PresidentialSyncServiceTest {
                 }
                 return pres;
             });
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
@@ -366,23 +391,30 @@ class PresidentialSyncServiceTest {
             // Track how many times Grover Cleveland is created
             List<String> clevelandCreations = new ArrayList<>();
 
-            when(personRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            when(individualService.findByNameAndBirthDate(anyString(), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                if ("Grover".equals(p.getFirstName()) && "Cleveland".equals(p.getLastName())) {
-                    clevelandCreations.add(p.getFirstName() + " " + p.getLastName());
-                }
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        String firstName = invocation.getArgument(0);
+                        String lastName = invocation.getArgument(1);
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .build();
+                        if ("Grover".equals(firstName) && "Cleveland".equals(lastName)) {
+                            clevelandCreations.add(firstName + " " + lastName);
+                        }
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
             when(presidencyRepository.save(any(Presidency.class))).thenAnswer(invocation -> {
                 Presidency pres = invocation.getArgument(0);
                 pres.setId(UUID.randomUUID());
                 return pres;
             });
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
@@ -410,13 +442,18 @@ class PresidentialSyncServiceTest {
             when(positionRepository.findByTitle("Vice President of the United States"))
                     .thenReturn(Optional.of(vpPosition));
 
-            when(personRepository.findByFirstNameAndLastName(anyString(), anyString()))
+            when(individualService.findByNameAndBirthDate(anyString(), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
             when(presidencyRepository.save(any(Presidency.class))).thenAnswer(invocation -> {
                 Presidency pres = invocation.getArgument(0);
@@ -428,10 +465,10 @@ class PresidentialSyncServiceTest {
             PositionHolding existingHolding = PositionHolding.builder()
                     .id(UUID.randomUUID())
                     .build();
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(
                     any(), any(), eq(LocalDate.of(1789, 4, 21))))
                     .thenReturn(Optional.of(existingHolding));
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(
                     any(), any(), argThat(d -> !LocalDate.of(1789, 4, 21).equals(d))))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
@@ -469,23 +506,28 @@ class PresidentialSyncServiceTest {
             when(positionRepository.findByTitle("Vice President of the United States"))
                     .thenReturn(Optional.of(vpPosition));
 
-            // First person save throws error, rest succeed
-            when(personRepository.findByFirstNameAndLastName("George", "Washington"))
+            // First individual lookup throws error (for George Washington), rest succeed
+            when(individualService.findByNameAndBirthDate("George", "Washington", LocalDate.of(1732, 2, 22)))
                     .thenThrow(new RuntimeException("Database error"));
-            when(personRepository.findByFirstNameAndLastName(argThat(s -> !s.equals("George")), anyString()))
+            when(individualService.findByNameAndBirthDate(argThat(s -> !s.equals("George")), anyString(), any()))
                     .thenReturn(Optional.empty());
-            when(personRepository.save(any(Person.class))).thenAnswer(invocation -> {
-                Person p = invocation.getArgument(0);
-                p.setId(UUID.randomUUID());
-                return p;
-            });
+            when(individualService.findOrCreate(anyString(), anyString(), any(), any(), any(), any(), any(), any(), any()))
+                    .thenAnswer(invocation -> {
+                        Individual ind = Individual.builder()
+                                .id(UUID.randomUUID())
+                                .firstName(invocation.getArgument(0))
+                                .lastName(invocation.getArgument(1))
+                                .build();
+                        return ind;
+                    });
+            when(individualService.save(any(Individual.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(presidencyRepository.findByNumber(anyInt())).thenReturn(Optional.empty());
             when(presidencyRepository.save(any(Presidency.class))).thenAnswer(invocation -> {
                 Presidency pres = invocation.getArgument(0);
                 pres.setId(UUID.randomUUID());
                 return pres;
             });
-            when(positionHoldingRepository.findByPersonIdAndPositionIdAndStartDate(any(), any(), any()))
+            when(positionHoldingRepository.findByIndividualIdAndPositionIdAndStartDate(any(), any(), any()))
                     .thenReturn(Optional.empty());
             when(positionHoldingRepository.save(any(PositionHolding.class))).thenAnswer(invocation -> {
                 PositionHolding h = invocation.getArgument(0);
