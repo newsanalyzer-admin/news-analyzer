@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.newsanalyzer.model.Person;
+import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.model.Presidency;
 
 import java.time.LocalDate;
@@ -15,6 +15,8 @@ import java.util.UUID;
 /**
  * Data Transfer Object for Presidency API responses.
  * Includes president details and computed fields.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -30,7 +32,7 @@ public class PresidencyDTO {
     private String ordinalLabel;           // "1st", "22nd", "47th"
 
     // President details
-    private UUID personId;
+    private UUID individualId;
     private String presidentFullName;
     private String presidentFirstName;
     private String presidentLastName;
@@ -80,7 +82,7 @@ public class PresidencyDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class VicePresidentDTO {
-        private UUID personId;
+        private UUID individualId;
         private String fullName;
         private String firstName;
         private String lastName;
@@ -99,44 +101,44 @@ public class PresidencyDTO {
     // =====================================================================
 
     /**
-     * Create PresidencyDTO from Presidency entity and Person.
+     * Create PresidencyDTO from Presidency entity and Individual.
      *
      * @param presidency the presidency entity
-     * @param person the president's person record
+     * @param individual the president's individual record
      * @return the DTO
      */
-    public static PresidencyDTO from(Presidency presidency, Person person) {
-        return from(presidency, person, null, null);
+    public static PresidencyDTO from(Presidency presidency, Individual individual) {
+        return from(presidency, individual, null, null);
     }
 
     /**
-     * Create PresidencyDTO from Presidency entity, Person, EO count, and VP list.
+     * Create PresidencyDTO from Presidency entity, Individual, EO count, and VP list.
      *
      * @param presidency the presidency entity
-     * @param person the president's person record
+     * @param individual the president's individual record
      * @param eoCount executive order count (can be null)
      * @param vicePresidents list of VPs (can be null)
      * @return the DTO
      */
-    public static PresidencyDTO from(Presidency presidency, Person person,
+    public static PresidencyDTO from(Presidency presidency, Individual individual,
                                       Integer eoCount, List<VicePresidentDTO> vicePresidents) {
         if (presidency == null) return null;
 
-        String fullName = buildFullName(person);
-        boolean living = person != null && person.getDeathDate() == null;
+        String fullName = buildFullName(individual);
+        boolean living = individual != null && individual.getDeathDate() == null;
 
         return PresidencyDTO.builder()
                 .id(presidency.getId())
                 .number(presidency.getNumber())
                 .ordinalLabel(presidency.getOrdinalLabel())
-                .personId(presidency.getPersonId())
+                .individualId(presidency.getIndividualId())
                 .presidentFullName(fullName)
-                .presidentFirstName(person != null ? person.getFirstName() : null)
-                .presidentLastName(person != null ? person.getLastName() : null)
-                .imageUrl(person != null ? person.getImageUrl() : null)
-                .birthDate(person != null ? person.getBirthDate() : null)
-                .deathDate(person != null ? person.getDeathDate() : null)
-                .birthPlace(person != null ? person.getBirthPlace() : null)
+                .presidentFirstName(individual != null ? individual.getFirstName() : null)
+                .presidentLastName(individual != null ? individual.getLastName() : null)
+                .imageUrl(individual != null ? individual.getImageUrl() : null)
+                .birthDate(individual != null ? individual.getBirthDate() : null)
+                .deathDate(individual != null ? individual.getDeathDate() : null)
+                .birthPlace(individual != null ? individual.getBirthPlace() : null)
                 .isLiving(living)
                 .party(presidency.getParty())
                 .startDate(presidency.getStartDate())
@@ -154,22 +156,22 @@ public class PresidencyDTO {
     }
 
     /**
-     * Build full name from Person entity.
+     * Build full name from Individual entity.
      */
-    private static String buildFullName(Person person) {
-        if (person == null) return null;
+    private static String buildFullName(Individual individual) {
+        if (individual == null) return null;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(person.getFirstName());
+        sb.append(individual.getFirstName());
 
-        if (person.getMiddleName() != null && !person.getMiddleName().isEmpty()) {
-            sb.append(" ").append(person.getMiddleName());
+        if (individual.getMiddleName() != null && !individual.getMiddleName().isEmpty()) {
+            sb.append(" ").append(individual.getMiddleName());
         }
 
-        sb.append(" ").append(person.getLastName());
+        sb.append(" ").append(individual.getLastName());
 
-        if (person.getSuffix() != null && !person.getSuffix().isEmpty()) {
-            sb.append(" ").append(person.getSuffix());
+        if (individual.getSuffix() != null && !individual.getSuffix().isEmpty()) {
+            sb.append(" ").append(individual.getSuffix());
         }
 
         return sb.toString();

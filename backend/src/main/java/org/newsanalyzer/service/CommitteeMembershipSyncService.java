@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.newsanalyzer.model.Committee;
 import org.newsanalyzer.model.CommitteeMembership;
+import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.MembershipRole;
-import org.newsanalyzer.model.Person;
 import org.newsanalyzer.repository.CommitteeMembershipRepository;
 import org.newsanalyzer.repository.CommitteeRepository;
-import org.newsanalyzer.repository.PersonRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,8 @@ import java.util.Optional;
  * Handles syncing the relationship between members and committees,
  * including roles like Chair, Ranking Member, etc.
  *
+ * Part of ARCH-1.6: Updated to use CongressionalMember instead of Person.
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -37,7 +38,7 @@ public class CommitteeMembershipSyncService {
     private final CongressApiClient congressApiClient;
     private final CommitteeMembershipRepository membershipRepository;
     private final CommitteeRepository committeeRepository;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberService congressionalMemberService;
     private final ObjectMapper objectMapper;
 
     // Default to current Congress (can be configured)
@@ -46,12 +47,12 @@ public class CommitteeMembershipSyncService {
     public CommitteeMembershipSyncService(CongressApiClient congressApiClient,
                                           CommitteeMembershipRepository membershipRepository,
                                           CommitteeRepository committeeRepository,
-                                          PersonRepository personRepository,
+                                          CongressionalMemberService congressionalMemberService,
                                           ObjectMapper objectMapper) {
         this.congressApiClient = congressApiClient;
         this.membershipRepository = membershipRepository;
         this.committeeRepository = committeeRepository;
-        this.personRepository = personRepository;
+        this.congressionalMemberService = congressionalMemberService;
         this.objectMapper = objectMapper;
     }
 
@@ -201,16 +202,18 @@ public class CommitteeMembershipSyncService {
             throw new IllegalArgumentException("Member data missing bioguideId");
         }
 
-        // Find the Person
-        Optional<Person> person = personRepository.findByBioguideId(bioguideId);
-        if (person.isEmpty()) {
-            throw new IllegalArgumentException("Person not found: " + bioguideId);
+        // Find the CongressionalMember
+        Optional<CongressionalMember> memberOpt = congressionalMemberService.findByBioguideId(bioguideId);
+        if (memberOpt.isEmpty()) {
+            throw new IllegalArgumentException("CongressionalMember not found: " + bioguideId);
         }
+
+        CongressionalMember member = memberOpt.get();
 
         // Check if membership already exists
         Optional<CommitteeMembership> existing = membershipRepository
-                .findByPerson_IdAndCommittee_CommitteeCodeAndCongress(
-                        person.get().getId(),
+                .findByCongressionalMember_IdAndCommittee_CommitteeCodeAndCongress(
+                        member.getId(),
                         committee.getCommitteeCode(),
                         congress
                 );
@@ -219,7 +222,7 @@ public class CommitteeMembershipSyncService {
         boolean isNew = existing.isEmpty();
 
         // Map data
-        membership.setPerson(person.get());
+        membership.setCongressionalMember(member);
         membership.setCommittee(committee);
         membership.setCongress(congress);
         membership.setRole(mapRole(memberData.path("role").asText()));

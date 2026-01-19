@@ -4,7 +4,7 @@ import org.newsanalyzer.dto.DocumentQueryParams;
 import org.newsanalyzer.dto.FederalRegisterDocument;
 import org.newsanalyzer.model.*;
 import org.newsanalyzer.repository.ExecutiveOrderRepository;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.repository.IndividualRepository;
 import org.newsanalyzer.repository.PresidencyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +18,8 @@ import java.util.*;
  *
  * Fetches Executive Orders for each presidency and stores metadata in the database.
  * Links EOs to their respective Presidency entities.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -34,7 +36,7 @@ public class ExecutiveOrderSyncService {
     private final FederalRegisterClient federalRegisterClient;
     private final ExecutiveOrderRepository executiveOrderRepository;
     private final PresidencyRepository presidencyRepository;
-    private final PersonRepository personRepository;
+    private final IndividualRepository individualRepository;
 
     // Map of president names to Federal Register API identifiers
     // Federal Register uses lowercase hyphenated names
@@ -63,11 +65,11 @@ public class ExecutiveOrderSyncService {
     public ExecutiveOrderSyncService(FederalRegisterClient federalRegisterClient,
                                      ExecutiveOrderRepository executiveOrderRepository,
                                      PresidencyRepository presidencyRepository,
-                                     PersonRepository personRepository) {
+                                     IndividualRepository individualRepository) {
         this.federalRegisterClient = federalRegisterClient;
         this.executiveOrderRepository = executiveOrderRepository;
         this.presidencyRepository = presidencyRepository;
-        this.personRepository = personRepository;
+        this.individualRepository = individualRepository;
     }
 
     /**
@@ -173,14 +175,14 @@ public class ExecutiveOrderSyncService {
      * Sync Executive Orders for a presidency.
      */
     private void syncExecutiveOrdersForPresidency(Presidency presidency, SyncResult result) {
-        // Get president's name
-        Optional<Person> personOpt = personRepository.findById(presidency.getPersonId());
-        if (personOpt.isEmpty()) {
-            log.warn("Person not found for presidency #{}, skipping", presidency.getNumber());
+        // Get president's name from linked Individual
+        Optional<Individual> individualOpt = individualRepository.findById(presidency.getIndividualId());
+        if (individualOpt.isEmpty()) {
+            log.warn("Individual not found for presidency #{}, skipping", presidency.getNumber());
             return;
         }
 
-        Person president = personOpt.get();
+        Individual president = individualOpt.get();
         String presidentFullName = president.getFirstName() + " " + president.getLastName();
 
         // Get Federal Register identifier for this president
@@ -303,7 +305,7 @@ public class ExecutiveOrderSyncService {
      * Get Federal Register API identifier for a president.
      * Returns null for pre-FDR presidents (no EOs in database).
      */
-    private String getFederalRegisterName(String fullName, Person president) {
+    private String getFederalRegisterName(String fullName, Individual president) {
         // Try direct mapping
         for (Map.Entry<String, String> entry : PRESIDENT_NAME_MAPPING.entrySet()) {
             if (fullName.contains(entry.getKey()) ||

@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
  *
  * Provides business logic for querying appointees, positions, and Cabinet members.
  *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AppointeeService {
 
-    private final PersonRepository personRepository;
+    private final IndividualRepository individualRepository;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository holdingRepository;
     private final GovernmentOrganizationRepository orgRepository;
@@ -78,25 +80,25 @@ public class AppointeeService {
     }
 
     /**
-     * Get appointee by person ID.
+     * Get appointee by individual ID.
      */
-    public Optional<AppointeeDTO> getAppointeeById(UUID personId) {
-        return personRepository.findById(personId)
-                .flatMap(person -> {
+    public Optional<AppointeeDTO> getAppointeeById(UUID individualId) {
+        return individualRepository.findById(individualId)
+                .flatMap(individual -> {
                     // Find their current executive holding
                     List<PositionHolding> currentHoldings = holdingRepository
-                            .findByPersonIdOrderByStartDateDesc(personId)
+                            .findByIndividualIdOrderByStartDateDesc(individualId)
                             .stream()
                             .filter(PositionHolding::isCurrent)
                             .collect(Collectors.toList());
 
                     if (currentHoldings.isEmpty()) {
-                        // Return person info without active position
+                        // Return individual info without active position
                         return Optional.of(AppointeeDTO.builder()
-                                .id(person.getId())
-                                .firstName(person.getFirstName())
-                                .lastName(person.getLastName())
-                                .fullName(person.getFullName())
+                                .id(individual.getId())
+                                .firstName(individual.getFirstName())
+                                .lastName(individual.getLastName())
+                                .fullName(individual.getFullName())
                                 .current(false)
                                 .status("No active position")
                                 .build());
@@ -118,13 +120,13 @@ public class AppointeeService {
 
         Set<AppointeeDTO> results = new LinkedHashSet<>();
 
-        // Search by person name
-        List<Person> personMatches = personRepository.searchByName(query.trim());
-        for (Person person : personMatches) {
+        // Search by individual name
+        List<Individual> individualMatches = individualRepository.searchByName(query.trim());
+        for (Individual individual : individualMatches) {
             if (results.size() >= limit) break;
 
             List<PositionHolding> holdings = holdingRepository
-                    .findByPersonIdOrderByStartDateDesc(person.getId())
+                    .findByIndividualIdOrderByStartDateDesc(individual.getId())
                     .stream()
                     .filter(PositionHolding::isCurrent)
                     .collect(Collectors.toList());
@@ -263,7 +265,7 @@ public class AppointeeService {
     private AppointeeDTO convertToAppointeeDTO(PositionHolding holding) {
         if (holding == null) return null;
 
-        Person person = personRepository.findById(holding.getPersonId()).orElse(null);
+        Individual individual = individualRepository.findById(holding.getIndividualId()).orElse(null);
         GovernmentPosition position = positionRepository.findById(holding.getPositionId()).orElse(null);
         GovernmentOrganization org = null;
 
@@ -271,7 +273,7 @@ public class AppointeeService {
             org = orgRepository.findById(position.getOrganizationId()).orElse(null);
         }
 
-        return AppointeeDTO.from(person, position, holding, org);
+        return AppointeeDTO.from(individual, position, holding, org);
     }
 
     /**
@@ -286,10 +288,10 @@ public class AppointeeService {
                 .findCurrentHoldersByPositionId(position.getId());
 
         if (!currentHolders.isEmpty()) {
-            UUID personId = currentHolders.get(0).getPersonId();
-            Person person = personRepository.findById(personId).orElse(null);
-            if (person != null) {
-                currentHolderName = person.getFullName();
+            UUID individualId = currentHolders.get(0).getIndividualId();
+            Individual individual = individualRepository.findById(individualId).orElse(null);
+            if (individual != null) {
+                currentHolderName = individual.getFullName();
             }
         }
 

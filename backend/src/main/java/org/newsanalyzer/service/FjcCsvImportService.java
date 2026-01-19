@@ -25,8 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Service for importing federal judge data from FJC's Biographical Directory CSV.
  *
- * Downloads and parses the FJC CSV file, creating/updating Person, GovernmentPosition,
+ * Downloads and parses the FJC CSV file, creating/updating Individual, GovernmentPosition,
  * and PositionHolding records for federal judges.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -36,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class FjcCsvImportService {
 
-    private final PersonRepository personRepository;
+    private final IndividualService individualService;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository holdingRepository;
     private final GovernmentOrganizationRepository orgRepository;
@@ -52,13 +54,13 @@ public class FjcCsvImportService {
     // Cache for court organization lookups
     private final Map<String, UUID> courtCache = new ConcurrentHashMap<>();
 
-    public FjcCsvImportService(PersonRepository personRepository,
+    public FjcCsvImportService(IndividualService individualService,
                                GovernmentPositionRepository positionRepository,
                                PositionHoldingRepository holdingRepository,
                                GovernmentOrganizationRepository orgRepository,
                                RestTemplate restTemplate,
                                PlatformTransactionManager transactionManager) {
-        this.personRepository = personRepository;
+        this.individualService = individualService;
         this.positionRepository = positionRepository;
         this.holdingRepository = holdingRepository;
         this.orgRepository = orgRepository;
@@ -280,8 +282,8 @@ public class FjcCsvImportService {
                 return stats;
             }
 
-            // Find or create Person
-            Person person = findOrCreatePerson(record, stats);
+            // Find or create Individual
+            Individual individual = findOrCreateIndividual(record, stats);
 
             // Find court organization
             UUID courtId = findCourtId(record.getCourtName1());
@@ -290,74 +292,68 @@ public class FjcCsvImportService {
             GovernmentPosition position = findOrCreatePosition(record, courtId, stats);
 
             // Find or create position holding
-            findOrCreateHolding(person, position, record, stats);
+            findOrCreateHolding(individual, position, record, stats);
 
             return stats;
         });
     }
 
-    private Person findOrCreatePerson(FjcJudgeCsvRecord record, ImportStats stats) {
-        // Try to find by FJC NID in external_ids
-        String fjcNid = record.getNid();
-        Optional<Person> existing = Optional.empty();
+    private Individual findOrCreateIndividual(FjcJudgeCsvRecord record, ImportStats stats) {
+        String firstName = record.getFirstName() != null ? record.getFirstName().trim() : "";
+        String lastName = record.getLastName().trim();
+        LocalDate birthDate = parseDate(record.getBirthDateString());
 
-        if (fjcNid != null && !fjcNid.isBlank()) {
-            // Search by name since we don't have FJC NID indexed
-            existing = personRepository.findByFirstNameAndLastName(
-                    record.getFirstName().trim(),
-                    record.getLastName().trim());
-        }
+        // Use IndividualService.findOrCreate for deduplication
+        var existingOpt = individualService.findByNameAndBirthDate(firstName, lastName, birthDate);
 
-        if (existing.isEmpty()) {
-            // Try by name match
-            existing = personRepository.findByFirstNameAndLastName(
-                    record.getFirstName() != null ? record.getFirstName().trim() : "",
-                    record.getLastName().trim());
-        }
-
-        Person person;
-        if (existing.isPresent()) {
-            person = existing.get();
+        Individual individual;
+        if (existingOpt.isPresent()) {
+            individual = existingOpt.get();
             // Update if needed
-            updatePersonFromRecord(person, record);
-            person = personRepository.save(person);
-            stats.personsUpdated++;
+            boolean updated = updateIndividualFromRecord(individual, record);
+            if (updated) {
+                individual = individualService.save(individual);
+                stats.personsUpdated++;
+            }
         } else {
-            person = createPersonFromRecord(record);
-            person = personRepository.save(person);
+            // Use findOrCreate with full details
+            individual = individualService.findOrCreate(
+                    firstName,
+                    lastName,
+                    record.getMiddleName(),
+                    record.getSuffix(),
+                    birthDate,
+                    null, // birthPlace
+                    record.getGender(),
+                    null, // party
+                    DataSource.FJC
+            );
             stats.personsCreated++;
         }
 
-        return person;
+        return individual;
     }
 
-    private Person createPersonFromRecord(FjcJudgeCsvRecord record) {
-        Person person = new Person();
-        person.setFirstName(record.getFirstName() != null ? record.getFirstName().trim() : "");
-        person.setLastName(record.getLastName().trim());
-        person.setMiddleName(record.getMiddleName());
-        person.setSuffix(record.getSuffix());
-        person.setGender(record.getGender());
-        person.setBirthDate(parseDate(record.getBirthDateString()));
-        person.setDataSource(DataSource.FJC);
-        person.setEnrichmentSource("fjc");
-        return person;
-    }
-
-    private void updatePersonFromRecord(Person person, FjcJudgeCsvRecord record) {
+    private boolean updateIndividualFromRecord(Individual individual, FjcJudgeCsvRecord record) {
+        boolean updated = false;
         // Only update fields that are empty
-        if (person.getMiddleName() == null && record.getMiddleName() != null) {
-            person.setMiddleName(record.getMiddleName());
+        if (individual.getMiddleName() == null && record.getMiddleName() != null) {
+            individual.setMiddleName(record.getMiddleName());
+            updated = true;
         }
-        if (person.getSuffix() == null && record.getSuffix() != null) {
-            person.setSuffix(record.getSuffix());
+        if (individual.getSuffix() == null && record.getSuffix() != null) {
+            individual.setSuffix(record.getSuffix());
+            updated = true;
         }
-        if (person.getGender() == null && record.getGender() != null) {
-            person.setGender(record.getGender());
+        if (individual.getGender() == null && record.getGender() != null) {
+            individual.setGender(record.getGender());
+            updated = true;
         }
-        if (person.getBirthDate() == null && record.getBirthDateString() != null) {
-            person.setBirthDate(parseDate(record.getBirthDateString()));
+        if (individual.getBirthDate() == null && record.getBirthDateString() != null) {
+            individual.setBirthDate(parseDate(record.getBirthDateString()));
+            updated = true;
         }
+        return updated;
     }
 
     private UUID findCourtId(String courtName) {
@@ -404,7 +400,7 @@ public class FjcCsvImportService {
         return position;
     }
 
-    private void findOrCreateHolding(Person person, GovernmentPosition position,
+    private void findOrCreateHolding(Individual individual, GovernmentPosition position,
                                       FjcJudgeCsvRecord record, ImportStats stats) {
         LocalDate commissionDate = parseDate(record.getCommissionDate1());
         LocalDate terminationDate = parseDate(record.getTerminationDate1());
@@ -421,8 +417,8 @@ public class FjcCsvImportService {
         }
 
         // Check for existing holding
-        Optional<PositionHolding> existing = holdingRepository.findByPersonIdAndPositionIdAndStartDate(
-                person.getId(), position.getId(), commissionDate);
+        Optional<PositionHolding> existing = holdingRepository.findByIndividualIdAndPositionIdAndStartDate(
+                individual.getId(), position.getId(), commissionDate);
 
         if (existing.isPresent()) {
             PositionHolding holding = existing.get();
@@ -446,7 +442,7 @@ public class FjcCsvImportService {
 
         // Create new holding
         PositionHolding holding = new PositionHolding();
-        holding.setPersonId(person.getId());
+        holding.setIndividualId(individual.getId());
         holding.setPositionId(position.getId());
         holding.setStartDate(commissionDate);
         holding.setEndDate(terminationDate);

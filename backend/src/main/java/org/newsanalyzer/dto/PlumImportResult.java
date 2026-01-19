@@ -12,6 +12,8 @@ import java.util.List;
  *
  * Tracks statistics and errors from the import process.
  *
+ * Part of ARCH-1.6: Updated field names from persons to individuals.
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -23,8 +25,8 @@ public class PlumImportResult {
     private LocalDateTime endTime;
 
     private int totalRecords;
-    private int personsCreated;
-    private int personsUpdated;
+    private int individualsCreated;
+    private int individualsUpdated;
     private int positionsCreated;
     private int positionsUpdated;
     private int holdingsCreated;
@@ -97,12 +99,12 @@ public class PlumImportResult {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("PLUM Import Complete: %d records processed in %d seconds%n",
                 totalRecords, getDurationSeconds() != null ? getDurationSeconds() : 0));
-        sb.append(String.format("  Persons:   %d created, %d updated%n", personsCreated, personsUpdated));
-        sb.append(String.format("  Positions: %d created, %d updated%n", positionsCreated, positionsUpdated));
-        sb.append(String.format("  Holdings:  %d created, %d updated%n", holdingsCreated, holdingsUpdated));
-        sb.append(String.format("  Vacant:    %d%n", vacantPositions));
-        sb.append(String.format("  Skipped:   %d%n", skipped));
-        sb.append(String.format("  Errors:    %d%n", errors));
+        sb.append(String.format("  Individuals: %d created, %d updated%n", individualsCreated, individualsUpdated));
+        sb.append(String.format("  Positions:   %d created, %d updated%n", positionsCreated, positionsUpdated));
+        sb.append(String.format("  Holdings:    %d created, %d updated%n", holdingsCreated, holdingsUpdated));
+        sb.append(String.format("  Vacant:      %d%n", vacantPositions));
+        sb.append(String.format("  Skipped:     %d%n", skipped));
+        sb.append(String.format("  Errors:      %d%n", errors));
         if (unmatchedAgencies > 0) {
             sb.append(String.format("  Unmatched agencies: %d%n", unmatchedAgencies));
         }

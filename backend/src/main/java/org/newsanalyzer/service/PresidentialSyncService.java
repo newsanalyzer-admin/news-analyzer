@@ -20,13 +20,15 @@ import java.util.*;
  * Service for synchronizing presidential data from seed file.
  *
  * Imports all 47 presidencies with:
- * - President Person records
- * - Presidency records (linked to Person)
- * - Vice President Person records
+ * - President Individual records
+ * - Presidency records (linked to Individual)
+ * - Vice President Individual records
  * - VP PositionHolding records (linked to Presidency)
  *
  * Handles non-consecutive terms (Cleveland 22/24, Trump 45/47) by
- * reusing the same Person record for multiple Presidency entries.
+ * reusing the same Individual record for multiple Presidency entries.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -39,20 +41,20 @@ public class PresidentialSyncService {
     private static final String SEED_FILE_PATH = "data/presidencies-seed.json";
     private static final String VP_POSITION_TITLE = "Vice President of the United States";
 
-    private final PersonRepository personRepository;
+    private final IndividualService individualService;
     private final PresidencyRepository presidencyRepository;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository positionHoldingRepository;
     private final ObjectMapper objectMapper;
 
-    // Cache for person lookups during sync
-    private final Map<String, Person> personCache = new HashMap<>();
+    // Cache for individual lookups during sync
+    private final Map<String, Individual> individualCache = new HashMap<>();
 
-    public PresidentialSyncService(PersonRepository personRepository,
+    public PresidentialSyncService(IndividualService individualService,
                                    PresidencyRepository presidencyRepository,
                                    GovernmentPositionRepository positionRepository,
                                    PositionHoldingRepository positionHoldingRepository) {
-        this.personRepository = personRepository;
+        this.individualService = individualService;
         this.presidencyRepository = presidencyRepository;
         this.positionRepository = positionRepository;
         this.positionHoldingRepository = positionHoldingRepository;
@@ -66,16 +68,16 @@ public class PresidentialSyncService {
     public static class SyncResult {
         private int presidenciesAdded;
         private int presidenciesUpdated;
-        private int personsAdded;
-        private int personsUpdated;
+        private int individualsAdded;
+        private int individualsUpdated;
         private int vpHoldingsAdded;
         private int errors;
         private List<String> errorMessages = new ArrayList<>();
 
         public int getPresidenciesAdded() { return presidenciesAdded; }
         public int getPresidenciesUpdated() { return presidenciesUpdated; }
-        public int getPersonsAdded() { return personsAdded; }
-        public int getPersonsUpdated() { return personsUpdated; }
+        public int getIndividualsAdded() { return individualsAdded; }
+        public int getIndividualsUpdated() { return individualsUpdated; }
         public int getVpHoldingsAdded() { return vpHoldingsAdded; }
         public int getErrors() { return errors; }
         public List<String> getErrorMessages() { return errorMessages; }
@@ -85,9 +87,9 @@ public class PresidentialSyncService {
         @Override
         public String toString() {
             return String.format("SyncResult{presidencies=%d (added=%d, updated=%d), " +
-                            "persons=%d (added=%d, updated=%d), vpHoldings=%d, errors=%d}",
+                            "individuals=%d (added=%d, updated=%d), vpHoldings=%d, errors=%d}",
                     getTotalPresidencies(), presidenciesAdded, presidenciesUpdated,
-                    personsAdded + personsUpdated, personsAdded, personsUpdated,
+                    individualsAdded + individualsUpdated, individualsAdded, individualsUpdated,
                     vpHoldingsAdded, errors);
         }
     }
@@ -113,8 +115,8 @@ public class PresidentialSyncService {
 
             log.info("Loaded {} presidencies from seed file", seedData.getPresidencies().size());
 
-            // Clear person cache
-            personCache.clear();
+            // Clear individual cache
+            individualCache.clear();
 
             // Ensure VP position exists
             GovernmentPosition vpPosition = ensureVpPositionExists();
@@ -180,8 +182,8 @@ public class PresidentialSyncService {
                 entry.getPresident().getFirstName(),
                 entry.getPresident().getLastName());
 
-        // 1. Create/update president Person
-        Person president = syncPerson(entry.getPresident(), entry.getPresidentKey(), result);
+        // 1. Create/update president Individual
+        Individual president = syncIndividual(entry.getPresident(), entry.getPresidentKey(), result);
 
         // 2. Create/update Presidency
         Presidency presidency = syncPresidencyRecord(entry, president.getId(), result);
@@ -195,92 +197,114 @@ public class PresidentialSyncService {
     }
 
     /**
-     * Sync a person record (president or VP).
+     * Sync an individual record (president or VP).
+     *
+     * Uses IndividualService.findOrCreate for deduplication, then updates
+     * additional fields from the seed entry.
      */
-    private Person syncPerson(PersonEntry entry, String personKey, SyncResult result) {
+    private Individual syncIndividual(PersonEntry entry, String personKey, SyncResult result) {
         // Check cache first (for non-consecutive terms)
-        if (personCache.containsKey(personKey)) {
-            log.debug("Using cached person: {}", personKey);
-            return personCache.get(personKey);
+        if (individualCache.containsKey(personKey)) {
+            log.debug("Using cached individual: {}", personKey);
+            return individualCache.get(personKey);
         }
 
-        // Look up by name
-        Optional<Person> existing = personRepository.findByFirstNameAndLastName(
-                entry.getFirstName(), entry.getLastName());
+        // Use IndividualService for findOrCreate with deduplication
+        // First check if we need to determine if this is an update or create
+        var existingOpt = individualService.findByNameAndBirthDate(
+                entry.getFirstName(), entry.getLastName(), entry.getBirthDate());
 
-        Person person;
-        if (existing.isPresent()) {
-            person = existing.get();
-            updatePerson(person, entry);
-            person = personRepository.save(person);
-            result.personsUpdated++;
-            log.debug("Updated person: {} {}", entry.getFirstName(), entry.getLastName());
+        Individual individual;
+        if (existingOpt.isPresent()) {
+            individual = existingOpt.get();
+            boolean updated = updateIndividual(individual, entry);
+            if (updated) {
+                individual = individualService.save(individual);
+                result.individualsUpdated++;
+                log.debug("Updated individual: {} {}", entry.getFirstName(), entry.getLastName());
+            }
         } else {
-            person = createPerson(entry);
-            person = personRepository.save(person);
-            result.personsAdded++;
-            log.debug("Created person: {} {}", entry.getFirstName(), entry.getLastName());
+            // Use findOrCreate with full details
+            individual = individualService.findOrCreate(
+                    entry.getFirstName(),
+                    entry.getLastName(),
+                    entry.getMiddleName(),
+                    entry.getSuffix(),
+                    entry.getBirthDate(),
+                    entry.getBirthPlace(),
+                    null, // gender
+                    null, // party
+                    DataSource.WHITE_HOUSE_HISTORICAL
+            );
+
+            // Update additional fields not handled by findOrCreate
+            boolean updated = false;
+            if (entry.getDeathDate() != null && individual.getDeathDate() == null) {
+                individual.setDeathDate(entry.getDeathDate());
+                updated = true;
+            }
+            if (entry.getImageUrl() != null && individual.getImageUrl() == null) {
+                individual.setImageUrl(entry.getImageUrl());
+                updated = true;
+            }
+            if (updated) {
+                individual = individualService.save(individual);
+            }
+            result.individualsAdded++;
+            log.debug("Created individual: {} {}", entry.getFirstName(), entry.getLastName());
         }
 
         // Cache for later lookups
-        personCache.put(personKey, person);
-        return person;
+        individualCache.put(personKey, individual);
+        return individual;
     }
 
     /**
-     * Create a new Person from seed entry.
+     * Update existing individual with seed data (only if fields are empty).
+     *
+     * @return true if any field was updated
      */
-    private Person createPerson(PersonEntry entry) {
-        return Person.builder()
-                .firstName(entry.getFirstName())
-                .lastName(entry.getLastName())
-                .middleName(entry.getMiddleName())
-                .suffix(entry.getSuffix())
-                .birthDate(entry.getBirthDate())
-                .deathDate(entry.getDeathDate())
-                .birthPlace(entry.getBirthPlace())
-                .imageUrl(entry.getImageUrl())
-                .dataSource(DataSource.WHITE_HOUSE_HISTORICAL)
-                .build();
-    }
-
-    /**
-     * Update existing person with seed data (only if fields are empty).
-     */
-    private void updatePerson(Person person, PersonEntry entry) {
+    private boolean updateIndividual(Individual individual, PersonEntry entry) {
+        boolean updated = false;
         // Only update fields if currently null (don't overwrite existing data)
-        if (person.getBirthDate() == null && entry.getBirthDate() != null) {
-            person.setBirthDate(entry.getBirthDate());
+        if (individual.getBirthDate() == null && entry.getBirthDate() != null) {
+            individual.setBirthDate(entry.getBirthDate());
+            updated = true;
         }
-        if (person.getDeathDate() == null && entry.getDeathDate() != null) {
-            person.setDeathDate(entry.getDeathDate());
+        if (individual.getDeathDate() == null && entry.getDeathDate() != null) {
+            individual.setDeathDate(entry.getDeathDate());
+            updated = true;
         }
-        if (person.getBirthPlace() == null && entry.getBirthPlace() != null) {
-            person.setBirthPlace(entry.getBirthPlace());
+        if (individual.getBirthPlace() == null && entry.getBirthPlace() != null) {
+            individual.setBirthPlace(entry.getBirthPlace());
+            updated = true;
         }
-        if (person.getImageUrl() == null && entry.getImageUrl() != null) {
-            person.setImageUrl(entry.getImageUrl());
+        if (individual.getImageUrl() == null && entry.getImageUrl() != null) {
+            individual.setImageUrl(entry.getImageUrl());
+            updated = true;
         }
-        if (person.getMiddleName() == null && entry.getMiddleName() != null) {
-            person.setMiddleName(entry.getMiddleName());
+        if (individual.getMiddleName() == null && entry.getMiddleName() != null) {
+            individual.setMiddleName(entry.getMiddleName());
+            updated = true;
         }
+        return updated;
     }
 
     /**
      * Sync a Presidency record.
      */
-    private Presidency syncPresidencyRecord(PresidencyEntry entry, UUID personId, SyncResult result) {
+    private Presidency syncPresidencyRecord(PresidencyEntry entry, UUID individualId, SyncResult result) {
         Optional<Presidency> existing = presidencyRepository.findByNumber(entry.getNumber());
 
         Presidency presidency;
         if (existing.isPresent()) {
             presidency = existing.get();
-            updatePresidency(presidency, entry, personId);
+            updatePresidency(presidency, entry, individualId);
             presidency = presidencyRepository.save(presidency);
             result.presidenciesUpdated++;
             log.debug("Updated presidency #{}", entry.getNumber());
         } else {
-            presidency = createPresidency(entry, personId);
+            presidency = createPresidency(entry, individualId);
             presidency = presidencyRepository.save(presidency);
             result.presidenciesAdded++;
             log.debug("Created presidency #{}", entry.getNumber());
@@ -292,7 +316,7 @@ public class PresidentialSyncService {
     /**
      * Create a new Presidency from seed entry.
      */
-    private Presidency createPresidency(PresidencyEntry entry, UUID personId) {
+    private Presidency createPresidency(PresidencyEntry entry, UUID individualId) {
         PresidencyEndReason endReason = null;
         if (entry.getEndReason() != null) {
             try {
@@ -303,7 +327,7 @@ public class PresidentialSyncService {
         }
 
         return Presidency.builder()
-                .personId(personId)
+                .individualId(individualId)
                 .number(entry.getNumber())
                 .party(entry.getParty())
                 .startDate(entry.getStartDate())
@@ -317,8 +341,8 @@ public class PresidentialSyncService {
     /**
      * Update existing Presidency with seed data.
      */
-    private void updatePresidency(Presidency presidency, PresidencyEntry entry, UUID personId) {
-        presidency.setPersonId(personId);
+    private void updatePresidency(Presidency presidency, PresidencyEntry entry, UUID individualId) {
+        presidency.setIndividualId(individualId);
         presidency.setParty(entry.getParty());
         presidency.setStartDate(entry.getStartDate());
         presidency.setEndDate(entry.getEndDate());
@@ -338,23 +362,23 @@ public class PresidentialSyncService {
      */
     private void syncVpHolding(VicePresidentEntry entry, UUID presidencyId,
                                UUID vpPositionId, SyncResult result) {
-        // Create/update VP person
+        // Create/update VP individual
         PersonEntry vpPersonEntry = new PersonEntry();
         vpPersonEntry.setFirstName(entry.getFirstName());
         vpPersonEntry.setLastName(entry.getLastName());
         vpPersonEntry.setMiddleName(entry.getMiddleName());
 
-        Person vpPerson = syncPerson(vpPersonEntry, entry.getPersonKey(), result);
+        Individual vpIndividual = syncIndividual(vpPersonEntry, entry.getPersonKey(), result);
 
-        // Check if holding already exists for this person, position, and date range
+        // Check if holding already exists for this individual, position, and date range
         // We use start date as unique identifier within a position
         boolean exists = positionHoldingRepository
-                .findByPersonIdAndPositionIdAndStartDate(vpPerson.getId(), vpPositionId, entry.getStartDate())
+                .findByIndividualIdAndPositionIdAndStartDate(vpIndividual.getId(), vpPositionId, entry.getStartDate())
                 .isPresent();
 
         if (!exists) {
             PositionHolding holding = PositionHolding.builder()
-                    .personId(vpPerson.getId())
+                    .individualId(vpIndividual.getId())
                     .positionId(vpPositionId)
                     .presidencyId(presidencyId)
                     .startDate(entry.getStartDate())

@@ -3,10 +3,9 @@ package org.newsanalyzer.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.newsanalyzer.model.DataSource;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.model.Person.Chamber;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Individual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,8 @@ import java.util.Optional;
  *
  * Handles full sync and incremental updates of member data.
  *
+ * Part of ARCH-1.6: Updated to use two-entity pattern (Individual + CongressionalMember).
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -32,14 +33,17 @@ public class MemberSyncService {
     private static final Logger log = LoggerFactory.getLogger(MemberSyncService.class);
 
     private final CongressApiClient congressApiClient;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberService congressionalMemberService;
+    private final IndividualService individualService;
     private final ObjectMapper objectMapper;
 
     public MemberSyncService(CongressApiClient congressApiClient,
-                             PersonRepository personRepository,
+                             CongressionalMemberService congressionalMemberService,
+                             IndividualService individualService,
                              ObjectMapper objectMapper) {
         this.congressApiClient = congressApiClient;
-        this.personRepository = personRepository;
+        this.congressionalMemberService = congressionalMemberService;
+        this.individualService = individualService;
         this.objectMapper = objectMapper;
     }
 
@@ -107,6 +111,10 @@ public class MemberSyncService {
     /**
      * Sync a single member from API data.
      *
+     * Uses the two-entity pattern:
+     * 1. Parse API data to extract Individual and CongressionalMember fields
+     * 2. Use CongressionalMemberService.findOrCreate to create/update both entities
+     *
      * @param memberData JSON data from Congress.gov API
      * @return true if new record was created, false if updated
      */
@@ -117,20 +125,53 @@ public class MemberSyncService {
             throw new IllegalArgumentException("Member data missing bioguideId");
         }
 
-        Optional<Person> existingPerson = personRepository.findByBioguideId(bioguideId);
-        Person person = existingPerson.orElse(new Person());
-        boolean isNew = existingPerson.isEmpty();
+        // Check if member already exists
+        boolean isNew = congressionalMemberService.findByBioguideId(bioguideId).isEmpty();
 
-        // Map API response to Person entity
-        mapMemberDataToPerson(memberData, person);
-        person.setCongressLastSync(LocalDateTime.now());
+        // Extract fields from API data
+        MemberSyncData syncData = parseMemberData(memberData);
 
-        personRepository.save(person);
+        // Use CongressionalMemberService.findOrCreate for two-entity pattern
+        CongressionalMember member = congressionalMemberService.findOrCreate(
+                bioguideId,
+                syncData.firstName,
+                syncData.lastName,
+                syncData.birthDate,
+                syncData.chamber,
+                syncData.state,
+                syncData.party
+        );
+
+        // Update additional fields on the linked Individual
+        if (syncData.imageUrl != null || syncData.middleName != null || syncData.gender != null) {
+            individualService.findById(member.getIndividualId()).ifPresent(individual -> {
+                boolean updated = false;
+                if (syncData.imageUrl != null && individual.getImageUrl() == null) {
+                    individual.setImageUrl(syncData.imageUrl);
+                    updated = true;
+                }
+                if (syncData.middleName != null && individual.getMiddleName() == null) {
+                    individual.setMiddleName(syncData.middleName);
+                    updated = true;
+                }
+                if (syncData.gender != null && individual.getGender() == null) {
+                    individual.setGender(syncData.gender);
+                    updated = true;
+                }
+                if (updated) {
+                    individualService.save(individual);
+                }
+            });
+        }
+
+        // Update CongressionalMember sync timestamp
+        member.setCongressLastSync(LocalDateTime.now());
+        congressionalMemberService.save(member);
 
         if (isNew) {
-            log.debug("Added new member: {} {}", person.getFirstName(), person.getLastName());
+            log.debug("Added new member: {} {}", syncData.firstName, syncData.lastName);
         } else {
-            log.debug("Updated member: {} {}", person.getFirstName(), person.getLastName());
+            log.debug("Updated member: {} {}", syncData.firstName, syncData.lastName);
         }
 
         return isNew;
@@ -140,9 +181,9 @@ public class MemberSyncService {
      * Sync a specific member by BioGuide ID.
      *
      * @param bioguideId BioGuide ID to sync
-     * @return Optional containing the synced Person, or empty if fetch failed
+     * @return Optional containing the synced CongressionalMember, or empty if fetch failed
      */
-    public Optional<Person> syncMemberByBioguideId(String bioguideId) {
+    public Optional<CongressionalMember> syncMemberByBioguideId(String bioguideId) {
         if (!congressApiClient.isConfigured()) {
             log.error("Congress.gov API key not configured");
             return Optional.empty();
@@ -154,7 +195,7 @@ public class MemberSyncService {
             JsonNode memberData = response.get().path("member");
             if (!memberData.isMissingNode()) {
                 syncMember(memberData);
-                return personRepository.findByBioguideId(bioguideId);
+                return congressionalMemberService.findByBioguideId(bioguideId);
             }
         }
 
@@ -162,28 +203,43 @@ public class MemberSyncService {
     }
 
     /**
-     * Map Congress.gov API response to Person entity.
+     * Intermediate data holder for parsed member data.
+     */
+    private static class MemberSyncData {
+        String firstName;
+        String lastName;
+        String middleName;
+        LocalDate birthDate;
+        String party;
+        String state;
+        Chamber chamber;
+        String imageUrl;
+        String gender;
+    }
+
+    /**
+     * Parse Congress.gov API response to extract member fields.
      *
      * API returns: name (full), partyName, state, terms[].chamber, depiction.imageUrl
      * Not: firstName, lastName, party (separate fields)
      */
-    private void mapMemberDataToPerson(JsonNode data, Person person) {
-        person.setBioguideId(data.path("bioguideId").asText());
+    private MemberSyncData parseMemberData(JsonNode data) {
+        MemberSyncData syncData = new MemberSyncData();
 
         // Parse full name into first/last name
         // Format is typically "LastName, FirstName MiddleName" or just "LastName, FirstName"
         String fullName = getTextOrNull(data, "name");
         if (fullName != null) {
-            parseAndSetName(fullName, person);
+            parseNameIntoData(fullName, syncData);
         }
 
         // API uses "partyName" not "party"
-        person.setParty(getTextOrNull(data, "partyName"));
+        syncData.party = getTextOrNull(data, "partyName");
 
         // State - API returns full state name, need to map to 2-letter code
         String stateStr = getTextOrNull(data, "state");
         if (stateStr != null) {
-            person.setState(mapStateToCode(stateStr));
+            syncData.state = mapStateToCode(stateStr);
         }
 
         // Map chamber from terms.item array
@@ -195,7 +251,7 @@ public class MemberSyncService {
                 JsonNode latestTerm = termItems.get(termItems.size() - 1);
                 String chamberStr = getTextOrNull(latestTerm, "chamber");
                 if (chamberStr != null) {
-                    person.setChamber(mapChamber(chamberStr));
+                    syncData.chamber = mapChamber(chamberStr);
                 }
             }
         }
@@ -205,7 +261,7 @@ public class MemberSyncService {
         if (birthYear != null && !birthYear.isEmpty()) {
             try {
                 int year = Integer.parseInt(birthYear);
-                person.setBirthDate(LocalDate.of(year, 1, 1));
+                syncData.birthDate = LocalDate.of(year, 1, 1);
             } catch (NumberFormatException e) {
                 log.warn("Invalid birth year: {}", birthYear);
             }
@@ -214,21 +270,19 @@ public class MemberSyncService {
         // Map image URL from depiction
         JsonNode depiction = data.path("depiction");
         if (!depiction.isMissingNode()) {
-            String imageUrl = getTextOrNull(depiction, "imageUrl");
-            person.setImageUrl(imageUrl);
+            syncData.imageUrl = getTextOrNull(depiction, "imageUrl");
         }
 
         // Map gender if available
-        person.setGender(getTextOrNull(data, "gender"));
+        syncData.gender = getTextOrNull(data, "gender");
 
-        // Set data source
-        person.setDataSource(DataSource.CONGRESS_GOV);
+        return syncData;
     }
 
     /**
-     * Parse full name in "LastName, FirstName MiddleName" format.
+     * Parse full name into data holder.
      */
-    private void parseAndSetName(String fullName, Person person) {
+    private void parseNameIntoData(String fullName, MemberSyncData data) {
         if (fullName == null || fullName.isEmpty()) {
             return;
         }
@@ -236,25 +290,23 @@ public class MemberSyncService {
         // Format: "LastName, FirstName MiddleName" or "LastName, FirstName"
         int commaIndex = fullName.indexOf(',');
         if (commaIndex > 0) {
-            String lastName = fullName.substring(0, commaIndex).trim();
+            data.lastName = fullName.substring(0, commaIndex).trim();
             String rest = fullName.substring(commaIndex + 1).trim();
-
-            person.setLastName(lastName);
 
             // Split remaining into first name and optional middle name
             String[] parts = rest.split("\\s+", 2);
             if (parts.length > 0) {
-                person.setFirstName(parts[0]);
+                data.firstName = parts[0];
             }
             if (parts.length > 1) {
-                person.setMiddleName(parts[1]);
+                data.middleName = parts[1];
             }
         } else {
             // No comma - try splitting by space (FirstName LastName format)
             String[] parts = fullName.split("\\s+");
             if (parts.length >= 2) {
-                person.setFirstName(parts[0]);
-                person.setLastName(parts[parts.length - 1]);
+                data.firstName = parts[0];
+                data.lastName = parts[parts.length - 1];
                 if (parts.length > 2) {
                     // Middle parts
                     StringBuilder middle = new StringBuilder();
@@ -262,11 +314,11 @@ public class MemberSyncService {
                         if (middle.length() > 0) middle.append(" ");
                         middle.append(parts[i]);
                     }
-                    person.setMiddleName(middle.toString());
+                    data.middleName = middle.toString();
                 }
             } else if (parts.length == 1) {
-                person.setLastName(parts[0]);
-                person.setFirstName("Unknown");
+                data.lastName = parts[0];
+                data.firstName = "Unknown";
             }
         }
     }
@@ -372,6 +424,6 @@ public class MemberSyncService {
      * Get count of synced members.
      */
     public long getMemberCount() {
-        return personRepository.count();
+        return congressionalMemberService.count();
     }
 }

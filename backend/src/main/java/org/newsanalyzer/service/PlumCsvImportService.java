@@ -27,7 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Service for importing executive branch appointee data from OPM's PLUM CSV file.
  *
  * Downloads and parses the PLUM (Policy and Supporting Positions) CSV file,
- * creating/updating Person, GovernmentPosition, and PositionHolding records.
+ * creating/updating Individual, GovernmentPosition, and PositionHolding records.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -37,20 +39,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class PlumCsvImportService {
 
-    private final PersonRepository personRepository;
+    private final IndividualService individualService;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository holdingRepository;
     private final GovernmentOrganizationRepository orgRepository;
     private final RestTemplate restTemplate;
     private final TransactionTemplate transactionTemplate;
 
-    public PlumCsvImportService(PersonRepository personRepository,
+    public PlumCsvImportService(IndividualService individualService,
                                  GovernmentPositionRepository positionRepository,
                                  PositionHoldingRepository holdingRepository,
                                  GovernmentOrganizationRepository orgRepository,
                                  RestTemplate restTemplate,
                                  PlatformTransactionManager transactionManager) {
-        this.personRepository = personRepository;
+        this.individualService = individualService;
         this.positionRepository = positionRepository;
         this.holdingRepository = holdingRepository;
         this.orgRepository = orgRepository;
@@ -320,11 +322,11 @@ public class PlumCsvImportService {
         // Create or update position
         GovernmentPosition position = createOrUpdatePosition(record, orgId, result);
 
-        // Create or update person
-        Person person = createOrUpdatePerson(record, result);
+        // Create or update individual
+        Individual individual = createOrUpdateIndividual(record, result);
 
         // Create or update position holding
-        createOrUpdateHolding(person, position, record, result);
+        createOrUpdateHolding(individual, position, record, result);
     }
 
     /**
@@ -458,55 +460,55 @@ public class PlumCsvImportService {
     }
 
     /**
-     * Create or update a Person from PLUM record.
+     * Create or update an Individual from PLUM record.
      */
-    private Person createOrUpdatePerson(PlumCsvRecord record, PlumImportResult result) {
+    private Individual createOrUpdateIndividual(PlumCsvRecord record, PlumImportResult result) {
         String firstName = record.getIncumbentFirstName().trim();
         String lastName = record.getIncumbentLastName().trim();
 
-        // Try to find existing person by name and data source
-        Optional<Person> existing = personRepository
-                .findByFirstNameAndLastNameAndDataSource(firstName, lastName, DataSource.PLUM_CSV);
+        // Use IndividualService.findOrCreate for deduplication
+        // PLUM data doesn't have birth dates, so we use name-only matching
+        var existingOpt = individualService.findByFirstNameAndLastName(firstName, lastName);
 
-        Person person;
-        if (existing.isPresent()) {
-            person = existing.get();
-            // Update if needed (minimal updates for PLUM data)
-            result.setPersonsUpdated(result.getPersonsUpdated() + 1);
+        Individual individual;
+        if (existingOpt.isPresent()) {
+            individual = existingOpt.get();
+            // No updates needed for PLUM - just name
+            result.setIndividualsUpdated(result.getIndividualsUpdated() + 1);
         } else {
-            // Check if this person exists from another data source
-            List<Person> sameName = personRepository.findByFirstNameAndLastNameIgnoreCase(firstName, lastName);
-            if (!sameName.isEmpty()) {
-                // Use the existing person (might be from Congress.gov)
-                person = sameName.get(0);
-                result.setPersonsUpdated(result.getPersonsUpdated() + 1);
+            // Check by case-insensitive name
+            var matches = individualService.findByNameIgnoreCase(firstName, lastName);
+            if (!matches.isEmpty()) {
+                // Use the existing individual (might be from another source)
+                individual = matches.get(0);
+                result.setIndividualsUpdated(result.getIndividualsUpdated() + 1);
             } else {
-                // Create new person
-                person = Person.builder()
-                        .firstName(firstName)
-                        .lastName(lastName)
-                        .dataSource(DataSource.PLUM_CSV)
-                        .build();
-                person = personRepository.save(person);
-                result.setPersonsCreated(result.getPersonsCreated() + 1);
+                // Create new individual via findOrCreate
+                individual = individualService.findOrCreate(
+                        firstName,
+                        lastName,
+                        null, // birthDate - not provided in PLUM
+                        DataSource.PLUM_CSV
+                );
+                result.setIndividualsCreated(result.getIndividualsCreated() + 1);
             }
         }
 
-        return person;
+        return individual;
     }
 
     /**
-     * Create or update a PositionHolding linking person to position.
+     * Create or update a PositionHolding linking individual to position.
      */
-    private void createOrUpdateHolding(Person person, GovernmentPosition position,
+    private void createOrUpdateHolding(Individual individual, GovernmentPosition position,
                                        PlumCsvRecord record, PlumImportResult result) {
-        if (person == null || position == null) {
+        if (individual == null || position == null) {
             return;
         }
 
         // Try to find existing current holding
         Optional<PositionHolding> existing = holdingRepository
-                .findCurrentByPersonIdAndPositionId(person.getId(), position.getId());
+                .findCurrentByIndividualIdAndPositionId(individual.getId(), position.getId());
 
         PositionHolding holding;
         if (existing.isPresent()) {
@@ -526,7 +528,7 @@ public class PlumCsvImportService {
             }
 
             holding = PositionHolding.builder()
-                    .personId(person.getId())
+                    .individualId(individual.getId())
                     .positionId(position.getId())
                     .startDate(startDate)
                     .endDate(parseDate(record.getIncumbentVacateDate()))

@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.CommitteeMembership;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.CongressionalMember.Chamber;
 import org.newsanalyzer.model.PositionHolding;
 import org.newsanalyzer.service.CommitteeService;
 import org.newsanalyzer.service.MemberService;
@@ -37,6 +37,8 @@ import java.util.List;
  * - Searching by name
  * - Filtering by state or chamber
  * - Sync trigger (admin)
+ *
+ * Part of ARCH-1.6: Updated to use CongressionalMember instead of Person.
  *
  * Base Path: /api/members
  *
@@ -82,8 +84,8 @@ public class MemberController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List of members returned")
     })
-    public ResponseEntity<Page<Person>> listAll(Pageable pageable) {
-        Page<Person> members = memberService.findAll(pageable);
+    public ResponseEntity<Page<CongressionalMember>> listAll(Pageable pageable) {
+        Page<CongressionalMember> members = memberService.findAll(pageable);
         return ResponseEntity.ok(members);
     }
 
@@ -98,7 +100,7 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Member found"),
         @ApiResponse(responseCode = "404", description = "Member not found")
     })
-    public ResponseEntity<Person> getByBioguideId(
+    public ResponseEntity<CongressionalMember> getByBioguideId(
             @Parameter(description = "BioGuide ID (e.g., S000033 for Bernie Sanders)")
             @PathVariable String bioguideId) {
         return memberService.findByBioguideId(bioguideId)
@@ -116,14 +118,14 @@ public class MemberController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search results returned")
     })
-    public ResponseEntity<Page<Person>> searchByName(
+    public ResponseEntity<Page<CongressionalMember>> searchByName(
             @Parameter(description = "Name to search for")
             @RequestParam String name,
             Pageable pageable) {
         if (name == null || name.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        Page<Person> members = memberService.searchByName(name.trim(), pageable);
+        Page<CongressionalMember> members = memberService.searchByName(name.trim(), pageable);
         return ResponseEntity.ok(members);
     }
 
@@ -138,14 +140,14 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Members from state returned"),
         @ApiResponse(responseCode = "400", description = "Invalid state code")
     })
-    public ResponseEntity<Page<Person>> getByState(
+    public ResponseEntity<Page<CongressionalMember>> getByState(
             @Parameter(description = "2-letter state code (e.g., CA, TX, NY)")
             @PathVariable String state,
             Pageable pageable) {
         if (state == null || state.length() != 2) {
             return ResponseEntity.badRequest().build();
         }
-        Page<Person> members = memberService.findByState(state.toUpperCase(), pageable);
+        Page<CongressionalMember> members = memberService.findByState(state.toUpperCase(), pageable);
         return ResponseEntity.ok(members);
     }
 
@@ -156,13 +158,13 @@ public class MemberController {
         @ApiResponse(responseCode = "200", description = "Members from chamber returned"),
         @ApiResponse(responseCode = "400", description = "Invalid chamber")
     })
-    public ResponseEntity<Page<Person>> getByChamber(
+    public ResponseEntity<Page<CongressionalMember>> getByChamber(
             @Parameter(description = "Chamber: SENATE or HOUSE")
             @PathVariable String chamber,
             Pageable pageable) {
         try {
             Chamber chamberEnum = Chamber.valueOf(chamber.toUpperCase());
-            Page<Person> members = memberService.findByChamber(chamberEnum, pageable);
+            Page<CongressionalMember> members = memberService.findByChamber(chamberEnum, pageable);
             return ResponseEntity.ok(members);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid chamber: {}", chamber);
@@ -207,7 +209,7 @@ public class MemberController {
         @ApiResponse(responseCode = "400", description = "Invalid ID type"),
         @ApiResponse(responseCode = "404", description = "Member not found")
     })
-    public ResponseEntity<Person> getByExternalId(
+    public ResponseEntity<CongressionalMember> getByExternalId(
             @Parameter(description = "External ID type: fec, govtrack, opensecrets, votesmart")
             @PathVariable String type,
             @Parameter(description = "External ID value")
@@ -235,11 +237,12 @@ public class MemberController {
             @Parameter(description = "BioGuide ID of the member")
             @PathVariable String bioguideId) {
 
-        // Verify member exists and get their ID
-        Person member = memberService.getByBioguideId(bioguideId);
+        // Verify member exists and get their linked Individual ID
+        CongressionalMember member = memberService.getByBioguideId(bioguideId);
 
+        // Get position holdings by the linked Individual's ID
         List<PositionHolding> terms = positionHoldingRepository
-                .findByPersonIdOrderByStartDateDesc(member.getId());
+                .findByIndividualIdOrderByStartDateDesc(member.getIndividualId());
         return ResponseEntity.ok(terms);
     }
 

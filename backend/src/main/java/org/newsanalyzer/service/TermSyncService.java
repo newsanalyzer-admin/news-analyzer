@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.model.*;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.CongressionalMember.Chamber;
 import org.newsanalyzer.repository.GovernmentPositionRepository;
-import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,8 @@ import java.util.*;
  * Parses term data from member detail responses and creates PositionHolding records.
  * Filters to 1990s-present per scope requirements.
  *
+ * Part of ARCH-1.6: Updated to use CongressionalMember/Individual pattern.
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -31,7 +32,7 @@ public class TermSyncService {
     private static final int MIN_YEAR = 1990;  // Historical scope limit
 
     private final CongressApiClient congressApiClient;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberService congressionalMemberService;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository holdingRepository;
     private final PositionInitializationService positionInitService;
@@ -48,13 +49,13 @@ public class TermSyncService {
         // Ensure positions are initialized
         positionInitService.initializeAllPositions();
 
-        List<Person> members = personRepository.findAll();
+        List<CongressionalMember> members = congressionalMemberService.findAll();
         int processed = 0;
         int termsAdded = 0;
         int termsUpdated = 0;
         int errors = 0;
 
-        for (Person member : members) {
+        for (CongressionalMember member : members) {
             try {
                 TermResult result = syncTermsForMember(member.getBioguideId());
                 termsAdded += result.getAdded();
@@ -85,13 +86,13 @@ public class TermSyncService {
      */
     @Transactional
     public TermResult syncTermsForMember(String bioguideId) {
-        Optional<Person> personOpt = personRepository.findByBioguideId(bioguideId);
-        if (personOpt.isEmpty()) {
-            log.warn("Person not found for bioguideId: {}", bioguideId);
+        Optional<CongressionalMember> memberOpt = congressionalMemberService.findByBioguideId(bioguideId);
+        if (memberOpt.isEmpty()) {
+            log.warn("CongressionalMember not found for bioguideId: {}", bioguideId);
             return new TermResult(0, 0);
         }
 
-        Person person = personOpt.get();
+        CongressionalMember member = memberOpt.get();
 
         // Fetch member detail from Congress.gov API
         Optional<JsonNode> memberData = congressApiClient.fetchMemberByBioguideId(bioguideId);
@@ -100,8 +101,8 @@ public class TermSyncService {
             return new TermResult(0, 0);
         }
 
-        JsonNode member = memberData.get().path("member");
-        JsonNode termsNode = member.path("terms");
+        JsonNode memberNode = memberData.get().path("member");
+        JsonNode termsNode = memberNode.path("terms");
 
         // Handle both array and object with "item" array
         JsonNode termsArray;
@@ -126,7 +127,7 @@ public class TermSyncService {
             }
 
             try {
-                TermResult result = processTermNode(person, termNode);
+                TermResult result = processTermNode(member, termNode);
                 added += result.getAdded();
                 updated += result.getUpdated();
             } catch (Exception e) {
@@ -143,7 +144,7 @@ public class TermSyncService {
     /**
      * Process a single term node from the API response.
      */
-    private TermResult processTermNode(Person person, JsonNode termNode) {
+    private TermResult processTermNode(CongressionalMember member, JsonNode termNode) {
         String chamberStr = termNode.path("chamber").asText("");
         String stateCode = termNode.path("stateCode").asText(termNode.path("state").asText(""));
         Integer congress = termNode.has("congress") ? termNode.path("congress").asInt() : null;
@@ -173,9 +174,12 @@ public class TermSyncService {
         LocalDate startDate = LocalDate.of(startYear, 1, 3);  // Congress starts Jan 3
         LocalDate endDate = endYear != null ? LocalDate.of(endYear, 1, 3) : null;
 
+        // Use the individual ID from the linked Individual entity
+        UUID individualId = member.getIndividualId();
+
         // Check if holding already exists
         Optional<PositionHolding> existingOpt = holdingRepository
-                .findByPersonIdAndPositionIdAndCongress(person.getId(), position.getId(), congress);
+                .findByIndividualIdAndPositionIdAndCongress(individualId, position.getId(), congress);
 
         if (existingOpt.isPresent()) {
             // Update existing holding if end date changed
@@ -190,13 +194,13 @@ public class TermSyncService {
 
         // Create new holding
         PositionHolding holding = PositionHolding.builder()
-                .personId(person.getId())
+                .individualId(individualId)
                 .positionId(position.getId())
                 .startDate(startDate)
                 .endDate(endDate)
                 .congress(congress)
                 .dataSource(DataSource.CONGRESS_GOV)
-                .sourceReference("member/" + person.getBioguideId())
+                .sourceReference("member/" + member.getBioguideId())
                 .build();
 
         holdingRepository.save(holding);
@@ -211,7 +215,7 @@ public class TermSyncService {
             // For Senate, we need to determine the class
             // Congress.gov doesn't always provide class directly, so we use the existing position
             List<GovernmentPosition> senatePositions = positionRepository
-                    .findByChamberAndState(Chamber.SENATE, state);
+                    .findByChamberAndState(chamber, state);
 
             if (senatePositions.isEmpty()) {
                 return null;
@@ -226,7 +230,7 @@ public class TermSyncService {
             int district = termNode.path("district").asInt(0);  // 0 for at-large
 
             return positionRepository
-                    .findByChamberAndStateAndDistrict(Chamber.HOUSE, state, district)
+                    .findByChamberAndStateAndDistrict(chamber, state, district)
                     .orElse(null);
         }
     }

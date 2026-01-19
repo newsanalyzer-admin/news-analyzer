@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
  *
  * Provides methods to search and filter judges by court, circuit, status, etc.
  *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
+ *
  * @author James (Dev Agent)
  * @since 2.0.0
  */
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class JudgeService {
 
-    private final PersonRepository personRepository;
+    private final IndividualRepository individualRepository;
     private final GovernmentPositionRepository positionRepository;
     private final PositionHoldingRepository holdingRepository;
     private final GovernmentOrganizationRepository orgRepository;
@@ -126,18 +128,18 @@ public class JudgeService {
      * Find judge by ID.
      */
     public Optional<JudgeDTO> findById(UUID id) {
-        return personRepository.findById(id)
-                .filter(p -> p.getDataSource() == DataSource.FJC)
-                .map(this::personToJudgeDTO);
+        return individualRepository.findById(id)
+                .filter(i -> i.getPrimaryDataSource() == DataSource.FJC)
+                .map(this::individualToJudgeDTO);
     }
 
     /**
      * Search judges by name.
      */
     public List<JudgeDTO> searchByName(String query) {
-        return personRepository.searchByName(query).stream()
-                .filter(p -> p.getDataSource() == DataSource.FJC)
-                .map(this::personToJudgeDTO)
+        return individualRepository.searchByName(query).stream()
+                .filter(i -> i.getPrimaryDataSource() == DataSource.FJC)
+                .map(this::individualToJudgeDTO)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -148,7 +150,7 @@ public class JudgeService {
     public Map<String, Object> getStatistics() {
         Map<String, Object> stats = new HashMap<>();
 
-        long totalFjcPersons = personRepository.countByDataSource(DataSource.FJC);
+        long totalFjcIndividuals = individualRepository.countByPrimaryDataSource(DataSource.FJC);
         long totalFjcHoldings = holdingRepository.countByDataSource(DataSource.FJC);
 
         // Count current holdings (no end date)
@@ -157,7 +159,7 @@ public class JudgeService {
                 .filter(h -> h.getEndDate() == null)
                 .count();
 
-        stats.put("totalJudges", totalFjcPersons);
+        stats.put("totalJudges", totalFjcIndividuals);
         stats.put("totalAppointments", totalFjcHoldings);
         stats.put("currentJudges", currentJudges);
 
@@ -171,12 +173,12 @@ public class JudgeService {
     private JudgeDTO toJudgeDTO(PositionHolding holding) {
         if (holding == null) return null;
 
-        Optional<Person> personOpt = personRepository.findById(holding.getPersonId());
+        Optional<Individual> individualOpt = individualRepository.findById(holding.getIndividualId());
         Optional<GovernmentPosition> positionOpt = positionRepository.findById(holding.getPositionId());
 
-        if (personOpt.isEmpty()) return null;
+        if (individualOpt.isEmpty()) return null;
 
-        Person person = personOpt.get();
+        Individual individual = individualOpt.get();
         GovernmentPosition position = positionOpt.orElse(null);
         GovernmentOrganization court = null;
 
@@ -184,14 +186,14 @@ public class JudgeService {
             court = orgRepository.findById(position.getOrganizationId()).orElse(null);
         }
 
-        return buildJudgeDTO(person, position, holding, court);
+        return buildJudgeDTO(individual, position, holding, court);
     }
 
-    private JudgeDTO personToJudgeDTO(Person person) {
-        if (person == null) return null;
+    private JudgeDTO individualToJudgeDTO(Individual individual) {
+        if (individual == null) return null;
 
-        // Find the most recent holding for this person
-        List<PositionHolding> holdings = holdingRepository.findByPersonIdOrderByStartDateDesc(person.getId());
+        // Find the most recent holding for this individual
+        List<PositionHolding> holdings = holdingRepository.findByIndividualIdOrderByStartDateDesc(individual.getId());
         PositionHolding holding = holdings.isEmpty() ? null : holdings.get(0);
 
         GovernmentPosition position = null;
@@ -204,20 +206,20 @@ public class JudgeService {
             }
         }
 
-        return buildJudgeDTO(person, position, holding, court);
+        return buildJudgeDTO(individual, position, holding, court);
     }
 
-    private JudgeDTO buildJudgeDTO(Person person, GovernmentPosition position,
+    private JudgeDTO buildJudgeDTO(Individual individual, GovernmentPosition position,
                                     PositionHolding holding, GovernmentOrganization court) {
         JudgeDTO.JudgeDTOBuilder builder = JudgeDTO.builder()
-                .id(person.getId())
-                .firstName(person.getFirstName())
-                .middleName(person.getMiddleName())
-                .lastName(person.getLastName())
-                .suffix(person.getSuffix())
-                .fullName(person.getFullName())
-                .gender(person.getGender())
-                .birthDate(person.getBirthDate());
+                .id(individual.getId())
+                .firstName(individual.getFirstName())
+                .middleName(individual.getMiddleName())
+                .lastName(individual.getLastName())
+                .suffix(individual.getSuffix())
+                .fullName(individual.getFullName())
+                .gender(individual.getGender())
+                .birthDate(individual.getBirthDate());
 
         if (court != null) {
             builder.courtName(court.getOfficialName())

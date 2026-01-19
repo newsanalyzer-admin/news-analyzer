@@ -184,21 +184,21 @@ public class CommitteeService {
      * Find committees a member serves on.
      */
     public List<CommitteeMembership> findCommitteesForMember(String bioguideId) {
-        return membershipRepository.findByPerson_BioguideId(bioguideId);
+        return membershipRepository.findByCongressionalMember_BioguideId(bioguideId);
     }
 
     /**
      * Find committees a member serves on with pagination.
      */
     public Page<CommitteeMembership> findCommitteesForMember(String bioguideId, Pageable pageable) {
-        return membershipRepository.findByPerson_BioguideId(bioguideId, pageable);
+        return membershipRepository.findByCongressionalMember_BioguideId(bioguideId, pageable);
     }
 
     /**
      * Find committees a member serves on in a specific congress.
      */
     public List<CommitteeMembership> findCommitteesForMemberByCongress(String bioguideId, int congress) {
-        return membershipRepository.findByPerson_BioguideIdAndCongress(bioguideId, congress);
+        return membershipRepository.findByCongressionalMember_BioguideIdAndCongress(bioguideId, congress);
     }
 
     // =====================================================================

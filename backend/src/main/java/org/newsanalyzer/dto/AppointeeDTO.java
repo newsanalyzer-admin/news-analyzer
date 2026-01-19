@@ -11,8 +11,10 @@ import java.util.UUID;
 /**
  * DTO for executive branch appointee information.
  *
- * Combines data from Person, GovernmentPosition, PositionHolding, and GovernmentOrganization
+ * Combines data from Individual, GovernmentPosition, PositionHolding, and GovernmentOrganization
  * to provide a complete view of an appointee.
+ *
+ * Part of ARCH-1.6: Updated to use Individual instead of Person.
  *
  * @author James (Dev Agent)
  * @since 2.0.0
@@ -54,22 +56,22 @@ public class AppointeeDTO {
     /**
      * Create AppointeeDTO from entity objects.
      *
-     * @param person The person holding the position
+     * @param individual The individual holding the position
      * @param position The government position
      * @param holding The position holding record (may be null for vacant positions)
      * @param org The organization (may be null)
      * @return AppointeeDTO
      */
-    public static AppointeeDTO from(Person person, GovernmentPosition position,
+    public static AppointeeDTO from(Individual individual, GovernmentPosition position,
                                     PositionHolding holding, GovernmentOrganization org) {
         AppointeeDTOBuilder builder = AppointeeDTO.builder();
 
-        // Person fields
-        if (person != null) {
-            builder.id(person.getId())
-                   .firstName(person.getFirstName())
-                   .lastName(person.getLastName())
-                   .fullName(person.getFullName());
+        // Individual fields
+        if (individual != null) {
+            builder.id(individual.getId())
+                   .firstName(individual.getFirstName())
+                   .lastName(individual.getLastName())
+                   .fullName(individual.getFullName());
         }
 
         // Position fields

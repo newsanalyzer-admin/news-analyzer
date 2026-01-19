@@ -127,8 +127,8 @@ public class AdminSyncController {
             lastImport.put("startTime", lastPlumResult.getStartTime());
             lastImport.put("endTime", lastPlumResult.getEndTime());
             lastImport.put("totalRecords", lastPlumResult.getTotalRecords());
-            lastImport.put("personsCreated", lastPlumResult.getPersonsCreated());
-            lastImport.put("personsUpdated", lastPlumResult.getPersonsUpdated());
+            lastImport.put("individualsCreated", lastPlumResult.getIndividualsCreated());
+            lastImport.put("individualsUpdated", lastPlumResult.getIndividualsUpdated());
             lastImport.put("positionsCreated", lastPlumResult.getPositionsCreated());
             lastImport.put("positionsUpdated", lastPlumResult.getPositionsUpdated());
             lastImport.put("holdingsCreated", lastPlumResult.getHoldingsCreated());
@@ -343,8 +343,8 @@ public class AdminSyncController {
             lastSync.put("presidenciesAdded", lastPresidentialResult.getPresidenciesAdded());
             lastSync.put("presidenciesUpdated", lastPresidentialResult.getPresidenciesUpdated());
             lastSync.put("totalPresidencies", lastPresidentialResult.getTotalPresidencies());
-            lastSync.put("personsAdded", lastPresidentialResult.getPersonsAdded());
-            lastSync.put("personsUpdated", lastPresidentialResult.getPersonsUpdated());
+            lastSync.put("individualsAdded", lastPresidentialResult.getIndividualsAdded());
+            lastSync.put("individualsUpdated", lastPresidentialResult.getIndividualsUpdated());
             lastSync.put("vpHoldingsAdded", lastPresidentialResult.getVpHoldingsAdded());
             lastSync.put("errors", lastPresidentialResult.getErrors());
             if (!lastPresidentialResult.getErrorMessages().isEmpty()) {
