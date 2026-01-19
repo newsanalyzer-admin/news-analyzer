@@ -13,7 +13,7 @@ import type {
   CongressMemberImportRequest,
   CongressImportResult,
 } from '@/types/congress-search';
-import type { Person } from '@/types/member';
+import type { Member } from '@/types/member';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
@@ -110,12 +110,12 @@ export const congressSearchApi = {
   },
 
   /**
-   * Get existing local person by bioguide ID
+   * Get existing local member by bioguide ID
    * GET /api/members/{bioguideId}
    */
-  getLocalMember: async (bioguideId: string): Promise<Person | null> => {
+  getLocalMember: async (bioguideId: string): Promise<Member | null> => {
     try {
-      const response = await api.get<Person>(`/api/members/${bioguideId}`);
+      const response = await api.get<Member>(`/api/members/${bioguideId}`);
       return response.data;
     } catch {
       return null;

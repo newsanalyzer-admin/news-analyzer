@@ -105,15 +105,15 @@ export function CommitteeMembersDialog({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">
-                      {membership.person.firstName} {membership.person.lastName}
-                      {membership.person.suffix && ` ${membership.person.suffix}`}
+                      {membership.member.firstName} {membership.member.lastName}
+                      {membership.member.suffix && ` ${membership.member.suffix}`}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {membership.person.party && (
-                        <span className="mr-2">{membership.person.party}</span>
+                      {membership.member.party && (
+                        <span className="mr-2">{membership.member.party}</span>
                       )}
-                      {membership.person.state && (
-                        <span>{membership.person.state}</span>
+                      {membership.member.state && (
+                        <span>{membership.member.state}</span>
                       )}
                     </div>
                   </div>

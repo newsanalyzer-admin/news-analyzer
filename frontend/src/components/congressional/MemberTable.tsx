@@ -19,11 +19,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MemberPhoto } from './MemberPhoto';
-import type { Person } from '@/types/member';
+import type { Member } from '@/types/member';
 import type { Page } from '@/types/pagination';
 
 interface MemberTableProps {
-  data?: Page<Person>;
+  data?: Page<Member>;
   isLoading: boolean;
   error: Error | null;
   onRetry: () => void;

@@ -14,7 +14,7 @@ import type {
   EntityDetailConfig,
 } from './entityTypes';
 import type { Judge } from '@/types/judge';
-import type { Person } from '@/types/member';
+import type { Member } from '@/types/member';
 import type { Appointee, AppointmentType } from '@/types/appointee';
 import { APPOINTMENT_TYPE_LABELS } from '@/types/appointee';
 import {
@@ -346,7 +346,7 @@ function renderChamberBadge(chamber: unknown): ReactNode {
 /**
  * Members column configuration
  */
-const memberColumns: ColumnConfig<Person>[] = [
+const memberColumns: ColumnConfig<Member>[] = [
   {
     id: 'fullName',
     label: 'Name',
@@ -476,7 +476,7 @@ const memberFilters: FilterConfig[] = [
 /**
  * Members detail configuration
  */
-const memberDetailConfig: EntityDetailConfig<Person> = {
+const memberDetailConfig: EntityDetailConfig<Member> = {
   header: {
     titleField: 'fullName',
     subtitleField: 'bioguideId',
@@ -587,7 +587,7 @@ const memberDetailConfig: EntityDetailConfig<Person> = {
 /**
  * Complete members subtype configuration
  */
-export const membersSubtypeConfig: SubtypeConfig<Person> = {
+export const membersSubtypeConfig: SubtypeConfig<Member> = {
   id: 'members',
   label: 'Congressional Members',
   apiEndpoint: '/api/members',

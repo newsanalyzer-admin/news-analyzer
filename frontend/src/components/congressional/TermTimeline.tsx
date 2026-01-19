@@ -14,15 +14,15 @@ import {
   formatTermDisplay,
   sortTermsByDate,
 } from '@/lib/utils/term-helpers';
-import type { Person, PositionHolding } from '@/types/member';
+import type { Member, PositionHolding } from '@/types/member';
 
 interface TermTimelineProps {
   terms: PositionHolding[];
-  person: Person;
+  member: Member;
   isLoading?: boolean;
 }
 
-export function TermTimeline({ terms, person, isLoading }: TermTimelineProps) {
+export function TermTimeline({ terms, member, isLoading }: TermTimelineProps) {
   if (isLoading) {
     return <TermTimelineSkeleton />;
   }
@@ -46,8 +46,8 @@ export function TermTimeline({ terms, person, isLoading }: TermTimelineProps) {
       <div className="space-y-4">
         {sortedTerms.map((term, index) => {
           const isCurrent = isCurrentTerm(term);
-          const { label } = getTermDisplayInfo(term, person);
-          const description = formatTermDisplay(term, person);
+          const { label } = getTermDisplayInfo(term, member);
+          const description = formatTermDisplay(term, member);
 
           return (
             <div key={term.id || index} className="relative pl-10">

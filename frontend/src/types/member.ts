@@ -1,7 +1,10 @@
 /**
  * Member Types
  *
- * TypeScript interfaces and Zod schemas for Person and PositionHolding entities.
+ * TypeScript interfaces and Zod schemas for Member (CongressionalMember + Individual)
+ * and PositionHolding entities.
+ *
+ * Part of ARCH-1.8: Updated to match dual-entity model (Individual + CongressionalMember).
  */
 
 import { z } from 'zod';
@@ -14,7 +17,7 @@ export type Chamber = 'SENATE' | 'HOUSE';
 /**
  * Data source for records
  */
-export type DataSource = 'congress_gov' | 'govinfo' | 'legislators_repo' | 'manual';
+export type DataSource = 'CONGRESS_GOV' | 'GOVINFO' | 'LEGISLATORS_REPO' | 'MANUAL' | 'FJC' | 'PLUM';
 
 /**
  * Social media links
@@ -27,37 +30,54 @@ export interface SocialMedia {
 }
 
 /**
- * Person entity from /api/members
+ * Member entity from /api/members
+ *
+ * This is a flattened DTO combining Individual (biographical) and
+ * CongressionalMember (Congress-specific) data.
  */
-export interface Person {
+export interface Member {
   id: string;
-  bioguideId: string;
+
+  // From Individual (biographical data)
   firstName: string;
   lastName: string;
-  middleName?: string;
-  suffix?: string;
-  party?: string;
-  state?: string;
-  chamber?: Chamber;
-  birthDate?: string;
-  gender?: string;
+  middleName?: string | null;
+  suffix?: string | null;
+  fullName?: string | null;
+  birthDate?: string | null;
+  deathDate?: string | null;
+  birthPlace?: string | null;
+  gender?: string | null;
   imageUrl?: string | null;
-  externalIds?: Record<string, unknown>;
-  socialMedia?: SocialMedia | null;
+  isLiving?: boolean | null;
+
+  // From CongressionalMember (Congress-specific data)
+  bioguideId: string;
+  chamber?: Chamber | null;
+  state?: string | null;
+  party?: string | null;
+  congressLastSync?: string | null;
   enrichmentSource?: string | null;
   enrichmentVersion?: string | null;
-  congressLastSync?: string | null;
   dataSource?: string | null;
+
   createdAt: string;
   updatedAt: string;
 }
 
 /**
+ * @deprecated Use Member instead. Alias for backward compatibility.
+ */
+export type Person = Member;
+
+/**
  * PositionHolding entity from /api/members/{id}/terms
+ *
+ * Part of ARCH-1.8: Updated to use individualId instead of personId.
  */
 export interface PositionHolding {
   id: string;
-  personId: string;
+  individualId: string;
   positionId: string;
   startDate: string;
   endDate?: string | null;
@@ -67,6 +87,10 @@ export interface PositionHolding {
   createdAt: string;
   updatedAt: string;
   termLabel?: string | null;
+
+  // Legacy alias for backward compatibility
+  /** @deprecated Use individualId instead */
+  personId?: string;
 }
 
 // ============ Zod Schemas ============
@@ -78,39 +102,53 @@ export const SocialMediaSchema = z.object({
   youtube_id: z.string().optional(),
 });
 
-export const PersonSchema = z.object({
+export const MemberSchema = z.object({
   id: z.string().uuid(),
-  bioguideId: z.string(),
+
+  // From Individual (biographical data)
   firstName: z.string(),
   lastName: z.string(),
-  middleName: z.string().optional(),
-  suffix: z.string().optional(),
-  party: z.string().optional(),
-  state: z.string().length(2).optional(),
-  chamber: z.enum(['SENATE', 'HOUSE']).optional(),
-  birthDate: z.string().optional(),
-  gender: z.string().optional(),
+  middleName: z.string().optional().nullable(),
+  suffix: z.string().optional().nullable(),
+  fullName: z.string().optional().nullable(),
+  birthDate: z.string().optional().nullable(),
+  deathDate: z.string().optional().nullable(),
+  birthPlace: z.string().optional().nullable(),
+  gender: z.string().optional().nullable(),
   imageUrl: z.string().url().optional().nullable(),
-  externalIds: z.record(z.unknown()).optional(),
-  socialMedia: SocialMediaSchema.optional().nullable(),
+  isLiving: z.boolean().optional().nullable(),
+
+  // From CongressionalMember (Congress-specific data)
+  bioguideId: z.string(),
+  chamber: z.enum(['SENATE', 'HOUSE']).optional().nullable(),
+  state: z.string().length(2).optional().nullable(),
+  party: z.string().optional().nullable(),
+  congressLastSync: z.string().optional().nullable(),
   enrichmentSource: z.string().optional().nullable(),
   enrichmentVersion: z.string().optional().nullable(),
-  congressLastSync: z.string().optional().nullable(),
   dataSource: z.string().optional().nullable(),
+
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
+/**
+ * @deprecated Use MemberSchema instead. Alias for backward compatibility.
+ */
+export const PersonSchema = MemberSchema;
+
 export const DataSourceSchema = z.enum([
-  'congress_gov',
-  'govinfo',
-  'legislators_repo',
-  'manual',
+  'CONGRESS_GOV',
+  'GOVINFO',
+  'LEGISLATORS_REPO',
+  'MANUAL',
+  'FJC',
+  'PLUM',
 ]);
 
 export const PositionHoldingSchema = z.object({
   id: z.string().uuid(),
-  personId: z.string().uuid(),
+  individualId: z.string().uuid(),
   positionId: z.string().uuid(),
   startDate: z.string(),
   endDate: z.string().optional().nullable(),
@@ -120,15 +158,24 @@ export const PositionHoldingSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   termLabel: z.string().optional().nullable(),
+  // Legacy alias
+  personId: z.string().uuid().optional(),
 });
 
 // ============ Validation Helpers ============
 
 /**
- * Validate a Person object at runtime
+ * Validate a Member object at runtime
  */
-export function validatePerson(data: unknown): Person {
-  return PersonSchema.parse(data);
+export function validateMember(data: unknown): Member {
+  return MemberSchema.parse(data);
+}
+
+/**
+ * @deprecated Use validateMember instead
+ */
+export function validatePerson(data: unknown): Member {
+  return validateMember(data);
 }
 
 /**

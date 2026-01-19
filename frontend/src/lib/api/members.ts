@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import type {
+  Member,
   Person,
   PositionHolding,
   PartyStats,
@@ -40,8 +41,8 @@ export const membersApi = {
    * List members with pagination
    * GET /api/members
    */
-  list: async (params: MemberListParams = {}): Promise<Page<Person>> => {
-    const response = await api.get<Page<Person>>('/api/members', { params });
+  list: async (params: MemberListParams = {}): Promise<Page<Member>> => {
+    const response = await api.get<Page<Member>>('/api/members', { params });
     return response.data;
   },
 
@@ -49,8 +50,8 @@ export const membersApi = {
    * Get member by bioguide ID
    * GET /api/members/{bioguideId}
    */
-  getByBioguideId: async (bioguideId: string): Promise<Person> => {
-    const response = await api.get<Person>(`/api/members/${bioguideId}`);
+  getByBioguideId: async (bioguideId: string): Promise<Member> => {
+    const response = await api.get<Member>(`/api/members/${bioguideId}`);
     return response.data;
   },
 
@@ -61,8 +62,8 @@ export const membersApi = {
   search: async (
     name: string,
     params: PaginationParams = {}
-  ): Promise<Page<Person>> => {
-    const response = await api.get<Page<Person>>('/api/members/search', {
+  ): Promise<Page<Member>> => {
+    const response = await api.get<Page<Member>>('/api/members/search', {
       params: { name, ...params },
     });
     return response.data;
@@ -75,8 +76,8 @@ export const membersApi = {
   getByState: async (
     state: string,
     params: PaginationParams = {}
-  ): Promise<Page<Person>> => {
-    const response = await api.get<Page<Person>>(
+  ): Promise<Page<Member>> => {
+    const response = await api.get<Page<Member>>(
       `/api/members/by-state/${state}`,
       { params }
     );
@@ -90,8 +91,8 @@ export const membersApi = {
   getByChamber: async (
     chamber: Chamber,
     params: PaginationParams = {}
-  ): Promise<Page<Person>> => {
-    const response = await api.get<Page<Person>>(
+  ): Promise<Page<Member>> => {
+    const response = await api.get<Page<Member>>(
       `/api/members/by-chamber/${chamber}`,
       { params }
     );

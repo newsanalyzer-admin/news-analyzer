@@ -9,10 +9,10 @@
 import { Badge } from '@/components/ui/badge';
 import { MemberPhoto } from './MemberPhoto';
 import { isCurrentlyServing } from '@/lib/utils/term-helpers';
-import type { Person, PositionHolding } from '@/types/member';
+import type { Member, PositionHolding } from '@/types/member';
 
 interface MemberProfileProps {
-  member: Person;
+  member: Member;
   terms: PositionHolding[];
 }
 

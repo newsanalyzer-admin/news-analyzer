@@ -4,7 +4,7 @@
  * Utilities for working with Congressional term data.
  */
 
-import type { PositionHolding, Person } from '@/types/member';
+import type { PositionHolding, Member } from '@/types/member';
 
 /**
  * Check if a term is current (still serving)
@@ -23,7 +23,7 @@ export function isCurrentlyServing(terms: PositionHolding[]): boolean {
 /**
  * Get term display information
  */
-export function getTermDisplayInfo(term: PositionHolding, person: Person): {
+export function getTermDisplayInfo(term: PositionHolding, member: Member): {
   label: string;
   chamber: 'Senate' | 'House';
   isCurrent: boolean;
@@ -33,8 +33,8 @@ export function getTermDisplayInfo(term: PositionHolding, person: Person): {
   // termLabel is pre-computed by backend if available
   const label = term.termLabel || formatTermLabel(term);
 
-  // Chamber from person's current chamber
-  const chamber = person.chamber === 'SENATE' ? 'Senate' : 'House';
+  // Chamber from member's current chamber
+  const chamber = member.chamber === 'SENATE' ? 'Senate' : 'House';
 
   return { label, chamber, isCurrent };
 }
@@ -65,10 +65,10 @@ function getOrdinalSuffix(n: number): string {
 /**
  * Format term for display
  */
-export function formatTermDisplay(term: PositionHolding, person: Person): string {
-  const { chamber } = getTermDisplayInfo(term, person);
+export function formatTermDisplay(term: PositionHolding, member: Member): string {
+  const { chamber } = getTermDisplayInfo(term, member);
   const position = chamber === 'Senate' ? 'Senator' : 'Representative';
-  const location = person.state ? `from ${person.state}` : '';
+  const location = member.state ? `from ${member.state}` : '';
 
   return `${position} ${location}`.trim();
 }

@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { PersonSchema, type Person } from './member';
+import { MemberSchema, type Member, type Person } from './member';
 
 /**
  * Committee chamber type (includes JOINT)
@@ -52,10 +52,15 @@ export interface Committee {
 
 /**
  * Committee membership entity from /api/members/{id}/committees
+ *
+ * Part of ARCH-1.8: Updated to use Member (was Person).
  */
 export interface CommitteeMembership {
   id: string;
-  person: Person;
+  /** The member holding this committee position */
+  member: Member;
+  /** @deprecated Use member instead */
+  person?: Person;
   committee: Committee;
   role: MembershipRole;
   congress: number;
@@ -104,7 +109,8 @@ export const CommitteeSchema = z.object({
 
 export const CommitteeMembershipSchema = z.object({
   id: z.string().uuid(),
-  person: PersonSchema,
+  member: MemberSchema,
+  person: MemberSchema.optional(), // Legacy alias
   committee: CommitteeSchema,
   role: MembershipRoleSchema,
   congress: z.number(),

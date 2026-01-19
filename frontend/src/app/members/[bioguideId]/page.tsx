@@ -81,7 +81,7 @@ function MemberDetailContent({ bioguideId }: { bioguideId: string }) {
           <div className="grid gap-6 md:grid-cols-2">
             <div>
               <h3 className="text-lg font-semibold mb-4">Social Media</h3>
-              <MemberSocialMedia socialMedia={member.socialMedia} />
+              <MemberSocialMedia socialMedia={(member as unknown as Record<string, unknown>).socialMedia as Record<string, string> | undefined} />
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Facts</h3>
@@ -94,7 +94,7 @@ function MemberDetailContent({ bioguideId }: { bioguideId: string }) {
           <h3 className="text-lg font-semibold mb-4">Term History</h3>
           <TermTimeline
             terms={termsList}
-            person={member}
+            member={member}
             isLoading={termsLoading}
           />
         </TabsContent>
@@ -109,7 +109,7 @@ function MemberDetailContent({ bioguideId }: { bioguideId: string }) {
 
         <TabsContent value="links" className="mt-6">
           <h3 className="text-lg font-semibold mb-4">External Resources</h3>
-          <ExternalIds externalIds={member.externalIds} bioguideId={member.bioguideId} />
+          <ExternalIds externalIds={(member as unknown as Record<string, unknown>).externalIds as Record<string, unknown> | undefined} bioguideId={member.bioguideId} />
         </TabsContent>
       </Tabs>
     </div>
@@ -121,7 +121,7 @@ function QuickFacts({
   termsCount,
   committeesCount,
 }: {
-  member: { party?: string; state?: string; chamber?: string; birthDate?: string };
+  member: { party?: string | null; state?: string | null; chamber?: string | null; birthDate?: string | null };
   termsCount: number;
   committeesCount: number;
 }) {
