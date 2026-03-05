@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -35,6 +37,20 @@ public interface StatuteRepository extends JpaRepository<Statute, UUID> {
      * Check if a statute exists by USC identifier.
      */
     boolean existsByUscIdentifier(String uscIdentifier);
+
+    /**
+     * Batch lookup of existing USC identifiers from a collection.
+     * Used to avoid N+1 queries during import by pre-loading which identifiers already exist.
+     */
+    @Query("SELECT s.uscIdentifier FROM Statute s WHERE s.uscIdentifier IN :identifiers")
+    Set<String> findExistingUscIdentifiers(@Param("identifiers") Collection<String> identifiers);
+
+    /**
+     * Find all statutes by a collection of USC identifiers.
+     * Used for batch update operations during import.
+     */
+    @Query("SELECT s FROM Statute s WHERE s.uscIdentifier IN :identifiers")
+    List<Statute> findByUscIdentifierIn(@Param("identifiers") Collection<String> identifiers);
 
     // =====================================================================
     // Title Queries

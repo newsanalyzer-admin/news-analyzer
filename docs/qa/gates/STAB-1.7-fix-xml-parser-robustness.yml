@@ -1,0 +1,46 @@
+schema: 1
+story: 'STAB-1.7'
+story_title: 'Fix XML Parser Robustness and Resource Management'
+gate: CONCERNS
+status_reason: 'All ACs met and tests pass. Minor concern: readElementXml() lacks the same depth limit applied to readElementText(), leaving an asymmetric defense. Low practical risk since readElementXml() is iterative (not recursive), but should be hardened for consistency.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-05T17:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: 'PARSER-001'
+    severity: medium
+    finding: 'UslmXmlParser.readElementXml() does not enforce MAX_NESTING_DEPTH — only readElementText() does. While readElementXml() is iterative (no StackOverflow risk), extremely deep nesting could cause excessive memory via StringBuilder accumulation.'
+    suggested_action: 'Add depth limit guard to readElementXml() for consistency with readElementText().'
+    suggested_owner: dev
+
+quality_score: 80
+expires: '2026-03-19T17:00:00Z'
+
+evidence:
+  tests_reviewed: 29
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'XXE protection confirmed in both UslmXmlParser and GovmanXmlImportService. Depth limit added to readElementText(). FederalRegisterParseException distinguishes parse errors from not-found.'
+  performance:
+    status: PASS
+    notes: 'Infinite loop bug in executeWithRetry() fixed — was a production time bomb.'
+  reliability:
+    status: PASS
+    notes: 'Resource leak in GovmanImportController fixed with try-with-resources. Error context improved in FederalRegisterImportService.'
+  maintainability:
+    status: PASS
+    notes: 'Clean implementation with well-documented changes. FederalRegisterParseException is a focused, minimal custom exception.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Add depth limit to readElementXml() for parity with readElementText()'
+      refs: ['backend/src/main/java/org/newsanalyzer/service/UslmXmlParser.java:296-332']

@@ -163,8 +163,9 @@ public class CommitteeSyncService {
 
             } catch (Exception e) {
                 result.errors++;
-                log.error("Failed to sync committee: {}", e.getMessage());
-                // Clear persistence context to recover from failed transaction
+                String failedCode = committeeData.path("systemCode").asText("unknown");
+                log.error("Failed to sync committee [systemCode={}]: {}", failedCode, e.getMessage(), e);
+                // Detach any dirty entities from this failed save to prevent cascading failures
                 entityManager.clear();
             }
         }
@@ -193,8 +194,9 @@ public class CommitteeSyncService {
 
             } catch (Exception e) {
                 result.errors++;
-                log.error("Failed to sync subcommittee: {}", e.getMessage());
-                // Clear persistence context to recover from failed transaction
+                String failedCode = subcommitteeData.path("systemCode").asText("unknown");
+                log.error("Failed to sync subcommittee [systemCode={}]: {}", failedCode, e.getMessage(), e);
+                // Detach any dirty entities from this failed save to prevent cascading failures
                 entityManager.clear();
             }
         }
@@ -305,6 +307,7 @@ public class CommitteeSyncService {
             case "joint":
                 return CommitteeChamber.JOINT;
             default:
+                log.warn("Unknown chamber value: '{}'", chamberStr);
                 return null;
         }
     }

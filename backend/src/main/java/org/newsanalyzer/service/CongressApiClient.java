@@ -5,7 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.newsanalyzer.config.CongressApiConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -44,10 +49,14 @@ public class CongressApiClient {
     private final AtomicInteger requestCount = new AtomicInteger(0);
     private final AtomicLong windowStart = new AtomicLong(System.currentTimeMillis());
 
-    public CongressApiClient(CongressApiConfig config, ObjectMapper objectMapper) {
+    public CongressApiClient(CongressApiConfig config, ObjectMapper objectMapper,
+                             RestTemplateBuilder restTemplateBuilder) {
         this.config = config;
         this.objectMapper = objectMapper;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplateBuilder
+                .setConnectTimeout(Duration.ofMillis(config.getTimeout()))
+                .setReadTimeout(Duration.ofMillis(config.getTimeout()))
+                .build();
     }
 
     /**
@@ -133,13 +142,14 @@ public class CongressApiClient {
     }
 
     /**
-     * Execute API call with retry logic and exponential backoff.
+     * Execute API call with retry logic, exponential backoff, and HTTP status awareness.
+     * 4xx errors (except 429) fail immediately. 5xx and network errors are retried.
      */
     private Optional<JsonNode> executeWithRetry(String url) {
-        int attempt = 0;
+        String safeUrl = CongressApiUtils.sanitizeUrl(url);
         long delayMs = INITIAL_RETRY_DELAY_MS;
 
-        while (attempt < MAX_RETRIES) {
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
                 requestCount.incrementAndGet();
                 String response = restTemplate.getForObject(url, String.class);
@@ -147,27 +157,64 @@ public class CongressApiClient {
                 if (response != null) {
                     return Optional.of(objectMapper.readTree(response));
                 }
-            } catch (RestClientException e) {
-                attempt++;
-                log.warn("API request failed (attempt {}/{}): {}", attempt, MAX_RETRIES, e.getMessage());
 
-                if (attempt < MAX_RETRIES) {
-                    try {
-                        Thread.sleep(delayMs);
-                        delayMs *= 2; // Exponential backoff
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        return Optional.empty();
-                    }
+                log.warn("Congress.gov API returned null response (attempt {}/{}): {}",
+                        attempt, MAX_RETRIES, safeUrl);
+            } catch (HttpClientErrorException e) {
+                int statusCode = e.getStatusCode().value();
+                if (statusCode == 429) {
+                    long retryAfterMs = parseRetryAfter(e);
+                    log.warn("Congress.gov API rate limited (429), retrying after {} ms", retryAfterMs);
+                    sleepQuietly(retryAfterMs);
+                    continue;
                 }
-            } catch (Exception e) {
-                log.error("Failed to parse API response: {}", e.getMessage());
+                // Other 4xx errors — do not retry
+                log.warn("Congress.gov API returned {} (attempt {}/{}): {}",
+                        statusCode, attempt, MAX_RETRIES, safeUrl);
                 return Optional.empty();
+            } catch (HttpServerErrorException e) {
+                log.warn("Congress.gov API server error {} (attempt {}/{}): {}",
+                        e.getStatusCode().value(), attempt, MAX_RETRIES, safeUrl);
+            } catch (ResourceAccessException e) {
+                log.warn("Congress.gov API connection error (attempt {}/{}): {}",
+                        attempt, MAX_RETRIES, e.getMessage());
+            } catch (RestClientException e) {
+                log.warn("Congress.gov API request failed (attempt {}/{}): {}",
+                        attempt, MAX_RETRIES, safeUrl);
+            } catch (Exception e) {
+                log.error("Failed to parse Congress.gov API response: {}", e.getMessage());
+                return Optional.empty();
+            }
+
+            if (attempt < MAX_RETRIES) {
+                sleepQuietly(delayMs);
+                delayMs *= 2; // Exponential backoff
             }
         }
 
-        log.error("Failed to fetch from Congress.gov API after {} attempts", MAX_RETRIES);
+        log.error("Failed to fetch from Congress.gov API after {} attempts: {}", MAX_RETRIES, safeUrl);
         return Optional.empty();
+    }
+
+    private long parseRetryAfter(HttpStatusCodeException e) {
+        String retryAfter = e.getResponseHeaders() != null
+                ? e.getResponseHeaders().getFirst("Retry-After") : null;
+        if (retryAfter != null) {
+            try {
+                return Long.parseLong(retryAfter) * 1000; // seconds → ms
+            } catch (NumberFormatException ignored) {
+                // Not a numeric Retry-After
+            }
+        }
+        return 10_000; // Default 10s backoff for rate limiting
+    }
+
+    private void sleepQuietly(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**

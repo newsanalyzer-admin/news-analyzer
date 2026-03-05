@@ -17,9 +17,9 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Service for importing US Code data from uscode.house.gov.
@@ -193,12 +193,54 @@ public class UsCodeImportService {
     }
 
     /**
-     * Save a batch of statutes with upsert logic.
-     * Each statute is saved individually to prevent transaction cascade failures.
+     * Save a batch of statutes using batch lookup to avoid N+1 queries.
+     * Pre-loads existing identifiers in one query, then performs batch save.
+     * Falls back to individual saves on batch failure.
      */
-    private void saveBatch(List<Statute> batch, UsCodeImportResult result) {
-        for (Statute statute : batch) {
-            saveStatuteIndividually(statute, result);
+    @Transactional
+    public void saveBatch(List<Statute> batch, UsCodeImportResult result) {
+        // Snapshot counters so we can restore on failure
+        int insertsBefore = result.getSectionsInserted();
+        int updatesBefore = result.getSectionsUpdated();
+
+        try {
+            // Single query to find which identifiers already exist
+            List<String> identifiers = batch.stream()
+                    .map(Statute::getUscIdentifier)
+                    .collect(Collectors.toList());
+
+            Map<String, Statute> existingMap = statuteRepository
+                    .findByUscIdentifierIn(identifiers)
+                    .stream()
+                    .collect(Collectors.toMap(Statute::getUscIdentifier, Function.identity()));
+
+            List<Statute> toSave = new ArrayList<>(batch.size());
+
+            for (Statute statute : batch) {
+                Statute existing = existingMap.get(statute.getUscIdentifier());
+                if (existing != null) {
+                    updateExistingStatute(existing, statute);
+                    toSave.add(existing);
+                    result.setSectionsUpdated(result.getSectionsUpdated() + 1);
+                } else {
+                    toSave.add(statute);
+                    result.setSectionsInserted(result.getSectionsInserted() + 1);
+                }
+            }
+
+            statuteRepository.saveAll(toSave);
+            entityManager.flush();
+            entityManager.clear();
+
+        } catch (Exception e) {
+            log.warn("Batch save failed, falling back to individual saves: {}", e.getMessage());
+            // Restore counters — individual saves will re-count
+            result.setSectionsInserted(insertsBefore);
+            result.setSectionsUpdated(updatesBefore);
+            entityManager.clear();
+            for (Statute statute : batch) {
+                saveStatuteIndividually(statute, result);
+            }
         }
     }
 
@@ -206,19 +248,17 @@ public class UsCodeImportService {
      * Save a single statute with error recovery.
      * Clears EntityManager on failure to prevent transaction cascade.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveStatuteIndividually(Statute statute, UsCodeImportResult result) {
         try {
             Optional<Statute> existing = statuteRepository.findByUscIdentifier(statute.getUscIdentifier());
 
             if (existing.isPresent()) {
-                // Update existing record
                 Statute toUpdate = existing.get();
                 updateExistingStatute(toUpdate, statute);
                 statuteRepository.saveAndFlush(toUpdate);
                 result.setSectionsUpdated(result.getSectionsUpdated() + 1);
             } else {
-                // Insert new record
                 statuteRepository.saveAndFlush(statute);
                 result.setSectionsInserted(result.getSectionsInserted() + 1);
             }
@@ -226,7 +266,6 @@ public class UsCodeImportService {
             log.warn("Failed to save statute {}: {}", statute.getUscIdentifier(), e.getMessage());
             result.addError(statute.getUscIdentifier() + ": " + e.getMessage());
             result.setSectionsFailed(result.getSectionsFailed() + 1);
-            // Clear persistence context to recover from failed transaction state
             entityManager.clear();
         }
     }

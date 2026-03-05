@@ -7,7 +7,11 @@
         "url": "https://www.usda.gov",
         "parent_id": null,
         "logo": null,
+        "agency_url": "",
+        "child_ids": [],
+        "child_slugs": [],
         "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/agriculture-department/recent_articles.json",
+        "json_url": "https://www.federalregister.gov/api/v1/agencies/1.json",
         "slug": "agriculture-department"
     },
     {
@@ -17,8 +21,16 @@
         "description": "The Environmental Protection Agency protects human health and the environment.",
         "url": "https://www.epa.gov",
         "parent_id": null,
-        "logo": null,
+        "logo": {
+            "thumb_url": "https://www.federalregister.gov/images/agencies/epa-thumb.png",
+            "small_url": "https://www.federalregister.gov/images/agencies/epa-small.png",
+            "medium_url": "https://www.federalregister.gov/images/agencies/epa-medium.png"
+        },
+        "agency_url": "",
+        "child_ids": [],
+        "child_slugs": [],
         "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/environmental-protection-agency/recent_articles.json",
+        "json_url": "https://www.federalregister.gov/api/v1/agencies/2.json",
         "slug": "environmental-protection-agency"
     },
     {
@@ -29,7 +41,11 @@
         "url": "https://www.defense.gov",
         "parent_id": null,
         "logo": null,
+        "agency_url": "",
+        "child_ids": [],
+        "child_slugs": [],
         "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/defense-department/recent_articles.json",
+        "json_url": "https://www.federalregister.gov/api/v1/agencies/3.json",
         "slug": "defense-department"
     },
     {
@@ -40,7 +56,11 @@
         "url": "https://www.state.gov",
         "parent_id": null,
         "logo": null,
+        "agency_url": "",
+        "child_ids": [],
+        "child_slugs": [],
         "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/state-department/recent_articles.json",
+        "json_url": "https://www.federalregister.gov/api/v1/agencies/4.json",
         "slug": "state-department"
     },
     {
@@ -51,7 +71,11 @@
         "url": "https://www.nasa.gov",
         "parent_id": null,
         "logo": null,
+        "agency_url": "",
+        "child_ids": [],
+        "child_slugs": [],
         "recent_articles_url": "https://www.federalregister.gov/api/v1/agencies/national-aeronautics-and-space-administration/recent_articles.json",
+        "json_url": "https://www.federalregister.gov/api/v1/agencies/5.json",
         "slug": "national-aeronautics-and-space-administration"
     }
 ]

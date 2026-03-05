@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * REST Controller for US Code XML file upload and import operations.
@@ -59,8 +60,8 @@ public class StatuteImportController {
     private final UsCodeImportService importService;
     private final UslmXmlParser xmlParser;
 
-    // Track ongoing imports to prevent concurrent runs
-    private volatile boolean importInProgress = false;
+    // Track ongoing imports to prevent concurrent runs (AtomicBoolean for thread-safe check-then-set)
+    private final AtomicBoolean importInProgress = new AtomicBoolean(false);
     private UsCodeImportResult lastResult = null;
 
     public StatuteImportController(UsCodeImportService importService, UslmXmlParser xmlParser) {
@@ -84,25 +85,17 @@ public class StatuteImportController {
     public ResponseEntity<UsCodeImportResult> uploadAndImport(
             @RequestParam("file") MultipartFile file) {
 
-        // Check if import is already running
-        if (importInProgress) {
-            log.warn("US Code import already in progress");
-            return ResponseEntity.status(409).build();
-        }
-
-        // Validate file is present
+        // Validate file before acquiring import lock
         if (file == null || file.isEmpty()) {
             log.warn("Empty or null file received");
             return ResponseEntity.badRequest().build();
         }
 
-        // Check file size
         if (file.getSize() > MAX_FILE_SIZE) {
             log.warn("File size {} exceeds maximum {} bytes", file.getSize(), MAX_FILE_SIZE);
             return ResponseEntity.status(413).build();
         }
 
-        // Validate file extension
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".xml")) {
             log.warn("Invalid file type: {}. Expected .xml file", filename);
@@ -120,10 +113,15 @@ public class StatuteImportController {
             return ResponseEntity.badRequest().build();
         }
 
+        // Acquire import lock (atomic check-then-set)
+        if (!importInProgress.compareAndSet(false, true)) {
+            log.warn("US Code import already in progress");
+            return ResponseEntity.status(409).build();
+        }
+
         log.info("US Code import triggered via file upload, file: {}, size: {} bytes",
                 filename, file.getSize());
 
-        importInProgress = true;
         UsCodeImportResult result = UsCodeImportResult.forFullImport(DEFAULT_RELEASE_POINT);
 
         try {
@@ -155,7 +153,7 @@ public class StatuteImportController {
             return ResponseEntity.internalServerError().body(result);
 
         } finally {
-            importInProgress = false;
+            importInProgress.set(false);
         }
     }
 
@@ -167,7 +165,7 @@ public class StatuteImportController {
     })
     public ResponseEntity<Map<String, Object>> getStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", importInProgress);
+        status.put("inProgress", importInProgress.get());
 
         if (lastResult != null) {
             Map<String, Object> lastImport = new HashMap<>();

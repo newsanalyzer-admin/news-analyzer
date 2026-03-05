@@ -102,15 +102,10 @@ public class TermSyncService {
         }
 
         JsonNode memberNode = memberData.get().path("member");
-        JsonNode termsNode = memberNode.path("terms");
 
-        // Handle both array and object with "item" array
-        JsonNode termsArray;
-        if (termsNode.has("item")) {
-            termsArray = termsNode.path("item");
-        } else if (termsNode.isArray()) {
-            termsArray = termsNode;
-        } else {
+        // Normalize terms array (handles both direct array and terms.item formats)
+        JsonNode termsArray = CongressApiUtils.normalizeTermsArray(memberNode.path("terms"));
+        if (!termsArray.isArray() || termsArray.size() == 0) {
             log.debug("No terms found for member: {}", bioguideId);
             return new TermResult(0, 0);
         }

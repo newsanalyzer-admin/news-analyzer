@@ -1,5 +1,6 @@
 package org.newsanalyzer.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FederalRegisterAgency {
 
     /**
@@ -56,7 +58,8 @@ public class FederalRegisterAgency {
     private String slug;
 
     /**
-     * URL to agency logo (may be null).
+     * Agency logo data. May be null, or a nested object with thumb_url, small_url, medium_url fields.
+     * Typed as Object to handle both null and nested JSON object responses from the API.
      */
-    private String logo;
+    private Object logo;
 }

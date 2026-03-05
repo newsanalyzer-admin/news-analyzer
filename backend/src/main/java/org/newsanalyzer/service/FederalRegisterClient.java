@@ -9,10 +9,16 @@ import org.newsanalyzer.dto.FederalRegisterDocument;
 import org.newsanalyzer.dto.FederalRegisterDocumentPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +45,14 @@ public class FederalRegisterClient {
 
     private long lastRequestTime = 0;
 
-    public FederalRegisterClient(FederalRegisterConfig config, ObjectMapper objectMapper) {
+    public FederalRegisterClient(FederalRegisterConfig config, ObjectMapper objectMapper,
+                                  RestTemplateBuilder restTemplateBuilder) {
         this.config = config;
         this.objectMapper = objectMapper;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplateBuilder
+                .setConnectTimeout(Duration.ofMillis(config.getTimeout()))
+                .setReadTimeout(Duration.ofMillis(config.getTimeout()))
+                .build();
     }
 
     /**
@@ -66,7 +76,8 @@ public class FederalRegisterClient {
                 log.info("Successfully fetched {} agencies from Federal Register", agencies.size());
                 return agencies;
             } catch (Exception e) {
-                log.error("Failed to parse Federal Register API response: {}", e.getMessage());
+                String snippet = truncateForLog(response.get());
+                log.error("Failed to parse Federal Register agencies response (first 500 chars: {})", snippet, e);
                 return Collections.emptyList();
             }
         }
@@ -95,7 +106,8 @@ public class FederalRegisterClient {
                 );
                 return Optional.of(agency);
             } catch (Exception e) {
-                log.error("Failed to parse agency response for slug {}: {}", slug, e.getMessage());
+                String snippet = truncateForLog(response.get());
+                log.error("Failed to parse agency response for slug {} (first 500 chars: {})", slug, snippet, e);
                 return Optional.empty();
             }
         }
@@ -134,7 +146,8 @@ public class FederalRegisterClient {
                         page.getCount());
                 return page;
             } catch (Exception e) {
-                log.error("Failed to parse Federal Register documents response: {}", e.getMessage());
+                String snippet = truncateForLog(response.get());
+                log.error("Failed to parse Federal Register documents response (first 500 chars: {})", snippet, e);
                 return new FederalRegisterDocumentPage();
             }
         }
@@ -206,8 +219,10 @@ public class FederalRegisterClient {
                 );
                 return Optional.of(document);
             } catch (Exception e) {
-                log.error("Failed to parse document response for {}: {}", documentNumber, e.getMessage());
-                return Optional.empty();
+                String snippet = truncateForLog(response.get());
+                log.error("Failed to parse document response for {} (first 500 chars: {})", documentNumber, snippet, e);
+                throw new FederalRegisterParseException(
+                        "Failed to parse document " + documentNumber + " from Federal Register API", e);
             }
         }
 
@@ -246,10 +261,9 @@ public class FederalRegisterClient {
      * @return Optional containing the response body, or empty if all retries failed
      */
     private Optional<String> executeWithRetry(String url) {
-        int attempt = 0;
         long delayMs = 1000; // Initial retry delay
 
-        while (attempt < config.getRetryAttempts()) {
+        for (int attempt = 1; attempt <= config.getRetryAttempts(); attempt++) {
             try {
                 applyRateLimit();
                 String response = restTemplate.getForObject(url, String.class);
@@ -257,26 +271,62 @@ public class FederalRegisterClient {
                 if (response != null) {
                     return Optional.of(response);
                 }
+
+                log.warn("Federal Register API returned null response (attempt {}/{})",
+                        attempt, config.getRetryAttempts());
+            } catch (HttpClientErrorException e) {
+                int statusCode = e.getStatusCode().value();
+                if (statusCode == 429) {
+                    // Rate limited — use Retry-After header or extended backoff
+                    long retryAfterMs = parseRetryAfter(e);
+                    log.warn("Federal Register API rate limited (429), retrying after {} ms", retryAfterMs);
+                    sleepQuietly(retryAfterMs);
+                    continue;
+                }
+                // Other 4xx errors — do not retry
+                log.warn("Federal Register API returned {} (attempt {}/{}): {}",
+                        statusCode, attempt, config.getRetryAttempts(), e.getMessage());
+                return Optional.empty();
+            } catch (HttpServerErrorException e) {
+                log.warn("Federal Register API server error {} (attempt {}/{}): {}",
+                        e.getStatusCode().value(), attempt, config.getRetryAttempts(), e.getMessage());
+            } catch (ResourceAccessException e) {
+                log.warn("Federal Register API connection error (attempt {}/{}): {}",
+                        attempt, config.getRetryAttempts(), e.getMessage());
             } catch (RestClientException e) {
-                attempt++;
                 log.warn("Federal Register API request failed (attempt {}/{}): {}",
                         attempt, config.getRetryAttempts(), e.getMessage());
+            }
 
-                if (attempt < config.getRetryAttempts()) {
-                    try {
-                        Thread.sleep(delayMs);
-                        delayMs *= 2; // Exponential backoff
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        log.warn("Retry interrupted");
-                        return Optional.empty();
-                    }
-                }
+            if (attempt < config.getRetryAttempts()) {
+                sleepQuietly(delayMs);
+                delayMs *= 2; // Exponential backoff
             }
         }
 
         log.error("Failed to fetch from Federal Register API after {} attempts", config.getRetryAttempts());
         return Optional.empty();
+    }
+
+    private long parseRetryAfter(HttpStatusCodeException e) {
+        String retryAfter = e.getResponseHeaders() != null
+                ? e.getResponseHeaders().getFirst("Retry-After") : null;
+        if (retryAfter != null) {
+            try {
+                return Long.parseLong(retryAfter) * 1000; // seconds → ms
+            } catch (NumberFormatException ignored) {
+                // Not a numeric Retry-After
+            }
+        }
+        return 10_000; // Default 10s backoff for rate limiting
+    }
+
+    private void sleepQuietly(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
@@ -308,5 +358,10 @@ public class FederalRegisterClient {
      */
     public String getBaseUrl() {
         return config.getBaseUrl();
+    }
+
+    private String truncateForLog(String text) {
+        if (text == null) return "null";
+        return text.length() <= 500 ? text : text.substring(0, 500) + "...";
     }
 }

@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * REST Controller for Government Manual XML import operations.
@@ -46,8 +48,8 @@ public class GovmanImportController {
 
     private final GovmanXmlImportService importService;
 
-    // Track ongoing imports to prevent concurrent runs
-    private volatile boolean importInProgress = false;
+    // Track ongoing imports to prevent concurrent runs (AtomicBoolean for thread-safe check-then-set)
+    private final AtomicBoolean importInProgress = new AtomicBoolean(false);
     private GovmanImportResult lastResult = null;
 
     public GovmanImportController(GovmanXmlImportService importService) {
@@ -69,38 +71,34 @@ public class GovmanImportController {
     public ResponseEntity<GovmanImportResult> importGovman(
             @RequestParam("file") MultipartFile file) {
 
-        // Check if import is already running
-        if (importInProgress) {
-            log.warn("GOVMAN import already in progress");
-            return ResponseEntity.status(409).build();
-        }
-
-        // Validate file
+        // Validate file before acquiring import lock
         if (file == null || file.isEmpty()) {
             log.warn("Empty or null file received");
             return ResponseEntity.badRequest().build();
         }
 
-        // Check file size
         if (file.getSize() > MAX_FILE_SIZE) {
             log.warn("File size {} exceeds maximum {}", file.getSize(), MAX_FILE_SIZE);
             return ResponseEntity.status(413).build();
         }
 
-        // Validate file type
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".xml")) {
             log.warn("Invalid file type: {}", filename);
             return ResponseEntity.badRequest().build();
         }
 
+        // Acquire import lock (atomic check-then-set)
+        if (!importInProgress.compareAndSet(false, true)) {
+            log.warn("GOVMAN import already in progress");
+            return ResponseEntity.status(409).build();
+        }
+
         log.info("GOVMAN import triggered via API, file: {}, size: {} bytes",
                 filename, file.getSize());
 
-        importInProgress = true;
-
-        try {
-            GovmanImportResult result = importService.importFromStream(file.getInputStream());
+        try (InputStream stream = file.getInputStream()) {
+            GovmanImportResult result = importService.importFromStream(stream);
             lastResult = result;
 
             if (result.getErrors() > 0) {
@@ -120,7 +118,7 @@ public class GovmanImportController {
             return ResponseEntity.internalServerError().body(errorResult);
 
         } finally {
-            importInProgress = false;
+            importInProgress.set(false);
         }
     }
 
@@ -132,7 +130,7 @@ public class GovmanImportController {
     })
     public ResponseEntity<Map<String, Object>> getStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", importInProgress);
+        status.put("inProgress", importInProgress.get());
 
         if (lastResult != null) {
             Map<String, Object> lastImport = new HashMap<>();

@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.dto.PlumImportResult;
 import org.newsanalyzer.dto.UsCodeImportResult;
+import org.newsanalyzer.scheduler.EnrichmentScheduler;
+import org.newsanalyzer.scheduler.GovernmentOrgScheduler;
+import org.newsanalyzer.scheduler.RegulationSyncScheduler;
 import org.newsanalyzer.service.ExecutiveOrderSyncService;
 import org.newsanalyzer.service.PlumCsvImportService;
 import org.newsanalyzer.service.PresidentialSyncService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * REST Controller for administrative data synchronization operations.
@@ -46,27 +50,41 @@ public class AdminSyncController {
     private final PresidentialSyncService presidentialSyncService;
     private final ExecutiveOrderSyncService executiveOrderSyncService;
 
-    // Track ongoing imports to prevent concurrent runs
-    private volatile boolean plumImportInProgress = false;
+    // Optional scheduler dependencies (may be disabled via config)
+    private final RegulationSyncScheduler regulationSyncScheduler;
+    private final GovernmentOrgScheduler governmentOrgScheduler;
+    private final EnrichmentScheduler enrichmentScheduler;
+
+    // Track ongoing imports to prevent concurrent runs (AtomicBoolean for thread-safe check-then-set)
+    private final AtomicBoolean plumImportInProgress = new AtomicBoolean(false);
     private PlumImportResult lastPlumResult = null;
 
-    private volatile boolean usCodeImportInProgress = false;
+    private final AtomicBoolean usCodeImportInProgress = new AtomicBoolean(false);
     private UsCodeImportResult lastUsCodeResult = null;
 
-    private volatile boolean presidentialSyncInProgress = false;
+    private final AtomicBoolean presidentialSyncInProgress = new AtomicBoolean(false);
     private PresidentialSyncService.SyncResult lastPresidentialResult = null;
 
-    private volatile boolean eoSyncInProgress = false;
+    private final AtomicBoolean eoSyncInProgress = new AtomicBoolean(false);
     private ExecutiveOrderSyncService.SyncResult lastEoResult = null;
 
     public AdminSyncController(PlumCsvImportService plumImportService,
                                UsCodeImportService usCodeImportService,
                                PresidentialSyncService presidentialSyncService,
-                               ExecutiveOrderSyncService executiveOrderSyncService) {
+                               ExecutiveOrderSyncService executiveOrderSyncService,
+                               @org.springframework.beans.factory.annotation.Autowired(required = false)
+                               RegulationSyncScheduler regulationSyncScheduler,
+                               @org.springframework.beans.factory.annotation.Autowired(required = false)
+                               GovernmentOrgScheduler governmentOrgScheduler,
+                               @org.springframework.beans.factory.annotation.Autowired(required = false)
+                               EnrichmentScheduler enrichmentScheduler) {
         this.plumImportService = plumImportService;
         this.usCodeImportService = usCodeImportService;
         this.presidentialSyncService = presidentialSyncService;
         this.executiveOrderSyncService = executiveOrderSyncService;
+        this.regulationSyncScheduler = regulationSyncScheduler;
+        this.governmentOrgScheduler = governmentOrgScheduler;
+        this.enrichmentScheduler = enrichmentScheduler;
     }
 
     // =====================================================================
@@ -86,13 +104,12 @@ public class AdminSyncController {
     public ResponseEntity<PlumImportResult> importPlumData(
             @RequestParam(required = false) Integer offset,
             @RequestParam(required = false) Integer limit) {
-        if (plumImportInProgress) {
+        if (!plumImportInProgress.compareAndSet(false, true)) {
             log.warn("PLUM import already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("PLUM import triggered via API (offset={}, limit={})", offset, limit);
-        plumImportInProgress = true;
 
         try {
             PlumImportResult result = plumImportService.importFromUrl(offset, limit);
@@ -107,7 +124,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            plumImportInProgress = false;
+            plumImportInProgress.set(false);
         }
     }
 
@@ -119,7 +136,7 @@ public class AdminSyncController {
     })
     public ResponseEntity<Map<String, Object>> getPlumStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", plumImportInProgress);
+        status.put("inProgress", plumImportInProgress.get());
         status.put("csvUrl", plumImportService.getPlumCsvUrl());
 
         if (lastPlumResult != null) {
@@ -172,13 +189,12 @@ public class AdminSyncController {
     public ResponseEntity<UsCodeImportResult> importAllStatutes(
             @RequestParam(required = false) String releasePoint) {
 
-        if (usCodeImportInProgress) {
+        if (!usCodeImportInProgress.compareAndSet(false, true)) {
             log.warn("US Code import already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("Full US Code import triggered via API (releasePoint: {})", releasePoint);
-        usCodeImportInProgress = true;
 
         try {
             UsCodeImportResult result = usCodeImportService.importAllTitles(releasePoint);
@@ -194,7 +210,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            usCodeImportInProgress = false;
+            usCodeImportInProgress.set(false);
         }
     }
 
@@ -215,13 +231,12 @@ public class AdminSyncController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (usCodeImportInProgress) {
+        if (!usCodeImportInProgress.compareAndSet(false, true)) {
             log.warn("US Code import already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("US Code Title {} import triggered via API (releasePoint: {})", titleNumber, releasePoint);
-        usCodeImportInProgress = true;
 
         try {
             UsCodeImportResult result = usCodeImportService.importTitle(titleNumber, releasePoint);
@@ -237,7 +252,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            usCodeImportInProgress = false;
+            usCodeImportInProgress.set(false);
         }
     }
 
@@ -249,7 +264,7 @@ public class AdminSyncController {
     })
     public ResponseEntity<Map<String, Object>> getStatutesStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", usCodeImportInProgress);
+        status.put("inProgress", usCodeImportInProgress.get());
         status.put("totalStatutes", usCodeImportService.getTotalStatuteCount());
         status.put("usCodeStatutes", usCodeImportService.getUsCodeCount());
 
@@ -302,13 +317,12 @@ public class AdminSyncController {
         @ApiResponse(responseCode = "500", description = "Sync failed")
     })
     public ResponseEntity<PresidentialSyncService.SyncResult> syncPresidencies() {
-        if (presidentialSyncInProgress) {
+        if (!presidentialSyncInProgress.compareAndSet(false, true)) {
             log.warn("Presidential sync already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("Presidential sync triggered via API");
-        presidentialSyncInProgress = true;
 
         try {
             PresidentialSyncService.SyncResult result = presidentialSyncService.syncFromSeedFile();
@@ -323,7 +337,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            presidentialSyncInProgress = false;
+            presidentialSyncInProgress.set(false);
         }
     }
 
@@ -335,7 +349,7 @@ public class AdminSyncController {
     })
     public ResponseEntity<Map<String, Object>> getPresidenciesStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", presidentialSyncInProgress);
+        status.put("inProgress", presidentialSyncInProgress.get());
         status.put("totalPresidencies", presidentialSyncService.getPresidencyCount());
 
         if (lastPresidentialResult != null) {
@@ -385,13 +399,12 @@ public class AdminSyncController {
         @ApiResponse(responseCode = "500", description = "Sync failed")
     })
     public ResponseEntity<ExecutiveOrderSyncService.SyncResult> syncAllExecutiveOrders() {
-        if (eoSyncInProgress) {
+        if (!eoSyncInProgress.compareAndSet(false, true)) {
             log.warn("Executive Order sync already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("Executive Order sync triggered via API");
-        eoSyncInProgress = true;
 
         try {
             ExecutiveOrderSyncService.SyncResult result = executiveOrderSyncService.syncAllExecutiveOrders();
@@ -406,7 +419,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            eoSyncInProgress = false;
+            eoSyncInProgress.set(false);
         }
     }
 
@@ -426,13 +439,12 @@ public class AdminSyncController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (eoSyncInProgress) {
+        if (!eoSyncInProgress.compareAndSet(false, true)) {
             log.warn("Executive Order sync already in progress");
             return ResponseEntity.status(409).build();
         }
 
         log.info("Executive Order sync for presidency #{} triggered via API", presidencyNumber);
-        eoSyncInProgress = true;
 
         try {
             ExecutiveOrderSyncService.SyncResult result =
@@ -449,7 +461,7 @@ public class AdminSyncController {
             return ResponseEntity.ok(result);
 
         } finally {
-            eoSyncInProgress = false;
+            eoSyncInProgress.set(false);
         }
     }
 
@@ -461,7 +473,7 @@ public class AdminSyncController {
     })
     public ResponseEntity<Map<String, Object>> getExecutiveOrdersStatus() {
         Map<String, Object> status = new HashMap<>();
-        status.put("inProgress", eoSyncInProgress);
+        status.put("inProgress", eoSyncInProgress.get());
         status.put("eoCounts", executiveOrderSyncService.getExecutiveOrderCounts());
 
         if (lastEoResult != null) {
@@ -511,23 +523,60 @@ public class AdminSyncController {
         Map<String, Object> services = new HashMap<>();
         services.put("plumImport", Map.of(
                 "available", true,
-                "inProgress", plumImportInProgress,
+                "inProgress", plumImportInProgress.get(),
                 "csvUrl", plumImportService.getPlumCsvUrl()
         ));
         services.put("usCodeImport", Map.of(
                 "available", true,
-                "inProgress", usCodeImportInProgress,
+                "inProgress", usCodeImportInProgress.get(),
                 "totalStatutes", usCodeImportService.getTotalStatuteCount()
         ));
         services.put("presidentialSync", Map.of(
                 "available", true,
-                "inProgress", presidentialSyncInProgress,
+                "inProgress", presidentialSyncInProgress.get(),
                 "totalPresidencies", presidentialSyncService.getPresidencyCount()
         ));
         services.put("executiveOrderSync", Map.of(
                 "available", true,
-                "inProgress", eoSyncInProgress
+                "inProgress", eoSyncInProgress.get()
         ));
+
+        // Scheduled sync health
+        Map<String, Object> scheduledSyncs = new HashMap<>();
+        if (regulationSyncScheduler != null) {
+            Map<String, Object> regSync = new HashMap<>();
+            regSync.put("enabled", true);
+            regSync.put("lastRun", regulationSyncScheduler.getLastSyncTime());
+            regSync.put("lastStatus", regulationSyncScheduler.getLastSyncStatus());
+            regSync.put("lastError", regulationSyncScheduler.getLastSyncError());
+            scheduledSyncs.put("regulationSync", regSync);
+        } else {
+            scheduledSyncs.put("regulationSync", Map.of("enabled", false));
+        }
+        if (governmentOrgScheduler != null) {
+            Map<String, Object> govSync = new HashMap<>();
+            govSync.put("enabled", true);
+            govSync.put("lastRun", governmentOrgScheduler.getLastScheduledSyncTime());
+            var result = governmentOrgScheduler.getLastSyncResult();
+            govSync.put("lastStatus", result != null ? "COMPLETED" : null);
+            govSync.put("lastErrors", result != null ? result.getErrors() : null);
+            scheduledSyncs.put("govOrgSync", govSync);
+        } else {
+            scheduledSyncs.put("govOrgSync", Map.of("enabled", false));
+        }
+        if (enrichmentScheduler != null) {
+            var status = enrichmentScheduler.getStatus();
+            Map<String, Object> enrSync = new HashMap<>();
+            enrSync.put("enabled", true);
+            enrSync.put("lastRun", status.lastSyncTime());
+            enrSync.put("lastCommit", status.lastCommitSha());
+            enrSync.put("schedule", status.schedule());
+            scheduledSyncs.put("enrichmentSync", enrSync);
+        } else {
+            scheduledSyncs.put("enrichmentSync", Map.of("enabled", false));
+        }
+        health.put("scheduledSyncs", scheduledSyncs);
+
         health.put("services", services);
         return ResponseEntity.ok(health);
     }

@@ -1,0 +1,60 @@
+schema: 1
+story: 'STAB-1.10'
+story_title: 'Performance and Memory Optimizations'
+gate: CONCERNS
+status_reason: 'N+1 query elimination and memory optimizations implemented correctly. One medium concern: saveBatch() counter restoration on partial failure may miscount if some records were already flushed before the exception. Also, findExistingUscIdentifiers() was added to repository but is unused — only findByUscIdentifierIn() is called.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-05T17:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: 'BATCH-001'
+    severity: medium
+    finding: 'UsCodeImportService.saveBatch() snapshots insert/update counters and restores on exception. But if saveAll()+flush() partially succeeds before throwing (e.g., 50 of 100 records saved), the counter restoration is incorrect — individual fallback re-processes all 100, double-counting the 50 that already committed.'
+    suggested_action: 'Use @Transactional to ensure atomicity of the batch — if flush() throws, the entire batch should roll back. Verify that the current @Transactional actually provides this guarantee (it should, since saveAll+flush happen within the same transaction).'
+    suggested_owner: dev
+  - id: 'UNUSED-001'
+    severity: low
+    finding: 'StatuteRepository.findExistingUscIdentifiers() (returns Set<String>) was added but is never called — only findByUscIdentifierIn() (returns List<Statute>) is used in saveBatch().'
+    suggested_action: 'Remove unused findExistingUscIdentifiers() method to avoid dead code, or document its intended future use.'
+    suggested_owner: dev
+  - id: 'PARENT-001'
+    severity: low
+    finding: 'GovmanXmlImportService.resolveParentReferences() performs per-entity repository.findByOfficialNameIgnoreCase() lookups — an N+1 pattern that was not addressed in this story. Existing behavior, not a regression.'
+    suggested_action: 'Future optimization: pre-load all organizations by name into a Map for parent resolution.'
+    suggested_owner: dev
+
+quality_score: 70
+expires: '2026-03-19T17:00:00Z'
+
+evidence:
+  tests_reviewed: 31
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 5]
+    ac_gaps: [4]
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No security changes in this story.'
+  performance:
+    status: PASS
+    notes: 'N+1 eliminated in UsCodeImportService. Batch size of 100 is reasonable. entityManager.clear() after each batch bounds memory.'
+  reliability:
+    status: CONCERNS
+    notes: 'Batch fallback to individual saves is a good safety net but counter accuracy is uncertain on partial failures.'
+  maintainability:
+    status: PASS
+    notes: 'Test updated correctly for batch approach. Reflection-based EntityManager injection is documented.'
+
+recommendations:
+  immediate:
+    - action: 'Verify @Transactional on saveBatch() ensures atomic rollback — if so, counter restoration logic is correct (no partial commits). Add a comment documenting this guarantee.'
+      refs: ['backend/src/main/java/org/newsanalyzer/service/UsCodeImportService.java:200-244']
+  future:
+    - action: 'Remove unused findExistingUscIdentifiers() from StatuteRepository'
+      refs: ['backend/src/main/java/org/newsanalyzer/repository/StatuteRepository.java']
+    - action: 'Optimize GovmanXmlImportService parent resolution N+1'
+      refs: ['backend/src/main/java/org/newsanalyzer/service/GovmanXmlImportService.java:262-306']

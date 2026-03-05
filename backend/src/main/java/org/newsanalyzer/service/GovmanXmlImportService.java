@@ -5,6 +5,8 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.newsanalyzer.dto.GovmanImportResult;
 import org.newsanalyzer.dto.govman.GovmanDocument;
 import org.newsanalyzer.dto.govman.GovmanEntity;
@@ -15,6 +17,9 @@ import org.newsanalyzer.repository.GovernmentOrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,9 +57,25 @@ public class GovmanXmlImportService {
         }
 
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        GovmanDocument document = (GovmanDocument) unmarshaller.unmarshal(xmlStream);
 
-        return document.getEntities();
+        // Configure XXE protection via secure SAXParser
+        try {
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            SAXSource source = new SAXSource(
+                    spf.newSAXParser().getXMLReader(),
+                    new InputSource(xmlStream));
+            GovmanDocument document = (GovmanDocument) unmarshaller.unmarshal(source);
+            List<GovmanEntity> entities = document.getEntities();
+            // Null out document reference to allow GC of the full JAXB tree
+            document = null;
+            return entities;
+        } catch (SAXException | ParserConfigurationException e) {
+            log.warn("XML security validation failed: {}", e.getMessage());
+            throw new JAXBException("XML security validation failed: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -82,6 +103,9 @@ public class GovmanXmlImportService {
 
             // Import entities
             importEntities(entities, entityMap, result);
+
+            // Release memory — entityMap and entities list are no longer needed
+            entityMap.clear();
 
             result.setEndTime(LocalDateTime.now());
             log.info(result.getSummary());

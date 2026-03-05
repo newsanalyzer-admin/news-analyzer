@@ -242,17 +242,14 @@ public class MemberSyncService {
             syncData.state = mapStateToCode(stateStr);
         }
 
-        // Map chamber from terms.item array
-        JsonNode terms = data.path("terms");
-        if (!terms.isMissingNode()) {
-            JsonNode termItems = terms.path("item");
-            if (termItems.isArray() && termItems.size() > 0) {
-                // Get most recent term (last in array)
-                JsonNode latestTerm = termItems.get(termItems.size() - 1);
-                String chamberStr = getTextOrNull(latestTerm, "chamber");
-                if (chamberStr != null) {
-                    syncData.chamber = mapChamber(chamberStr);
-                }
+        // Map chamber from terms array (handles both direct array and terms.item formats)
+        JsonNode termsArray = CongressApiUtils.normalizeTermsArray(data.path("terms"));
+        if (termsArray.isArray() && termsArray.size() > 0) {
+            // Get most recent term (last in array)
+            JsonNode latestTerm = termsArray.get(termsArray.size() - 1);
+            String chamberStr = getTextOrNull(latestTerm, "chamber");
+            if (chamberStr != null) {
+                syncData.chamber = mapChamber(chamberStr);
             }
         }
 
@@ -405,6 +402,7 @@ public class MemberSyncService {
         } else if (normalized.contains("HOUSE") || normalized.contains("REPRESENTATIVE")) {
             return Chamber.HOUSE;
         }
+        log.warn("Unknown chamber value: '{}'", chamberStr);
         return null;
     }
 

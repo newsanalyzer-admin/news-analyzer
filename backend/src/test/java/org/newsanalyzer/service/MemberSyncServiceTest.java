@@ -347,6 +347,99 @@ class MemberSyncServiceTest {
     }
 
     @Test
+    @DisplayName("Should sync member with terms as direct array format")
+    void syncMember_directArrayTerms_mapsChamberCorrectly() throws Exception {
+        // Given - API returns terms as direct array (not nested in "item" object)
+        String memberJson = """
+            {
+              "bioguideId": "W000817",
+              "name": "Warren, Elizabeth",
+              "partyName": "Democratic",
+              "state": "MA",
+              "terms": [{"chamber": "Senate", "congress": 118, "startYear": 2023}]
+            }
+            """;
+        JsonNode memberData = objectMapper.readTree(memberJson);
+
+        UUID individualId = UUID.randomUUID();
+        Individual individual = new Individual();
+        individual.setId(individualId);
+        individual.setFirstName("Elizabeth");
+        individual.setLastName("Warren");
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId("W000817");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+        member.setChamber(Chamber.SENATE);
+
+        when(congressionalMemberService.findByBioguideId("W000817")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                eq("W000817"),
+                eq("Elizabeth"),
+                eq("Warren"),
+                any(),
+                eq(Chamber.SENATE),
+                eq("MA"),
+                eq("Democratic")
+        )).thenReturn(member);
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
+
+        // When
+        boolean isNew = syncService.syncMember(memberData);
+
+        // Then
+        assertThat(isNew).isTrue();
+        verify(congressionalMemberService).findOrCreate(
+                eq("W000817"), eq("Elizabeth"), eq("Warren"),
+                any(), eq(Chamber.SENATE), eq("MA"), eq("Democratic")
+        );
+    }
+
+    @Test
+    @DisplayName("Should handle missing terms node gracefully")
+    void syncMember_noTerms_handlesGracefully() throws Exception {
+        // Given - API response with no terms at all
+        String memberJson = """
+            {
+              "bioguideId": "T000001",
+              "name": "Test, Member",
+              "partyName": "Republican",
+              "state": "TX"
+            }
+            """;
+        JsonNode memberData = objectMapper.readTree(memberJson);
+
+        UUID individualId = UUID.randomUUID();
+        Individual individual = new Individual();
+        individual.setId(individualId);
+
+        CongressionalMember member = new CongressionalMember();
+        member.setId(UUID.randomUUID());
+        member.setBioguideId("T000001");
+        member.setIndividualId(individualId);
+        member.setIndividual(individual);
+
+        when(congressionalMemberService.findByBioguideId("T000001")).thenReturn(Optional.empty());
+        when(congressionalMemberService.findOrCreate(
+                eq("T000001"), eq("Member"), eq("Test"),
+                any(), isNull(), eq("TX"), eq("Republican")
+        )).thenReturn(member);
+        when(congressionalMemberService.save(any(CongressionalMember.class))).thenReturn(member);
+
+        // When
+        boolean isNew = syncService.syncMember(memberData);
+
+        // Then - chamber should be null since no terms
+        assertThat(isNew).isTrue();
+        verify(congressionalMemberService).findOrCreate(
+                eq("T000001"), eq("Member"), eq("Test"),
+                any(), isNull(), eq("TX"), eq("Republican")
+        );
+    }
+
+    @Test
     @DisplayName("Should return member count")
     void getMemberCount_returnsTotalCount() {
         // Given

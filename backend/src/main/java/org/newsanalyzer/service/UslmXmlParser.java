@@ -62,6 +62,8 @@ public class UslmXmlParser {
     private static final String ELEMENT_CHAPTER = "chapter";
     private static final String ATTR_IDENTIFIER = "identifier";
 
+    private static final int MAX_NESTING_DEPTH = 100;
+
     // Pattern to extract title number from identifier: /us/usc/t5/s101 -> 5
     private static final Pattern TITLE_PATTERN = Pattern.compile("/us/usc/t(\\d+)");
     // Pattern to clean section number: "§ 101" -> "101"
@@ -267,6 +269,13 @@ public class UslmXmlParser {
      * Read element text content.
      */
     private String readElementText(XMLStreamReader reader) throws XMLStreamException {
+        return readElementText(reader, 0);
+    }
+
+    private String readElementText(XMLStreamReader reader, int depth) throws XMLStreamException {
+        if (depth > MAX_NESTING_DEPTH) {
+            throw new XMLStreamException("Maximum XML nesting depth exceeded (" + MAX_NESTING_DEPTH + ")");
+        }
         StringBuilder sb = new StringBuilder();
         while (reader.hasNext()) {
             int event = reader.next();
@@ -275,8 +284,7 @@ public class UslmXmlParser {
             } else if (event == XMLStreamConstants.END_ELEMENT) {
                 break;
             } else if (event == XMLStreamConstants.START_ELEMENT) {
-                // Nested element - read recursively
-                sb.append(readElementText(reader));
+                sb.append(readElementText(reader, depth + 1));
             }
         }
         return sb.toString().trim();

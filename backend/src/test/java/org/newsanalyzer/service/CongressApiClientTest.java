@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsanalyzer.config.CongressApiConfig;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,7 +45,7 @@ class CongressApiClientTest {
         config.setTimeout(30000);
 
         objectMapper = new ObjectMapper();
-        client = new CongressApiClient(config, objectMapper);
+        client = new CongressApiClient(config, objectMapper, new RestTemplateBuilder());
     }
 
     @Test
@@ -57,7 +58,7 @@ class CongressApiClientTest {
     @DisplayName("Should return false when API key is not set")
     void isConfigured_withoutKey_returnsFalse() {
         config.setKey(null);
-        client = new CongressApiClient(config, objectMapper);
+        client = new CongressApiClient(config, objectMapper, new RestTemplateBuilder());
         assertThat(client.isConfigured()).isFalse();
     }
 
@@ -65,7 +66,7 @@ class CongressApiClientTest {
     @DisplayName("Should return false when API key is empty")
     void isConfigured_withEmptyKey_returnsFalse() {
         config.setKey("");
-        client = new CongressApiClient(config, objectMapper);
+        client = new CongressApiClient(config, objectMapper, new RestTemplateBuilder());
         assertThat(client.isConfigured()).isFalse();
     }
 

@@ -1,0 +1,58 @@
+schema: 1
+story: 'STAB-1.8'
+story_title: 'Improve HTTP Retry Logic and Error Differentiation'
+gate: CONCERNS
+status_reason: 'All ACs met with consistent retry semantics across both API clients. Two medium concerns: (1) parseRetryAfter() silently swallows NumberFormatException without logging, (2) CongressApiClient rate limit window reset has a TOCTOU race condition between AtomicLong check and reset.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-05T17:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: 'RETRY-001'
+    severity: medium
+    finding: 'parseRetryAfter() in both clients catches NumberFormatException with empty catch block. Malformed Retry-After headers are silently ignored with no log output, making rate-limit debugging harder.'
+    suggested_action: 'Add log.debug() for malformed Retry-After header values.'
+    suggested_owner: dev
+  - id: 'RATE-001'
+    severity: medium
+    finding: 'CongressApiClient.checkRateLimit() has TOCTOU race: windowStart.set() and requestCount.set(0) are not atomic together. Under concurrent load, a request could slip through during the window reset.'
+    suggested_action: 'Use synchronized block or AtomicReference with compareAndSet for compound window-reset operation. Low practical risk given current single-threaded usage patterns.'
+    suggested_owner: dev
+  - id: 'TEST-001'
+    severity: low
+    finding: 'No test for 429 handling with Retry-After header parsing in either client.'
+    suggested_action: 'Add test verifying Retry-After header extraction and fallback to default 10s.'
+    suggested_owner: dev
+
+quality_score: 70
+expires: '2026-03-19T17:00:00Z'
+
+evidence:
+  tests_reviewed: 33
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'API key sanitization via CongressApiUtils.sanitizeUrl() correctly redacts api_key from all log outputs. Regex pattern handles both ?api_key= and &api_key= positions.'
+  performance:
+    status: CONCERNS
+    notes: 'Thread.sleep() in request handlers blocks HTTP threads. Acceptable for low-traffic admin endpoints but would be problematic at scale.'
+  reliability:
+    status: PASS
+    notes: 'Infinite loop bug in CongressApiClient fixed (same pattern as STAB-1.7). Both clients now share consistent retry semantics.'
+  maintainability:
+    status: PASS
+    notes: 'Consistent pattern across both clients. sleepQuietly() and parseRetryAfter() are duplicated — could be extracted to a shared utility, but acceptable for 2 clients.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Add log.debug for malformed Retry-After headers in parseRetryAfter()'
+      refs: ['backend/src/main/java/org/newsanalyzer/service/FederalRegisterClient.java:317', 'backend/src/main/java/org/newsanalyzer/service/CongressApiClient.java:205']
+    - action: 'Consider extracting retry/backoff helpers to shared utility class'
+      refs: ['backend/src/main/java/org/newsanalyzer/service/FederalRegisterClient.java:311-330', 'backend/src/main/java/org/newsanalyzer/service/CongressApiClient.java:199-215']

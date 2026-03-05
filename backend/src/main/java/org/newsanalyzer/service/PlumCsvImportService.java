@@ -72,6 +72,10 @@ public class PlumCsvImportService {
     private static final DateTimeFormatter PLUM_DATE_FORMAT_ALT =
             DateTimeFormatter.ofPattern("M/d/yyyy");
 
+    private static final String[] REQUIRED_PLUM_HEADERS = {
+            "AgencyName", "PositionTitle", "PositionStatus", "IncumbentFirstName", "IncumbentLastName"
+    };
+
     // Cache for organization lookups during import
     private final Map<String, UUID> orgCache = new ConcurrentHashMap<>();
 
@@ -165,6 +169,26 @@ public class PlumCsvImportService {
     }
 
     /**
+     * Validate that required PLUM CSV headers are present.
+     */
+    private void validatePlumHeaders(String csvContent) {
+        String headerLine = csvContent.lines().findFirst().orElse("");
+        Set<String> headers = Arrays.stream(headerLine.split(","))
+                .map(h -> h.trim().replace("\"", ""))
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<String> missing = new ArrayList<>();
+        for (String required : REQUIRED_PLUM_HEADERS) {
+            if (!headers.contains(required)) {
+                missing.add(required);
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new RuntimeException("PLUM CSV missing required headers: " + missing);
+        }
+    }
+
+    /**
      * Download CSV content from URL.
      */
     private String downloadCsv() {
@@ -198,6 +222,9 @@ public class PlumCsvImportService {
         if (csvContent.startsWith("\uFEFF")) {
             csvContent = csvContent.substring(1);
         }
+
+        // Validate required headers before parsing
+        validatePlumHeaders(csvContent);
 
         PlumImportResult result = resultBuilder.build();
         List<PlumCsvRecord> records;
@@ -407,7 +434,7 @@ public class PlumCsvImportService {
                     .payPlan(record.getPayPlanCode())
                     .payGrade(record.getPayGrade())
                     .location(record.getLocation())
-                    .expirationDate(parseDate(record.getExpirationDate()))
+                    .expirationDate(parseDate(record.getExpirationDate(), "expirationDate"))
                     .build();
             position = positionRepository.save(position);
             result.setPositionsCreated(result.getPositionsCreated() + 1);
@@ -424,7 +451,7 @@ public class PlumCsvImportService {
         position.setPayPlan(record.getPayPlanCode());
         position.setPayGrade(record.getPayGrade());
         position.setLocation(record.getLocation());
-        position.setExpirationDate(parseDate(record.getExpirationDate()));
+        position.setExpirationDate(parseDate(record.getExpirationDate(), "expirationDate"));
     }
 
     /**
@@ -463,8 +490,8 @@ public class PlumCsvImportService {
      * Create or update an Individual from PLUM record.
      */
     private Individual createOrUpdateIndividual(PlumCsvRecord record, PlumImportResult result) {
-        String firstName = record.getIncumbentFirstName().trim();
-        String lastName = record.getIncumbentLastName().trim();
+        String firstName = record.getIncumbentFirstName() != null ? record.getIncumbentFirstName().trim() : "";
+        String lastName = record.getIncumbentLastName() != null ? record.getIncumbentLastName().trim() : "";
 
         // Use IndividualService.findOrCreate for deduplication
         // PLUM data doesn't have birth dates, so we use name-only matching
@@ -522,7 +549,7 @@ public class PlumCsvImportService {
             result.setHoldingsUpdated(result.getHoldingsUpdated() + 1);
         } else {
             // Create new holding
-            LocalDate startDate = parseDate(record.getIncumbentBeginDate());
+            LocalDate startDate = parseDate(record.getIncumbentBeginDate(), "incumbentBeginDate");
             if (startDate == null) {
                 startDate = LocalDate.now(); // Default to today if not provided
             }
@@ -531,7 +558,7 @@ public class PlumCsvImportService {
                     .individualId(individual.getId())
                     .positionId(position.getId())
                     .startDate(startDate)
-                    .endDate(parseDate(record.getIncumbentVacateDate()))
+                    .endDate(parseDate(record.getIncumbentVacateDate(), "incumbentVacateDate"))
                     .tenure(record.getTenureCode())
                     .dataSource(DataSource.PLUM_CSV)
                     .sourceReference(plumCsvUrl)
@@ -545,6 +572,10 @@ public class PlumCsvImportService {
      * Parse date from PLUM format (M/d/yyyy H:mm or M/d/yyyy).
      */
     private LocalDate parseDate(String dateStr) {
+        return parseDate(dateStr, "unknown");
+    }
+
+    private LocalDate parseDate(String dateStr, String fieldName) {
         if (dateStr == null || dateStr.isBlank()) {
             return null;
         }
@@ -559,7 +590,7 @@ public class PlumCsvImportService {
                 // Try without time component
                 return LocalDate.parse(dateStr, PLUM_DATE_FORMAT_ALT);
             } catch (DateTimeParseException e2) {
-                log.debug("Failed to parse date: {}", dateStr);
+                log.warn("Failed to parse PLUM date field '{}': '{}'", fieldName, dateStr);
                 return null;
             }
         }

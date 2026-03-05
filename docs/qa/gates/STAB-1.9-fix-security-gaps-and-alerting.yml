@@ -1,0 +1,53 @@
+schema: 1
+story: 'STAB-1.9'
+story_title: 'Fix Security Gaps and Silent Failure Alerting'
+gate: CONCERNS
+status_reason: 'All ACs met. CORS wildcard removed, scheduler health tracking added, CSV date parsing improved. One medium concern: AdminSyncController stores lastXxxResult fields as non-volatile instance variables — concurrent HTTP requests could see stale values.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-05T17:00:00Z'
+
+waiver: { active: false }
+
+top_issues:
+  - id: 'CONC-001'
+    severity: medium
+    finding: 'AdminSyncController.lastPlumResult, lastUsCodeResult, lastPresidentialResult, lastEoResult are non-volatile instance fields written by one HTTP thread and read by another (health endpoint). Java Memory Model does not guarantee visibility without volatile or synchronization.'
+    suggested_action: 'Make result fields volatile or use AtomicReference<> (consistent with RegulationSyncScheduler which correctly uses AtomicReference).'
+    suggested_owner: dev
+  - id: 'CORS-001'
+    severity: low
+    finding: 'CORS origins are hardcoded to localhost:3000/3001. This works for dev but will need environment-specific configuration for staging/production.'
+    suggested_action: 'Future: externalize CORS origins to application.yml (not in scope for this story).'
+    suggested_owner: dev
+
+quality_score: 80
+expires: '2026-03-19T17:00:00Z'
+
+evidence:
+  tests_reviewed: 762
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'CORS wildcard removed from JudgeController. Verified no other controllers use wildcard origins.'
+  performance:
+    status: PASS
+    notes: 'No performance-impacting changes. Health endpoint adds minimal overhead.'
+  reliability:
+    status: PASS
+    notes: 'Scheduler health tracking enables admin visibility. CSV date parsing now logs field names for faster diagnosis.'
+  maintainability:
+    status: PASS
+    notes: 'Clean overloaded parseDate(String, String) pattern in both CSV services. AdminSyncController health endpoint follows existing conventions.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Make AdminSyncController result fields volatile or use AtomicReference'
+      refs: ['backend/src/main/java/org/newsanalyzer/controller/AdminSyncController.java:60-69']
+    - action: 'Externalize CORS origins to application.yml for environment-specific configuration'
+      refs: ['backend/src/main/java/org/newsanalyzer/controller/JudgeController.java:33']

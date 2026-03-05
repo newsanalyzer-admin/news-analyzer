@@ -531,4 +531,65 @@ class GovmanXmlImportServiceTest {
             assertThat(saved.getGovinfoPackageId()).isEqualTo("GOVMAN:TEST-1");
         }
     }
+
+    @Nested
+    @DisplayName("XML Security Tests")
+    class XmlSecurityTests {
+
+        @Test
+        @DisplayName("Should reject XML with DOCTYPE declaration (XXE protection)")
+        void testParseXml_withDoctype_throwsException() {
+            String xxePayload = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+                <GovernmentManual>
+                  <Entity EntityId="TEST-1">
+                    <AgencyName>&xxe;</AgencyName>
+                    <Category>Executive Branch</Category>
+                  </Entity>
+                </GovernmentManual>
+                """;
+
+            org.junit.jupiter.api.Assertions.assertThrows(JAXBException.class, () ->
+                    importService.parseXml(createXmlStream(xxePayload)));
+        }
+
+        @Test
+        @DisplayName("Should reject XML with entity expansion attack")
+        void testParseXml_entityExpansion_throwsException() {
+            String billionLaughs = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE lolz [
+                  <!ENTITY lol "lol">
+                  <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+                ]>
+                <GovernmentManual>
+                  <Entity EntityId="TEST-1">
+                    <AgencyName>&lol2;</AgencyName>
+                  </Entity>
+                </GovernmentManual>
+                """;
+
+            org.junit.jupiter.api.Assertions.assertThrows(JAXBException.class, () ->
+                    importService.parseXml(createXmlStream(billionLaughs)));
+        }
+
+        @Test
+        @DisplayName("Should still parse normal XML after security hardening")
+        void testParseXml_normalXml_stillWorks() throws JAXBException {
+            String xml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <GovernmentManual>
+                  <Entity EntityId="SAFE-1">
+                    <AgencyName>Safe Agency</AgencyName>
+                    <Category>Executive Branch</Category>
+                  </Entity>
+                </GovernmentManual>
+                """;
+
+            List<GovmanEntity> entities = importService.parseXml(createXmlStream(xml));
+            assertThat(entities).hasSize(1);
+            assertThat(entities.get(0).getAgencyName()).isEqualTo("Safe Agency");
+        }
+    }
 }

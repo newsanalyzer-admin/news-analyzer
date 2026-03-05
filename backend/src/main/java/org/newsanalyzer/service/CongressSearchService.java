@@ -211,11 +211,11 @@ public class CongressSearchService {
      * Determine chamber from member data.
      */
     private String determineChamber(JsonNode node) {
-        // Check terms array for most recent chamber
-        JsonNode terms = node.path("terms");
-        if (terms.isArray() && terms.size() > 0) {
+        // Check terms array for most recent chamber (handles both direct array and terms.item formats)
+        JsonNode termsArray = CongressApiUtils.normalizeTermsArray(node.path("terms"));
+        if (termsArray.isArray() && termsArray.size() > 0) {
             // Get most recent term (last in array)
-            JsonNode lastTerm = terms.get(terms.size() - 1);
+            JsonNode lastTerm = termsArray.get(termsArray.size() - 1);
             JsonNode chamber = lastTerm.path("chamber");
             if (!chamber.isMissingNode()) {
                 String chamberValue = chamber.asText().toLowerCase();

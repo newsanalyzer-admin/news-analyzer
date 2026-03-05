@@ -276,6 +276,70 @@ class TermSyncServiceTest {
     }
 
     @Test
+    @DisplayName("syncTermsForMember - Should handle terms as direct array format")
+    void syncTermsForMember_directArrayFormat_createsTerms() throws Exception {
+        // Given - API returns terms as direct array (not nested in "item" object)
+        String apiResponse = """
+            {
+              "member": {
+                "bioguideId": "S000033",
+                "terms": [
+                  {
+                    "chamber": "Senate",
+                    "congress": 118,
+                    "startYear": 2023,
+                    "endYear": 2025,
+                    "stateCode": "VT"
+                  }
+                ]
+              }
+            }
+            """;
+        JsonNode responseNode = objectMapper.readTree(apiResponse);
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
+        when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
+        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
+                .thenReturn(List.of(testPosition));
+        when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
+                .thenReturn(Optional.empty());
+        when(holdingRepository.save(any(PositionHolding.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        TermSyncService.TermResult result = termSyncService.syncTermsForMember("S000033");
+
+        // Then
+        assertThat(result.getAdded()).isEqualTo(1);
+        verify(holdingRepository, times(1)).save(any(PositionHolding.class));
+    }
+
+    @Test
+    @DisplayName("syncTermsForMember - Should handle missing terms node entirely")
+    void syncTermsForMember_noTermsNode_returnsEmpty() throws Exception {
+        // Given - API response with no terms field
+        String apiResponse = """
+            {
+              "member": {
+                "bioguideId": "S000033"
+              }
+            }
+            """;
+        JsonNode responseNode = objectMapper.readTree(apiResponse);
+
+        when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
+        when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
+
+        // When
+        TermSyncService.TermResult result = termSyncService.syncTermsForMember("S000033");
+
+        // Then
+        assertThat(result.getAdded()).isEqualTo(0);
+        assertThat(result.getUpdated()).isEqualTo(0);
+        verify(holdingRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("syncTermsForMember - Should handle current term with null end date")
     void syncTermsForMember_currentTerm_handlesNullEndDate() throws Exception {
         // Given

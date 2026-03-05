@@ -430,6 +430,58 @@ class UslmXmlParserTest {
     }
 
     // =====================================================================
+    // Depth Limit Tests (STAB-1.7 AC1, AC4)
+    // =====================================================================
+
+    @Test
+    void parse_deeplyNestedXml_throwsXMLStreamException() {
+        // Given - XML with 150 levels of nesting inside a <heading> element
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        xml.append("<uslm><main><section identifier=\"/us/usc/t5/s1\">");
+        xml.append("<num>§ 1</num><heading>");
+        for (int i = 0; i < 150; i++) {
+            xml.append("<nested>");
+        }
+        xml.append("deep text");
+        for (int i = 0; i < 150; i++) {
+            xml.append("</nested>");
+        }
+        xml.append("</heading><content><p>Content</p></content>");
+        xml.append("</section></main></uslm>");
+
+        // When / Then
+        InputStream stream = new ByteArrayInputStream(xml.toString().getBytes(StandardCharsets.UTF_8));
+        XMLStreamException exception = assertThrows(XMLStreamException.class, () -> parser.parse(stream));
+        assertTrue(exception.getMessage().contains("Maximum XML nesting depth exceeded"));
+    }
+
+    @Test
+    void parse_moderateNesting_succeeds() throws XMLStreamException {
+        // Given - XML with 10 levels of nesting (well within limit)
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        xml.append("<uslm><main><section identifier=\"/us/usc/t5/s1\">");
+        xml.append("<num>§ 1</num><heading>");
+        for (int i = 0; i < 10; i++) {
+            xml.append("<nested>");
+        }
+        xml.append("safe text");
+        for (int i = 0; i < 10; i++) {
+            xml.append("</nested>");
+        }
+        xml.append("</heading><content><p>Content</p></content>");
+        xml.append("</section></main></uslm>");
+
+        // When
+        List<ParsedStatuteSection> sections = parseXml(xml.toString());
+
+        // Then - parses successfully
+        assertEquals(1, sections.size());
+        assertTrue(sections.get(0).getHeading().contains("safe text"));
+    }
+
+    // =====================================================================
     // Helper Methods
     // =====================================================================
 

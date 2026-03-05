@@ -63,7 +63,16 @@ public class FederalRegisterImportService {
         }
 
         // Fetch document from Federal Register API
-        Optional<FederalRegisterDocument> docOpt = federalRegisterClient.fetchDocument(documentNumber);
+        Optional<FederalRegisterDocument> docOpt;
+        try {
+            docOpt = federalRegisterClient.fetchDocument(documentNumber);
+        } catch (FederalRegisterParseException e) {
+            log.error("Parse error fetching document {}", documentNumber, e);
+            return FederalRegisterImportResult.builder()
+                    .documentNumber(documentNumber)
+                    .error("Failed to parse document from Federal Register API: " + e.getMessage())
+                    .build();
+        }
 
         if (docOpt.isEmpty()) {
             return FederalRegisterImportResult.builder()

@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Service for importing federal judge data from FJC's Biographical Directory CSV.
@@ -238,7 +239,14 @@ public class FjcCsvImportService {
         return result.endTime(LocalDateTime.now()).build();
     }
 
+    private static final String[] REQUIRED_FJC_HEADERS = {
+            "Last Name", "First Name", "Court Type (1)", "Court Name (1)"
+    };
+
     private List<FjcJudgeCsvRecord> parseCsv(String csvContent) {
+        // Validate required headers before parsing
+        validateFjcHeaders(csvContent);
+
         try (Reader reader = new StringReader(csvContent)) {
             CsvToBean<FjcJudgeCsvRecord> csvToBean = new CsvToBeanBuilder<FjcJudgeCsvRecord>(reader)
                     .withType(FjcJudgeCsvRecord.class)
@@ -249,6 +257,23 @@ public class FjcCsvImportService {
         } catch (Exception e) {
             log.error("Failed to parse FJC CSV: {}", e.getMessage());
             throw new RuntimeException("CSV parsing failed: " + e.getMessage(), e);
+        }
+    }
+
+    private void validateFjcHeaders(String csvContent) {
+        String headerLine = csvContent.lines().findFirst().orElse("");
+        Set<String> headers = Arrays.stream(headerLine.split(","))
+                .map(h -> h.trim().replace("\"", ""))
+                .collect(Collectors.toSet());
+
+        List<String> missing = new ArrayList<>();
+        for (String required : REQUIRED_FJC_HEADERS) {
+            if (!headers.contains(required)) {
+                missing.add(required);
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new RuntimeException("FJC CSV missing required headers: " + missing);
         }
     }
 
@@ -300,8 +325,8 @@ public class FjcCsvImportService {
 
     private Individual findOrCreateIndividual(FjcJudgeCsvRecord record, ImportStats stats) {
         String firstName = record.getFirstName() != null ? record.getFirstName().trim() : "";
-        String lastName = record.getLastName().trim();
-        LocalDate birthDate = parseDate(record.getBirthDateString());
+        String lastName = record.getLastName() != null ? record.getLastName().trim() : "";
+        LocalDate birthDate = parseDate(record.getBirthDateString(), "birthDate");
 
         // Use IndividualService.findOrCreate for deduplication
         var existingOpt = individualService.findByNameAndBirthDate(firstName, lastName, birthDate);
@@ -350,7 +375,7 @@ public class FjcCsvImportService {
             updated = true;
         }
         if (individual.getBirthDate() == null && record.getBirthDateString() != null) {
-            individual.setBirthDate(parseDate(record.getBirthDateString()));
+            individual.setBirthDate(parseDate(record.getBirthDateString(), "birthDate"));
             updated = true;
         }
         return updated;
@@ -402,13 +427,13 @@ public class FjcCsvImportService {
 
     private void findOrCreateHolding(Individual individual, GovernmentPosition position,
                                       FjcJudgeCsvRecord record, ImportStats stats) {
-        LocalDate commissionDate = parseDate(record.getCommissionDate1());
-        LocalDate terminationDate = parseDate(record.getTerminationDate1());
-        LocalDate seniorStatusDate = parseDate(record.getSeniorStatusDate1());
+        LocalDate commissionDate = parseDate(record.getCommissionDate1(), "commissionDate");
+        LocalDate terminationDate = parseDate(record.getTerminationDate1(), "terminationDate");
+        LocalDate seniorStatusDate = parseDate(record.getSeniorStatusDate1(), "seniorStatusDate");
 
         if (commissionDate == null) {
             // Try confirmation date as fallback
-            commissionDate = parseDate(record.getConfirmationDate1());
+            commissionDate = parseDate(record.getConfirmationDate1(), "confirmationDate");
         }
 
         if (commissionDate == null) {
@@ -454,6 +479,10 @@ public class FjcCsvImportService {
     }
 
     private LocalDate parseDate(String dateStr) {
+        return parseDate(dateStr, "unknown");
+    }
+
+    private LocalDate parseDate(String dateStr, String fieldName) {
         if (dateStr == null || dateStr.isBlank()) {
             return null;
         }
@@ -466,7 +495,7 @@ public class FjcCsvImportService {
             try {
                 return LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("M/d/yyyy"));
             } catch (DateTimeParseException e2) {
-                log.trace("Could not parse date: {}", dateStr);
+                log.warn("Failed to parse FJC date field '{}': '{}'", fieldName, dateStr);
                 return null;
             }
         }
