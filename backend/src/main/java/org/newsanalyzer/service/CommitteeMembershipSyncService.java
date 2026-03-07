@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Service for synchronizing committee membership data from Congress.gov API.
@@ -34,6 +35,8 @@ import java.util.Optional;
 public class CommitteeMembershipSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(CommitteeMembershipSyncService.class);
+
+    private final AtomicBoolean syncInProgress = new AtomicBoolean(false);
 
     private final CongressApiClient congressApiClient;
     private final CommitteeMembershipRepository membershipRepository;
@@ -97,38 +100,48 @@ public class CommitteeMembershipSyncService {
     public SyncResult syncAllMemberships(int congress) {
         SyncResult result = new SyncResult();
 
-        if (!congressApiClient.isConfigured()) {
-            log.error("Congress.gov API key not configured. Set CONGRESS_API_KEY environment variable.");
+        if (!syncInProgress.compareAndSet(false, true)) {
+            log.warn("Membership sync already in progress, skipping duplicate request");
+            result.errors++;
             return result;
         }
 
-        log.info("Starting sync of committee memberships for Congress {}", congress);
-
-        // Get all committees
-        List<Committee> committees = committeeRepository.findAll();
-        result.total = committees.size();
-
-        for (Committee committee : committees) {
-            try {
-                SyncResult committeeResult = syncMembershipsForCommittee(
-                        committee.getCommitteeCode(),
-                        getChamberApiValue(committee),
-                        congress
-                );
-                result.added += committeeResult.added;
-                result.updated += committeeResult.updated;
-                result.skipped += committeeResult.skipped;
-                result.errors += committeeResult.errors;
-
-            } catch (Exception e) {
-                result.errors++;
-                log.error("Failed to sync memberships for committee {}: {}",
-                        committee.getCommitteeCode(), e.getMessage());
+        try {
+            if (!congressApiClient.isConfigured()) {
+                log.error("Congress.gov API key not configured. Set CONGRESS_API_KEY environment variable.");
+                return result;
             }
-        }
 
-        log.info("Membership sync completed: {}", result);
-        return result;
+            log.info("Starting sync of committee memberships for Congress {}", congress);
+
+            // Get all committees
+            List<Committee> committees = committeeRepository.findAll();
+            result.total = committees.size();
+
+            for (Committee committee : committees) {
+                try {
+                    SyncResult committeeResult = syncMembershipsForCommittee(
+                            committee.getCommitteeCode(),
+                            getChamberApiValue(committee),
+                            congress
+                    );
+                    result.added += committeeResult.added;
+                    result.updated += committeeResult.updated;
+                    result.skipped += committeeResult.skipped;
+                    result.errors += committeeResult.errors;
+
+                } catch (Exception e) {
+                    result.errors++;
+                    log.error("Failed to sync memberships for committee {}: {}",
+                            committee.getCommitteeCode(), e.getMessage());
+                }
+            }
+
+            log.info("Membership sync completed: {}", result);
+            return result;
+        } finally {
+            syncInProgress.set(false);
+        }
     }
 
     /**
