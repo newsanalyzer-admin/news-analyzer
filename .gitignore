@@ -25,10 +25,6 @@ backend/target/
 backend/*.jar
 backend/*.war
 backend/*.class
-backend/.mvn/
-backend/mvnw
-backend/mvnw.cmd
-
 # Maven
 backend/.m2/
 backend/.repository/
