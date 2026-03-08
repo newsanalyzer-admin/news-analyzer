@@ -4,7 +4,7 @@ Logical Reasoning API
 Uses SWI-Prolog for logical inference, fact verification, and relationship analysis.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 

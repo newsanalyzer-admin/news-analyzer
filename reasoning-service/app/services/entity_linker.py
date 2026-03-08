@@ -5,7 +5,6 @@ Coordinates Wikidata and DBpedia clients to link entities to external
 knowledge bases, using disambiguation to select the best match.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
@@ -26,7 +25,6 @@ from app.services.dbpedia_client import (
 from app.services.disambiguation import (
     DisambiguationService,
     Candidate,
-    DisambiguationResult,
     EntityType,
     get_disambiguation_service,
 )

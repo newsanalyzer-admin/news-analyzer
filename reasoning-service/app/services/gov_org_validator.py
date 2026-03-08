@@ -110,7 +110,7 @@ class GovernmentOrgValidator:
             "jurisdiction_areas": org.get("jurisdictionAreas", []),
             "is_active": org["active"],
             "is_cabinet_department": org.get("cabinetDepartment", False),
-            "is_independent_agency": org.get("independentAgency", False"),
+            "is_independent_agency": org.get("independentAgency", False),
         })
 
         # Update Schema.org data with enriched information

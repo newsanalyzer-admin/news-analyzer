@@ -11,7 +11,7 @@ import logging
 
 try:
     from rdflib import Graph, Namespace, URIRef, Literal
-    from rdflib.namespace import RDF, RDFS, OWL, XSD
+    from rdflib.namespace import RDF, RDFS, OWL
     import owlrl
     DEPENDENCIES_AVAILABLE = True
 except ImportError:

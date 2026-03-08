@@ -15,7 +15,7 @@ import os
 import logging
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import requests
