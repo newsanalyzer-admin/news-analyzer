@@ -114,9 +114,15 @@ public class CommitteeMembershipSyncService {
 
             log.info("Starting sync of committee memberships for Congress {}", congress);
 
-            // Get all committees
+            // Get all committees — fail fast if none exist
             List<Committee> committees = committeeRepository.findAll();
+            if (committees.isEmpty()) {
+                log.error("No committees found in database. Run committee sync first before syncing memberships.");
+                throw new IllegalStateException(
+                        "Cannot sync memberships: committees table is empty. Run committee sync first.");
+            }
             result.total = committees.size();
+            log.info("Found {} committees to sync memberships for", committees.size());
 
             for (Committee committee : committees) {
                 try {
