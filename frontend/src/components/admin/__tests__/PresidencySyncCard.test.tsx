@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PresidencySyncCard } from '../PresidencySyncCard';
-import type { PresidencySyncStatus, PresidencySyncResult } from '@/hooks/usePresidencySync';
+import type { PresidencySyncStatus } from '@/hooks/usePresidencySync';
 
 // Mock the usePresidencySync hooks
 const mockRefetch = vi.fn();
@@ -256,14 +256,9 @@ describe('PresidencySyncCard', () => {
 
     it('triggers sync when confirm is clicked', async () => {
       mockMutateAsync.mockResolvedValue({
-        presidenciesAdded: 47,
-        presidenciesUpdated: 0,
-        personsAdded: 79,
-        personsUpdated: 0,
-        vpHoldingsAdded: 52,
-        errors: 0,
-        errorMessages: [],
-      } as PresidencySyncResult);
+        jobId: 'test-job-id',
+        status: 'RUNNING',
+      });
 
       render(<PresidencySyncCard />);
 
@@ -277,14 +272,9 @@ describe('PresidencySyncCard', () => {
 
     it('shows success toast on successful sync', async () => {
       mockMutateAsync.mockResolvedValue({
-        presidenciesAdded: 47,
-        presidenciesUpdated: 0,
-        personsAdded: 79,
-        personsUpdated: 0,
-        vpHoldingsAdded: 52,
-        errors: 0,
-        errorMessages: [],
-      } as PresidencySyncResult);
+        jobId: 'test-job-id',
+        status: 'RUNNING',
+      });
 
       render(<PresidencySyncCard />);
 
@@ -294,7 +284,7 @@ describe('PresidencySyncCard', () => {
       await waitFor(() => {
         expect(mockToast).toHaveBeenCalledWith(
           expect.objectContaining({
-            title: 'Presidential Sync Complete',
+            title: 'Presidential Sync Started',
             variant: 'success',
           })
         );
@@ -349,16 +339,13 @@ describe('PresidencySyncCard', () => {
       expect(screen.getByText('Errors:')).toBeInTheDocument();
     });
 
-    it('shows warning toast when sync completes with errors', async () => {
+    it('shows success toast even when backend response contains errors (async job)', async () => {
+      // The component triggers an async sync job and does not inspect the response
+      // for error counts. It always shows "Presidential Sync Started" on success.
       mockMutateAsync.mockResolvedValue({
-        presidenciesAdded: 46,
-        presidenciesUpdated: 0,
-        personsAdded: 78,
-        personsUpdated: 0,
-        vpHoldingsAdded: 51,
-        errors: 1,
-        errorMessages: ['Error syncing presidency #47'],
-      } as PresidencySyncResult);
+        jobId: 'test-job-id',
+        status: 'RUNNING',
+      });
 
       render(<PresidencySyncCard />);
 
@@ -368,7 +355,8 @@ describe('PresidencySyncCard', () => {
       await waitFor(() => {
         expect(mockToast).toHaveBeenCalledWith(
           expect.objectContaining({
-            title: 'Sync Warnings',
+            title: 'Presidential Sync Started',
+            variant: 'success',
           })
         );
       });

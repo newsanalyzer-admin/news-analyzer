@@ -1,5 +1,7 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -23,6 +25,20 @@ vi.mock('@/hooks/useGovernmentOrgs', () => ({
   }),
 }));
 
+// Mock the presidency sync hooks used by PresidentPage
+vi.mock('@/hooks/usePresidencySync', () => ({
+  useCurrentPresidency: () => ({
+    data: null,
+    isLoading: false,
+    error: null,
+  }),
+  useAllPresidencies: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 // Import pages
 import PresidentPage from '../president/page';
 import VicePresidentPage from '../vice-president/page';
@@ -31,35 +47,44 @@ import CabinetPage from '../cabinet/page';
 import IndependentAgenciesPage from '../independent-agencies/page';
 import CorporationsPage from '../corporations/page';
 
+// QueryClient wrapper for components that use React Query
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+
 describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== President Page ==========
   describe('PresidentPage', () => {
     it('renders the page title', () => {
-      render(<PresidentPage />);
+      render(<PresidentPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /President of the United States/i })
       ).toBeInTheDocument();
     });
 
     it('renders back link to Executive Branch', () => {
-      render(<PresidentPage />);
+      render(<PresidentPage />, { wrapper });
       const backLink = screen.getByRole('link', { name: /Back to Executive Branch/i });
       expect(backLink).toHaveAttribute('href', '/knowledge-base/government/executive');
     });
 
     it('renders constitutional powers section', () => {
-      render(<PresidentPage />);
+      render(<PresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Constitutional Powers/i })).toBeInTheDocument();
     });
 
     it('renders term and eligibility information', () => {
-      render(<PresidentPage />);
+      render(<PresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Term and Eligibility/i })).toBeInTheDocument();
       expect(screen.getByText(/Natural-born citizen/i)).toBeInTheDocument();
     });
 
     it('renders external links to official resources', () => {
-      render(<PresidentPage />);
+      render(<PresidentPage />, { wrapper });
       const whiteHouseLink = screen.getByRole('link', { name: /The White House/i });
       expect(whiteHouseLink).toHaveAttribute('href', 'https://www.whitehouse.gov/');
       expect(whiteHouseLink).toHaveAttribute('target', '_blank');
@@ -69,29 +94,29 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== Vice President Page ==========
   describe('VicePresidentPage', () => {
     it('renders the page title', () => {
-      render(<VicePresidentPage />);
+      render(<VicePresidentPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /Vice President of the United States/i })
       ).toBeInTheDocument();
     });
 
     it('renders constitutional roles section', () => {
-      render(<VicePresidentPage />);
+      render(<VicePresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Constitutional Roles/i })).toBeInTheDocument();
     });
 
     it('renders term and eligibility section', () => {
-      render(<VicePresidentPage />);
+      render(<VicePresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Term and Eligibility/i })).toBeInTheDocument();
     });
 
     it('renders historical note', () => {
-      render(<VicePresidentPage />);
+      render(<VicePresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Historical Note/i })).toBeInTheDocument();
     });
 
     it('has official resources section', () => {
-      render(<VicePresidentPage />);
+      render(<VicePresidentPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
     });
   });
@@ -99,19 +124,19 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== EOP Page ==========
   describe('EOPPage', () => {
     it('renders the page title', () => {
-      render(<EOPPage />);
+      render(<EOPPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /Executive Office of the President/i })
       ).toBeInTheDocument();
     });
 
     it('renders component agencies section', () => {
-      render(<EOPPage />);
+      render(<EOPPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /EOP Component Agencies/i })).toBeInTheDocument();
     });
 
     it('has official resources section', () => {
-      render(<EOPPage />);
+      render(<EOPPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
     });
   });
@@ -119,26 +144,26 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== Cabinet Page ==========
   describe('CabinetPage', () => {
     it('renders the page title', () => {
-      render(<CabinetPage />);
+      render(<CabinetPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /Cabinet Departments/i })
       ).toBeInTheDocument();
     });
 
     it('renders the 15 departments section', () => {
-      render(<CabinetPage />);
+      render(<CabinetPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /The 15 Executive Departments/i })).toBeInTheDocument();
     });
 
     it('shows fallback department list when no data', () => {
-      render(<CabinetPage />);
+      render(<CabinetPage />, { wrapper });
       // Check that the fallback grid is rendered (15 departments)
       const cards = screen.getAllByText(/^Department of/i);
       expect(cards.length).toBeGreaterThan(0);
     });
 
     it('has official resources section', () => {
-      render(<CabinetPage />);
+      render(<CabinetPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
     });
   });
@@ -146,24 +171,24 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== Independent Agencies Page ==========
   describe('IndependentAgenciesPage', () => {
     it('renders the page title', () => {
-      render(<IndependentAgenciesPage />);
+      render(<IndependentAgenciesPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /Independent Agencies/i })
       ).toBeInTheDocument();
     });
 
     it('renders types of agencies section', () => {
-      render(<IndependentAgenciesPage />);
+      render(<IndependentAgenciesPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Types of Independent Agencies/i })).toBeInTheDocument();
     });
 
     it('renders federal independent agencies section', () => {
-      render(<IndependentAgenciesPage />);
+      render(<IndependentAgenciesPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Federal Independent Agencies/i })).toBeInTheDocument();
     });
 
     it('has official resources section', () => {
-      render(<IndependentAgenciesPage />);
+      render(<IndependentAgenciesPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
     });
   });
@@ -171,29 +196,29 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
   // ========== Government Corporations Page ==========
   describe('CorporationsPage', () => {
     it('renders the page title', () => {
-      render(<CorporationsPage />);
+      render(<CorporationsPage />, { wrapper });
       expect(
         screen.getByRole('heading', { level: 1, name: /Government Corporations/i })
       ).toBeInTheDocument();
     });
 
     it('renders types of corporations section', () => {
-      render(<CorporationsPage />);
+      render(<CorporationsPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Types of Government Corporations/i })).toBeInTheDocument();
     });
 
     it('renders federal government corporations section', () => {
-      render(<CorporationsPage />);
+      render(<CorporationsPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Federal Government Corporations/i })).toBeInTheDocument();
     });
 
     it('has official resources section', () => {
-      render(<CorporationsPage />);
+      render(<CorporationsPage />, { wrapper });
       expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
     });
 
     it('renders external links to corporation websites', () => {
-      render(<CorporationsPage />);
+      render(<CorporationsPage />, { wrapper });
       const links = screen.getAllByRole('link');
       const uspsLink = links.find(link => link.getAttribute('href') === 'https://www.usps.com/');
       expect(uspsLink).toBeDefined();
@@ -213,13 +238,13 @@ describe('Executive Branch Sub-Section Pages (UI-6.3)', () => {
 
     pages.forEach(({ Page, name }) => {
       it(`${name} page has back link to Executive Branch`, () => {
-        render(<Page />);
+        render(<Page />, { wrapper });
         const backLink = screen.getByRole('link', { name: /Back to Executive Branch/i });
         expect(backLink).toHaveAttribute('href', '/knowledge-base/government/executive');
       });
 
       it(`${name} page has Official Resources section`, () => {
-        render(<Page />);
+        render(<Page />, { wrapper });
         expect(screen.getByRole('heading', { name: /Official Resources/i })).toBeInTheDocument();
       });
     });
