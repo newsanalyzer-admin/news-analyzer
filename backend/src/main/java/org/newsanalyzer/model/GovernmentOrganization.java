@@ -59,7 +59,7 @@ public class GovernmentOrganization {
     private String acronym;
 
     @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
-    @Column(name = "former_names", columnDefinition = "text[]")
+    @Column(name = "former_names")
     private List<String> formerNames;
 
     // =====================================================================
@@ -136,11 +136,11 @@ public class GovernmentOrganization {
     // =====================================================================
 
     @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
-    @Column(name = "jurisdiction_areas", columnDefinition = "text[]")
+    @Column(name = "jurisdiction_areas")
     private List<String> jurisdictionAreas;
 
     @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
-    @Column(name = "primary_functions", columnDefinition = "text[]")
+    @Column(name = "primary_functions")
     private List<String> primaryFunctions;
 
     // =====================================================================
