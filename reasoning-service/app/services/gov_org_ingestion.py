@@ -281,7 +281,7 @@ class GovernmentManualParser:
             Organization dictionary or None
         """
         try:
-            org = {
+            org: Dict[str, Any] = {
                 'org_type': 'department',
                 'branch': 'executive',
                 'org_level': 1,
@@ -319,7 +319,7 @@ class GovernmentManualParser:
             Organization dictionary or None
         """
         try:
-            org = {
+            org: Dict[str, Any] = {
                 'org_type': 'independent_agency',
                 'branch': 'executive',
                 'org_level': 1,

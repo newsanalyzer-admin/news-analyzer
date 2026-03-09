@@ -164,7 +164,7 @@ class LinkRequest(BaseModel):
         description="Entities to link (max 100)"
     )
     options: LinkingOptions = Field(
-        default_factory=LinkingOptions,
+        default_factory=lambda: LinkingOptions(),
         description="Linking options"
     )
 

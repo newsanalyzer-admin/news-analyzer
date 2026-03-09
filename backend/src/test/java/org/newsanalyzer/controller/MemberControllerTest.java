@@ -16,6 +16,7 @@ import org.newsanalyzer.scheduler.EnrichmentScheduler;
 import org.newsanalyzer.service.CommitteeService;
 import org.newsanalyzer.service.MemberService;
 import org.newsanalyzer.service.MemberSyncService;
+import org.newsanalyzer.service.SyncJobRegistry;
 import org.newsanalyzer.service.TermSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -79,6 +80,9 @@ class MemberControllerTest {
 
     @MockBean
     private CongressionalMemberRepository congressionalMemberRepository;
+
+    @MockBean
+    private SyncJobRegistry syncJobRegistry;
 
     private CongressionalMember testMember;
     private Individual testIndividual;

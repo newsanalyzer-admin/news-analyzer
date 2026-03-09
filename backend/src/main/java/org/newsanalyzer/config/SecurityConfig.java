@@ -16,10 +16,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     /**
-     * Development security configuration - permits all requests
+     * Development/test security configuration - permits all requests
      */
     @Bean
-    @Profile("dev")
+    @Profile({"dev", "test"})
     public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
@@ -35,7 +35,7 @@ public class SecurityConfig {
      * Production security configuration - requires authentication
      */
     @Bean
-    @Profile("!dev")
+    @Profile("!dev & !test")
     public SecurityFilterChain prodSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf

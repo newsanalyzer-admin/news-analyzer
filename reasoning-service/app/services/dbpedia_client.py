@@ -183,7 +183,7 @@ class DBpediaClient:
         """
         self._rate_limit()
 
-        params = {
+        params: Dict[str, Any] = {
             "query": query,
             "maxResults": max_results,
             "format": "json",

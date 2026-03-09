@@ -195,8 +195,11 @@ class EntityExtractor:
                     )
 
                     # Enrich entity with official data
-                    enriched_entity = validator.enrich_entity(entity, validation_result)
-                    enriched_entities.append(enriched_entity)
+                    if validation_result is not None:
+                        enriched_entity = validator.enrich_entity(entity, validation_result)
+                        enriched_entities.append(enriched_entity)
+                    else:
+                        enriched_entities.append(entity)
                 else:
                     # Non-government entities pass through unchanged
                     enriched_entities.append(entity)

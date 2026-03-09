@@ -284,7 +284,7 @@ class DisambiguationService:
         self,
         entity_text: str,
         candidate_label: str,
-        candidate_aliases: List[str] = None
+        candidate_aliases: Optional[List[str]] = None
     ) -> float:
         """
         Score name similarity between entity and candidate.
@@ -432,7 +432,7 @@ class DisambiguationService:
 
             # Context score
             candidate.context_score = self._score_context_similarity(
-                context,
+                context,  # type: ignore[arg-type]  # guarded by has_context check above
                 candidate.description
             ) if has_context else 0.5
 

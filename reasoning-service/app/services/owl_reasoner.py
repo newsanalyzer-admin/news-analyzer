@@ -62,9 +62,11 @@ class OWLReasoner:
 
         # Load ontology
         if ontology_path is None:
-            ontology_path = Path(__file__).parent.parent.parent / "ontology" / "newsanalyzer.ttl"
+            resolved_path = Path(__file__).parent.parent.parent / "ontology" / "newsanalyzer.ttl"
+        else:
+            resolved_path = Path(ontology_path)
 
-        self._load_ontology(ontology_path)
+        self._load_ontology(resolved_path)
 
     def _load_ontology(self, ontology_path: Path):
         """Load the NewsAnalyzer ontology from a .ttl file."""
@@ -177,7 +179,7 @@ class OWLReasoner:
             Dictionary mapping property URIs to lists of values
         """
         entity = URIRef(entity_uri)
-        properties = {}
+        properties: Dict[str, List[Any]] = {}
 
         for _, prop, value in self.graph.triples((entity, None, None)):
             if prop == RDF.type:
@@ -220,7 +222,7 @@ class OWLReasoner:
 
         try:
             results = self.graph.query(query)
-            for row in results:
+            for row in results:  # type: ignore[union-attr]
                 errors.append(
                     f"Legislator {row.entity} is affiliated with {row.count} parties (max 1 allowed)"
                 )
@@ -295,15 +297,15 @@ class OWLReasoner:
             logger.warning(f"Inference failed for entity {entity_text}: {e}")
 
         # Extract inferred types
-        inferred_types = []
-        for _, _, type_uri in temp_graph.triples((entity, RDF.type, None)):
+        inferred_types: List[str] = []
+        for _, _, type_uri in temp_graph.triples((entity, RDF.type, None)):  # type: ignore[assignment]
             type_str = str(type_uri)
             if type_str not in inferred_types:
                 inferred_types.append(type_str)
 
         # Extract inferred properties
-        inferred_properties = {}
-        for _, prop, value in temp_graph.triples((entity, None, None)):
+        inferred_properties: Dict[str, str] = {}
+        for _, prop, value in temp_graph.triples((entity, None, None)):  # type: ignore[assignment]
             if prop == RDF.type:
                 continue
 
@@ -343,7 +345,7 @@ class OWLReasoner:
         try:
             results = self.graph.query(sparql_query)
             return [
-                {str(var): str(row[var]) for var in results.vars}
+                {str(var): str(row[var]) for var in results.vars}  # type: ignore[index]
                 for row in results
             ]
         except Exception as e:
