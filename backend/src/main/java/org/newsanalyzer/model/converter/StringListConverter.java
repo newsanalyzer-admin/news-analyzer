@@ -28,10 +28,26 @@ public class StringListConverter implements AttributeConverter<List<String>, Obj
     @Override
     public Object convertToDatabaseColumn(List<String> attribute) {
         if (attribute == null || attribute.isEmpty()) {
-            // Return empty array instead of null to help PostgreSQL with type binding
-            return new String[0];
+            return null;
         }
-        return attribute.toArray(new String[0]);
+        // Return PostgreSQL array literal format: {value1,"value with comma",value3}
+        // The @ColumnTransformer(write = "?::text[]") on the entity field will cast
+        // this String to text[] in the SQL, allowing PostgreSQL to parse the array literal.
+        StringBuilder sb = new StringBuilder("{");
+        for (int i = 0; i < attribute.size(); i++) {
+            if (i > 0) sb.append(",");
+            String val = attribute.get(i);
+            if (val == null) {
+                sb.append("NULL");
+            } else {
+                // Quote and escape the value for PostgreSQL array literal format
+                sb.append("\"")
+                  .append(val.replace("\\", "\\\\").replace("\"", "\\\""))
+                  .append("\"");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     @Override

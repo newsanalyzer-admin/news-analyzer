@@ -221,8 +221,8 @@ public class EntityService {
         if (govOrg.getBranch() != null) {
             entity.addProperty("branch", govOrg.getBranch().getValue());
         }
-        if (govOrg.getJurisdictionAreas() != null && govOrg.getJurisdictionAreas().length > 0) {
-            entity.addProperty("jurisdictionAreas", java.util.Arrays.asList(govOrg.getJurisdictionAreas()));
+        if (govOrg.getJurisdictionAreas() != null && !govOrg.getJurisdictionAreas().isEmpty()) {
+            entity.addProperty("jurisdictionAreas", govOrg.getJurisdictionAreas());
         }
         if (govOrg.getMissionStatement() != null) {
             entity.addProperty("missionStatement", govOrg.getMissionStatement());

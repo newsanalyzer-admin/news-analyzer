@@ -461,7 +461,7 @@ class AgencyLinkageServiceTest {
                 .id(orgId)
                 .officialName("Current Name")
                 .acronym("CN")
-                .formerNames(new String[]{"Old Name", "Previous Name"})
+                .formerNames(List.of("Old Name", "Previous Name"))
                 .build();
 
         when(govOrgRepository.findAll()).thenReturn(List.of(org));

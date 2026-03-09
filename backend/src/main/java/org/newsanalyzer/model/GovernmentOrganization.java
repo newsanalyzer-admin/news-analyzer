@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,9 +58,10 @@ public class GovernmentOrganization {
     @Size(max = 50, message = "Acronym must be less than 50 characters")
     private String acronym;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
     @Column(name = "former_names", columnDefinition = "text[]")
-    private String[] formerNames;
+    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
+    private List<String> formerNames;
 
     // =====================================================================
     // Classification
@@ -134,13 +136,15 @@ public class GovernmentOrganization {
     // Jurisdiction and Responsibilities
     // =====================================================================
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
     @Column(name = "jurisdiction_areas", columnDefinition = "text[]")
-    private String[] jurisdictionAreas;
+    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
+    private List<String> jurisdictionAreas;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
     @Column(name = "primary_functions", columnDefinition = "text[]")
-    private String[] primaryFunctions;
+    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
+    private List<String> primaryFunctions;
 
     // =====================================================================
     // Metadata
