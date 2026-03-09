@@ -58,9 +58,8 @@ public class GovernmentOrganization {
     @Size(max = 50, message = "Acronym must be less than 50 characters")
     private String acronym;
 
-    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
+    @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
     @Column(name = "former_names", columnDefinition = "text[]")
-    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
     private List<String> formerNames;
 
     // =====================================================================
@@ -136,14 +135,12 @@ public class GovernmentOrganization {
     // Jurisdiction and Responsibilities
     // =====================================================================
 
-    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
+    @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
     @Column(name = "jurisdiction_areas", columnDefinition = "text[]")
-    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
     private List<String> jurisdictionAreas;
 
-    @Convert(converter = org.newsanalyzer.model.converter.StringListConverter.class)
+    @org.hibernate.annotations.Type(org.newsanalyzer.model.converter.StringListUserType.class)
     @Column(name = "primary_functions", columnDefinition = "text[]")
-    @org.hibernate.annotations.ColumnTransformer(write = "?::text[]")
     private List<String> primaryFunctions;
 
     // =====================================================================
