@@ -176,7 +176,7 @@ describe('AdminSidebar', () => {
       const kbButton = screen.getByText('Knowledge Base').closest('[role="button"]');
 
       if (kbButton) {
-        kbButton.focus();
+        (kbButton as HTMLElement).focus();
 
         // Press Enter to toggle
         fireEvent.keyDown(kbButton, { key: 'Enter' });

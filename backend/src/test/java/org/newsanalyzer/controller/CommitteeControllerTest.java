@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.model.Committee;
+import org.newsanalyzer.dto.SyncJobStatus;
 import org.newsanalyzer.model.CommitteeChamber;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CommitteeType;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -379,35 +381,38 @@ class CommitteeControllerTest {
     // =========================================================================
 
     @Test
-    @DisplayName("POST /api/committees/sync - Should trigger sync and return result")
+    @DisplayName("POST /api/committees/sync - Should trigger async sync and return 202")
     void triggerSync_returnsSyncResult() throws Exception {
         // Given
-        CommitteeSyncService.SyncResult result = new CommitteeSyncService.SyncResult();
-        when(committeeSyncService.syncAllCommittees()).thenReturn(result);
+        SyncJobStatus status = new SyncJobStatus("job-1", "committees", SyncJobStatus.State.RUNNING, Instant.now());
+        when(syncJobRegistry.isRunning("committees")).thenReturn(false);
+        when(syncJobRegistry.startJob("committees")).thenReturn(status);
 
         // When/Then
         mockMvc.perform(post("/api/committees/sync")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.added").exists())
-                .andExpect(jsonPath("$.updated").exists())
-                .andExpect(jsonPath("$.errors").exists());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.jobId", is("job-1")))
+                .andExpect(jsonPath("$.syncType", is("committees")))
+                .andExpect(jsonPath("$.state", is("RUNNING")));
     }
 
     @Test
-    @DisplayName("POST /api/committees/sync/memberships - Should trigger membership sync")
+    @DisplayName("POST /api/committees/sync/memberships - Should trigger async membership sync and return 202")
     void triggerMembershipSync_returnsSyncResult() throws Exception {
         // Given
-        CommitteeMembershipSyncService.SyncResult result = new CommitteeMembershipSyncService.SyncResult();
-        when(membershipSyncService.syncAllMemberships(118)).thenReturn(result);
+        SyncJobStatus status = new SyncJobStatus("job-2", "memberships", SyncJobStatus.State.RUNNING, Instant.now());
+        when(syncJobRegistry.isRunning("memberships")).thenReturn(false);
+        when(syncJobRegistry.startJob("memberships")).thenReturn(status);
 
         // When/Then
         mockMvc.perform(post("/api/committees/sync/memberships")
                         .with(csrf())
                         .param("congress", "118"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.added").exists())
-                .andExpect(jsonPath("$.errors").exists());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.jobId", is("job-2")))
+                .andExpect(jsonPath("$.syncType", is("memberships")))
+                .andExpect(jsonPath("$.state", is("RUNNING")));
     }
 
     // =========================================================================

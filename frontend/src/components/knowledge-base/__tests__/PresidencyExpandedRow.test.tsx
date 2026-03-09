@@ -90,7 +90,7 @@ describe('PresidencyExpandedRow', () => {
       data: mockAdministrationData,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof usePresidencyAdministration>);
+    } as unknown as ReturnType<typeof usePresidencyAdministration>);
   });
 
   describe('Section Headers', () => {
@@ -172,7 +172,7 @@ describe('PresidencyExpandedRow', () => {
         data: undefined,
         isLoading: true,
         error: null,
-      } as ReturnType<typeof usePresidencyAdministration>);
+      } as unknown as ReturnType<typeof usePresidencyAdministration>);
 
       render(<PresidencyExpandedRow presidency={mockPresidency} />);
 
@@ -209,7 +209,7 @@ describe('PresidencyExpandedRow', () => {
         data: undefined,
         isLoading: false,
         error: null,
-      } as ReturnType<typeof usePresidencyAdministration>);
+      } as unknown as ReturnType<typeof usePresidencyAdministration>);
 
       render(<PresidencyExpandedRow presidency={historicalPresidency} />);
 
@@ -222,7 +222,7 @@ describe('PresidencyExpandedRow', () => {
         data: undefined,
         isLoading: false,
         error: null,
-      } as ReturnType<typeof usePresidencyAdministration>);
+      } as unknown as ReturnType<typeof usePresidencyAdministration>);
 
       render(<PresidencyExpandedRow presidency={historicalPresidency} />);
 
@@ -235,7 +235,7 @@ describe('PresidencyExpandedRow', () => {
         data: undefined,
         isLoading: false,
         error: null,
-      } as ReturnType<typeof usePresidencyAdministration>);
+      } as unknown as ReturnType<typeof usePresidencyAdministration>);
 
       render(<PresidencyExpandedRow presidency={historicalPresidency} />);
 
@@ -247,7 +247,7 @@ describe('PresidencyExpandedRow', () => {
         data: { ...mockAdministrationData, chiefsOfStaff: [] },
         isLoading: false,
         error: null,
-      } as ReturnType<typeof usePresidencyAdministration>);
+      } as unknown as ReturnType<typeof usePresidencyAdministration>);
 
       render(<PresidencyExpandedRow presidency={historicalPresidency} />);
 

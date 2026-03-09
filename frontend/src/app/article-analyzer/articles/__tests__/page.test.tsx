@@ -20,7 +20,7 @@ const mockArticles = [
     published_date: '2025-12-30T10:00:00Z',
     analyzed_at: '2025-12-30T12:00:00Z',
     entity_count: 15,
-    status: 'completed',
+    status: 'completed' as const,
   },
   {
     id: 2,
@@ -30,7 +30,7 @@ const mockArticles = [
     published_date: '2025-12-29T08:00:00Z',
     analyzed_at: '2025-12-29T14:00:00Z',
     entity_count: 8,
-    status: 'completed',
+    status: 'completed' as const,
   },
   {
     id: 3,
@@ -40,7 +40,7 @@ const mockArticles = [
     published_date: '2025-12-28T06:00:00Z',
     analyzed_at: '2025-12-28T09:00:00Z',
     entity_count: 12,
-    status: 'analyzing',
+    status: 'analyzing' as const,
   },
 ];
 

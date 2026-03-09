@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.newsanalyzer.dto.SyncJobStatus;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.CongressionalMember.Chamber;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -364,24 +366,20 @@ class MemberControllerTest {
     // =========================================================================
 
     @Test
-    @DisplayName("POST /api/members/sync - Should trigger sync and return result")
+    @DisplayName("POST /api/members/sync - Should trigger async sync and return 202")
     void triggerSync_returnsSyncResult() throws Exception {
         // Given
-        MemberSyncService.SyncResult result = new MemberSyncService.SyncResult();
-        result.setTotal(535);
-        result.setAdded(10);
-        result.setUpdated(525);
-        result.setErrors(0);
-        when(memberSyncService.syncAllCurrentMembers()).thenReturn(result);
+        SyncJobStatus status = new SyncJobStatus("job-1", "members", SyncJobStatus.State.RUNNING, Instant.now());
+        when(syncJobRegistry.isRunning("members")).thenReturn(false);
+        when(syncJobRegistry.startJob("members")).thenReturn(status);
 
         // When/Then
         mockMvc.perform(post("/api/members/sync")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total", is(535)))
-                .andExpect(jsonPath("$.added", is(10)))
-                .andExpect(jsonPath("$.updated", is(525)))
-                .andExpect(jsonPath("$.errors", is(0)));
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.jobId", is("job-1")))
+                .andExpect(jsonPath("$.syncType", is("members")))
+                .andExpect(jsonPath("$.state", is("RUNNING")));
     }
 
     // =========================================================================
@@ -475,17 +473,19 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/members/sync-terms - Should trigger term sync")
+    @DisplayName("POST /api/members/sync-terms - Should trigger async term sync and return 202")
     void triggerTermSync_returnsSyncResult() throws Exception {
         // Given
-        TermSyncService.SyncResult result = new TermSyncService.SyncResult(535, 1070, 0, 0);
-        when(termSyncService.syncAllCurrentMemberTerms()).thenReturn(result);
+        SyncJobStatus status = new SyncJobStatus("job-2", "terms", SyncJobStatus.State.RUNNING, Instant.now());
+        when(syncJobRegistry.isRunning("terms")).thenReturn(false);
+        when(syncJobRegistry.startJob("terms")).thenReturn(status);
 
         // When/Then
         mockMvc.perform(post("/api/members/sync-terms")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.membersProcessed", is(535)))
-                .andExpect(jsonPath("$.termsAdded", is(1070)));
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.jobId", is("job-2")))
+                .andExpect(jsonPath("$.syncType", is("terms")))
+                .andExpect(jsonPath("$.state", is("RUNNING")));
     }
 }

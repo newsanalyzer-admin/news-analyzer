@@ -42,7 +42,7 @@ describe('PresidencySyncCard', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
-    } as ReturnType<typeof usePresidencySyncStatus>);
+    } as unknown as ReturnType<typeof usePresidencySyncStatus>);
     mockUsePresidencySync.mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
@@ -58,7 +58,7 @@ describe('PresidencySyncCard', () => {
         isLoading: true,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -77,7 +77,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: new Error('Failed to fetch'),
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -91,7 +91,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: new Error('Failed to fetch'),
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -112,7 +112,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -129,7 +129,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -160,7 +160,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -174,7 +174,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -195,7 +195,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -211,7 +211,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 
@@ -231,7 +231,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
     });
 
     it('opens confirmation dialog when sync button is clicked', async () => {
@@ -341,7 +341,7 @@ describe('PresidencySyncCard', () => {
         isLoading: false,
         error: null,
         refetch: mockRefetch,
-      } as ReturnType<typeof usePresidencySyncStatus>);
+      } as unknown as ReturnType<typeof usePresidencySyncStatus>);
 
       render(<PresidencySyncCard />);
 

@@ -346,7 +346,7 @@ class OWLReasoner:
             results = self.graph.query(sparql_query)
             variables = results.vars or []
             return [
-                {str(var): str(row[var]) for var in variables}  # type: ignore[index]
+                {str(var): str(row[var]) for var in variables}  # type: ignore[index,call-overload]
                 for row in results
             ]
         except Exception as e:

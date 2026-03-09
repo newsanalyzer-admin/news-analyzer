@@ -10,6 +10,8 @@ vi.mock('@/hooks/useSearchImport', () => ({
   useSearchImport: vi.fn(() => ({
     results: [],
     total: 0,
+    currentPage: 1,
+    pageSize: 10,
     isLoading: false,
     isFetching: false,
     isError: false,
@@ -43,7 +45,7 @@ const defaultProps = {
   searchEndpoint: '/api/test/search',
   filterConfig: [] as FilterConfig[],
   resultRenderer: (data: TestRecord) => <div data-testid="result">{data.name}</div>,
-  onImport: vi.fn<[TestRecord, string], Promise<ImportResult>>().mockResolvedValue({ created: true }),
+  onImport: vi.fn<[TestRecord, string], Promise<ImportResult>>().mockResolvedValue({ id: 'test-1', created: true, updated: false }),
   searchPlaceholder: 'Search records...',
 };
 
@@ -53,6 +55,8 @@ describe('SearchImportPanel', () => {
     mockUseSearchImport.mockReturnValue({
       results: [],
       total: 0,
+      currentPage: 1,
+      pageSize: 10,
       isLoading: false,
       isFetching: false,
       isError: false,
@@ -65,25 +69,25 @@ describe('SearchImportPanel', () => {
 
   describe('Initial State', () => {
     it('renders search input with placeholder', () => {
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       expect(screen.getByPlaceholderText('Search records...')).toBeInTheDocument();
     });
 
     it('shows initial state message when no search query', () => {
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       expect(screen.getByText(/enter a search term to find records/i)).toBeInTheDocument();
     });
 
     it('shows API name in initial state message', () => {
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       expect(screen.getByText(/test api/i)).toBeInTheDocument();
     });
 
     it('renders search icon', () => {
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       // Search icon should be visible
       const input = screen.getByPlaceholderText('Search records...');
@@ -96,7 +100,7 @@ describe('SearchImportPanel', () => {
   describe('Search Input', () => {
     it('updates search query on input', async () => {
       const user = userEvent.setup();
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       await user.type(input, 'test query');
@@ -106,7 +110,7 @@ describe('SearchImportPanel', () => {
 
     it('triggers search when query is entered', async () => {
       const user = userEvent.setup();
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       await user.type(input, 'test');
@@ -116,7 +120,7 @@ describe('SearchImportPanel', () => {
     });
 
     it('has correct input type', () => {
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       expect(input).toHaveAttribute('type', 'search');
@@ -130,6 +134,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: true,
         isFetching: false,
         isError: false,
@@ -137,7 +143,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       // Type something to trigger search
       const input = screen.getByPlaceholderText('Search records...');
@@ -154,6 +160,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: true,
@@ -161,7 +169,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       // Type something to trigger search
       const input = screen.getByPlaceholderText('Search records...');
@@ -175,6 +183,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: true,
@@ -182,7 +192,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -194,6 +204,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: true,
@@ -201,7 +213,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -220,6 +232,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -227,7 +241,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -239,6 +253,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [],
         total: 0,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -247,7 +263,7 @@ describe('SearchImportPanel', () => {
       });
 
       render(
-        <SearchImportPanel
+        <SearchImportPanel<TestRecord>
           {...defaultProps}
           emptyMessage="Custom empty message"
         />
@@ -272,6 +288,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 2,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -279,7 +297,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -291,6 +309,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: [mockResults[0]],
         total: 1,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -298,7 +318,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -310,6 +330,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 2,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: true,
         isError: false,
@@ -317,7 +339,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -338,6 +360,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 25, // More than default page size
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -345,7 +369,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} pageSize={10} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={10} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -358,6 +382,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 25,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -365,7 +391,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} pageSize={10} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={10} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -377,6 +403,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 25,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -384,7 +412,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} pageSize={10} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={10} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -396,6 +424,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 25,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -403,7 +433,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} pageSize={10} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={10} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -419,6 +449,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 5, // Less than page size
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -426,7 +458,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} pageSize={10} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={10} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -452,7 +484,7 @@ describe('SearchImportPanel', () => {
     ];
 
     it('renders filters when filterConfig provided', () => {
-      render(<SearchImportPanel {...defaultProps} filterConfig={filterConfig} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} filterConfig={filterConfig} />);
 
       // SearchFilters component should be rendered
       // (we're not testing the full filter UI, just that the component renders)
@@ -460,7 +492,7 @@ describe('SearchImportPanel', () => {
     });
 
     it('does not render filters when filterConfig is empty', () => {
-      render(<SearchImportPanel {...defaultProps} filterConfig={[]} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} filterConfig={[]} />);
 
       // Only search input should be present, no filter UI
       expect(screen.getByPlaceholderText('Search records...')).toBeInTheDocument();
@@ -480,6 +512,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 1,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -487,7 +521,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} onImport={onImport} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} onImport={onImport} />);
 
       const input = screen.getByPlaceholderText('Search records...');
       fireEvent.change(input, { target: { value: 'test' } });
@@ -504,6 +538,8 @@ describe('SearchImportPanel', () => {
       mockUseSearchImport.mockReturnValue({
         results: mockResults,
         total: 1,
+        currentPage: 1,
+        pageSize: 10,
         isLoading: false,
         isFetching: false,
         isError: false,
@@ -511,7 +547,7 @@ describe('SearchImportPanel', () => {
         refetch: mockRefetch,
       });
 
-      render(<SearchImportPanel {...defaultProps} onImport={onImport} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} onImport={onImport} />);
 
       // Component is rendered and ready for import interactions
       expect(screen.getByPlaceholderText('Search records...')).toBeInTheDocument();
@@ -525,7 +561,7 @@ describe('SearchImportPanel', () => {
       const duplicateChecker = vi.fn().mockResolvedValue(null);
 
       render(
-        <SearchImportPanel
+        <SearchImportPanel<TestRecord>
           {...defaultProps}
           duplicateChecker={duplicateChecker}
         />
@@ -538,7 +574,7 @@ describe('SearchImportPanel', () => {
       const getExistingRecord = vi.fn().mockResolvedValue(null);
 
       render(
-        <SearchImportPanel
+        <SearchImportPanel<TestRecord>
           {...defaultProps}
           getExistingRecord={getExistingRecord}
         />
@@ -552,13 +588,13 @@ describe('SearchImportPanel', () => {
 
   describe('Component Props', () => {
     it('accepts custom debounceMs', () => {
-      render(<SearchImportPanel {...defaultProps} debounceMs={500} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} debounceMs={500} />);
 
       expect(screen.getByPlaceholderText('Search records...')).toBeInTheDocument();
     });
 
     it('accepts custom pageSize', () => {
-      render(<SearchImportPanel {...defaultProps} pageSize={20} />);
+      render(<SearchImportPanel<TestRecord> {...defaultProps} pageSize={20} />);
 
       expect(screen.getByPlaceholderText('Search records...')).toBeInTheDocument();
     });
@@ -566,7 +602,7 @@ describe('SearchImportPanel', () => {
     it('uses default placeholder when not provided', () => {
       const { searchPlaceholder, ...propsWithoutPlaceholder } = defaultProps;
 
-      render(<SearchImportPanel {...propsWithoutPlaceholder} searchPlaceholder="Search..." />);
+      render(<SearchImportPanel<TestRecord> {...propsWithoutPlaceholder} searchPlaceholder="Search..." />);
 
       expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
     });
