@@ -458,7 +458,7 @@ public class GovOrgCsvImportService {
         org.setEstablishedDate(csvRow.establishedDate);
         org.setDissolvedDate(csvRow.dissolvedDate);
         org.setWebsiteUrl(csvRow.websiteUrl);
-        org.setJurisdictionAreas(csvRow.jurisdictionAreas);
+        org.setJurisdictionAreas(csvRow.jurisdictionAreas != null ? csvRow.jurisdictionAreas.toArray(new String[0]) : null);
 
         org.setCreatedBy(AUDIT_SOURCE);
         org.setUpdatedBy(AUDIT_SOURCE);
@@ -523,9 +523,9 @@ public class GovOrgCsvImportService {
         }
 
         // Update jurisdiction areas only if currently null or empty
-        if ((org.getJurisdictionAreas() == null || org.getJurisdictionAreas().isEmpty())
+        if ((org.getJurisdictionAreas() == null || org.getJurisdictionAreas().length == 0)
                 && csvRow.jurisdictionAreas != null && !csvRow.jurisdictionAreas.isEmpty()) {
-            org.setJurisdictionAreas(csvRow.jurisdictionAreas);
+            org.setJurisdictionAreas(csvRow.jurisdictionAreas.toArray(new String[0]));
             updated = true;
         }
 

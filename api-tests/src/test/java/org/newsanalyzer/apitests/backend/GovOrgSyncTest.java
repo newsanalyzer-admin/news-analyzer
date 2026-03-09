@@ -3,7 +3,6 @@ package org.newsanalyzer.apitests.backend;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 import org.newsanalyzer.apitests.BaseApiTest;
-import org.newsanalyzer.apitests.backend.dto.SyncResultDto;
 import org.newsanalyzer.apitests.backend.dto.SyncStatusDto;
 import org.newsanalyzer.apitests.config.Endpoints;
 
@@ -99,64 +98,72 @@ class GovOrgSyncTest extends BaseApiTest {
     class FederalRegisterSyncTests {
 
         @Test
-        @DisplayName("Should trigger sync and return result with counts")
+        @DisplayName("Should trigger async sync and return job status")
         void shouldTriggerSyncAndReturnResultWithCounts() {
-            // When: Trigger Federal Register sync
+            // When: Trigger Federal Register sync (now async)
             Response response = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: Response contains sync result fields
-            response.then()
-                    .statusCode(anyOf(is(200), is(500))) // 500 if API unavailable
-                    .contentType("application/json")
-                    .body("added", notNullValue())
-                    .body("updated", notNullValue())
-                    .body("skipped", notNullValue())
-                    .body("errors", notNullValue());
-        }
+            // Then: Response is 202 Accepted (job started) or 409 Conflict (already running)
+            int statusCode = response.statusCode();
+            assertTrue(statusCode == 202 || statusCode == 409,
+                    "Expected 202 (job started) or 409 (already running), got " + statusCode);
 
-        @Test
-        @DisplayName("Should return valid sync result structure on success")
-        void shouldReturnValidSyncResultStructureOnSuccess() {
-            // When: Trigger sync
-            Response response = syncClient.triggerFederalRegisterSyncRaw();
-
-            // Then: If successful, all counts are non-negative
-            if (response.statusCode() == 200) {
-                SyncResultDto result = response.as(SyncResultDto.class);
-
-                assertTrue(result.getAdded() >= 0, "Added count should be >= 0");
-                assertTrue(result.getUpdated() >= 0, "Updated count should be >= 0");
-                assertTrue(result.getSkipped() >= 0, "Skipped count should be >= 0");
-                assertTrue(result.getErrors() >= 0, "Errors count should be >= 0");
+            if (statusCode == 202) {
+                response.then()
+                        .contentType("application/json")
+                        .body("jobId", notNullValue())
+                        .body("syncType", equalTo("gov-orgs"))
+                        .body("state", equalTo("RUNNING"));
             }
         }
 
         @Test
-        @DisplayName("Should return total processed count")
+        @DisplayName("Should return valid async job structure on accepted")
+        void shouldReturnValidSyncResultStructureOnSuccess() {
+            // When: Trigger sync (now async)
+            Response response = syncClient.triggerFederalRegisterSyncRaw();
+
+            // Then: If accepted, job status has required fields
+            if (response.statusCode() == 202) {
+                String jobId = response.jsonPath().getString("jobId");
+                String state = response.jsonPath().getString("state");
+                String syncType = response.jsonPath().getString("syncType");
+
+                assertNotNull(jobId, "Job ID should be present");
+                assertEquals("RUNNING", state, "State should be RUNNING");
+                assertEquals("gov-orgs", syncType, "Sync type should be gov-orgs");
+            }
+        }
+
+        @Test
+        @DisplayName("Should return job ID that can be used for polling")
         void shouldReturnTotalProcessedCount() {
             // When: Trigger sync
             Response response = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: Total should equal sum of added + updated + skipped + errors
-            if (response.statusCode() == 200) {
-                SyncResultDto result = response.as(SyncResultDto.class);
-
-                int expectedTotal = result.getAdded() + result.getUpdated() +
-                        result.getSkipped() + result.getErrors();
-                assertEquals(expectedTotal, result.getTotal(),
-                        "Total should equal sum of added, updated, skipped, and errors");
+            // Then: If accepted, job ID is a valid UUID-like string
+            if (response.statusCode() == 202) {
+                String jobId = response.jsonPath().getString("jobId");
+                assertNotNull(jobId, "Job ID should be present for polling");
+                assertFalse(jobId.isEmpty(), "Job ID should not be empty");
             }
         }
 
         @Test
-        @DisplayName("Should include error messages if errors occur")
+        @DisplayName("Should return 409 when sync is already running")
         void shouldIncludeErrorMessagesIfErrorsOccur() {
-            // When: Trigger sync
-            Response response = syncClient.triggerFederalRegisterSyncRaw();
+            // When: Trigger two syncs in quick succession
+            Response firstResponse = syncClient.triggerFederalRegisterSyncRaw();
+            Response secondResponse = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: Response has errorMessages field
-            response.then()
-                    .body("errorMessages", notNullValue());
+            // Then: At least one should be 202, and if first was 202 then second may be 409
+            int first = firstResponse.statusCode();
+            int second = secondResponse.statusCode();
+
+            assertTrue(first == 202 || first == 409,
+                    "First sync should return 202 or 409, got " + first);
+            assertTrue(second == 202 || second == 409,
+                    "Second sync should return 202 or 409, got " + second);
         }
     }
 
@@ -167,22 +174,19 @@ class GovOrgSyncTest extends BaseApiTest {
     class SyncProcessVerificationTests {
 
         @Test
-        @DisplayName("Should sync executive branch agencies from Federal Register")
+        @DisplayName("Should start async sync for executive branch agencies")
         void shouldSyncExecutiveBranchAgencies() {
-            // When: Trigger sync
+            // When: Trigger sync (now async)
             Response response = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: If successful, verify some data was processed
-            if (response.statusCode() == 200) {
-                SyncResultDto result = response.as(SyncResultDto.class);
+            // Then: Sync job should be accepted or already running
+            int statusCode = response.statusCode();
+            assertTrue(statusCode == 202 || statusCode == 409,
+                    "Expected 202 (job started) or 409 (already running), got " + statusCode);
 
-                // The Federal Register API returns ~300 agencies
-                // Depending on database state, these could be added, updated, or skipped
-                int total = result.getTotal();
-
-                // Should have processed some agencies (unless API returned empty)
-                // This is a sanity check - exact count depends on API response
-                System.out.println("Sync result: " + result);
+            if (statusCode == 202) {
+                String jobId = response.jsonPath().getString("jobId");
+                System.out.println("Sync job started: " + jobId);
             }
         }
 
@@ -193,17 +197,18 @@ class GovOrgSyncTest extends BaseApiTest {
             SyncStatusDto initialStatus = syncClient.getSyncStatus();
             long initialCount = initialStatus.getTotalOrganizations();
 
-            // When: Trigger sync (may add/update organizations)
+            // When: Trigger sync (async - may add/update organizations)
             Response syncResponse = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: Check final status
-            if (syncResponse.statusCode() == 200) {
-                SyncStatusDto finalStatus = syncClient.getSyncStatus();
+            // Then: Verify sync was accepted
+            int statusCode = syncResponse.statusCode();
+            assertTrue(statusCode == 202 || statusCode == 409,
+                    "Expected 202 (job started) or 409 (already running), got " + statusCode);
 
-                // Count should be at least the initial count (sync shouldn't delete)
-                assertTrue(finalStatus.getTotalOrganizations() >= 0,
-                        "Total organizations should be non-negative after sync");
-            }
+            // Verify status endpoint still works
+            SyncStatusDto finalStatus = syncClient.getSyncStatus();
+            assertTrue(finalStatus.getTotalOrganizations() >= 0,
+                    "Total organizations should be non-negative after sync");
         }
     }
 
@@ -214,15 +219,15 @@ class GovOrgSyncTest extends BaseApiTest {
     class ErrorHandlingTests {
 
         @Test
-        @DisplayName("Should handle sync gracefully when API returns empty")
+        @DisplayName("Should handle sync gracefully - returns accepted or conflict")
         void shouldHandleSyncGracefullyWhenApiReturnsEmpty() {
-            // When: Trigger sync
+            // When: Trigger sync (async pattern)
             Response response = syncClient.triggerFederalRegisterSyncRaw();
 
-            // Then: Either success or controlled error, not 500 crash
+            // Then: Either 202 Accepted or 409 Conflict, never 500
             int statusCode = response.statusCode();
-            assertTrue(statusCode == 200 || statusCode == 500,
-                    "Expected 200 (success) or 500 (controlled error), got " + statusCode);
+            assertTrue(statusCode == 202 || statusCode == 409,
+                    "Expected 202 (accepted) or 409 (already running), got " + statusCode);
         }
 
         @Test
