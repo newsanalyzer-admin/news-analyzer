@@ -9,6 +9,7 @@ reads configuration from OTEL_* environment variables set in Docker Compose.
 import logging
 import os
 
+from fastapi import FastAPI
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -65,7 +66,7 @@ def init_telemetry() -> None:
     logger.info("OpenTelemetry initialized for %s", os.getenv("OTEL_SERVICE_NAME"))
 
 
-def instrument_app(app: object) -> None:
+def instrument_app(app: FastAPI) -> None:
     """Instrument a FastAPI application instance.
 
     Must be called after app creation because FastAPIInstrumentor
