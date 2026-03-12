@@ -4,7 +4,7 @@
  * Client for interacting with the Java backend /api/members endpoints.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type {
   Member,
   Person,
@@ -17,13 +17,6 @@ import type {
 import type { CommitteeMembership } from '@/types/committee';
 import type { Page, PaginationParams } from '@/types/pagination';
 import type { SyncJobStatus } from '@/types/sync';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 10000,
-});
 
 /**
  * Member list parameters
@@ -43,7 +36,7 @@ export const membersApi = {
    * GET /api/members
    */
   list: async (params: MemberListParams = {}): Promise<Page<Member>> => {
-    const response = await api.get<Page<Member>>('/api/members', { params });
+    const response = await backendClient.get<Page<Member>>('/api/members', { params });
     return response.data;
   },
 
@@ -52,7 +45,7 @@ export const membersApi = {
    * GET /api/members/{bioguideId}
    */
   getByBioguideId: async (bioguideId: string): Promise<Member> => {
-    const response = await api.get<Member>(`/api/members/${bioguideId}`);
+    const response = await backendClient.get<Member>(`/api/members/${bioguideId}`);
     return response.data;
   },
 
@@ -64,7 +57,7 @@ export const membersApi = {
     name: string,
     params: PaginationParams = {}
   ): Promise<Page<Member>> => {
-    const response = await api.get<Page<Member>>('/api/members/search', {
+    const response = await backendClient.get<Page<Member>>('/api/members/search', {
       params: { name, ...params },
     });
     return response.data;
@@ -78,7 +71,7 @@ export const membersApi = {
     state: string,
     params: PaginationParams = {}
   ): Promise<Page<Member>> => {
-    const response = await api.get<Page<Member>>(
+    const response = await backendClient.get<Page<Member>>(
       `/api/members/by-state/${state}`,
       { params }
     );
@@ -93,7 +86,7 @@ export const membersApi = {
     chamber: Chamber,
     params: PaginationParams = {}
   ): Promise<Page<Member>> => {
-    const response = await api.get<Page<Member>>(
+    const response = await backendClient.get<Page<Member>>(
       `/api/members/by-chamber/${chamber}`,
       { params }
     );
@@ -105,7 +98,7 @@ export const membersApi = {
    * GET /api/members/{bioguideId}/terms
    */
   getTerms: async (bioguideId: string): Promise<PositionHolding[]> => {
-    const response = await api.get<PositionHolding[]>(
+    const response = await backendClient.get<PositionHolding[]>(
       `/api/members/${bioguideId}/terms`
     );
     return response.data;
@@ -119,7 +112,7 @@ export const membersApi = {
     bioguideId: string,
     params: PaginationParams = {}
   ): Promise<Page<CommitteeMembership>> => {
-    const response = await api.get<Page<CommitteeMembership>>(
+    const response = await backendClient.get<Page<CommitteeMembership>>(
       `/api/members/${bioguideId}/committees`,
       { params }
     );
@@ -131,7 +124,7 @@ export const membersApi = {
    * GET /api/members/count
    */
   getCount: async (): Promise<number> => {
-    const response = await api.get<number>('/api/members/count');
+    const response = await backendClient.get<number>('/api/members/count');
     return response.data;
   },
 
@@ -140,7 +133,7 @@ export const membersApi = {
    * GET /api/members/stats/party
    */
   getPartyStats: async (): Promise<PartyStats[]> => {
-    const response = await api.get<PartyStats[]>('/api/members/stats/party');
+    const response = await backendClient.get<PartyStats[]>('/api/members/stats/party');
     return response.data;
   },
 
@@ -149,7 +142,7 @@ export const membersApi = {
    * GET /api/members/stats/state
    */
   getStateStats: async (): Promise<StateStats[]> => {
-    const response = await api.get<StateStats[]>('/api/members/stats/state');
+    const response = await backendClient.get<StateStats[]>('/api/members/stats/state');
     return response.data;
   },
 
@@ -158,7 +151,7 @@ export const membersApi = {
    * POST /api/members/sync → 202 Accepted
    */
   triggerSync: async (): Promise<SyncJobStatus> => {
-    const response = await api.post<SyncJobStatus>('/api/members/sync');
+    const response = await backendClient.post<SyncJobStatus>('/api/members/sync');
     return response.data;
   },
 
@@ -167,7 +160,7 @@ export const membersApi = {
    * POST /api/members/enrichment-sync → 202 Accepted
    */
   triggerEnrichmentSync: async (force: boolean = false): Promise<SyncJobStatus> => {
-    const response = await api.post<SyncJobStatus>('/api/members/enrichment-sync', null, {
+    const response = await backendClient.post<SyncJobStatus>('/api/members/enrichment-sync', null, {
       params: { force },
     });
     return response.data;
@@ -178,7 +171,7 @@ export const membersApi = {
    * GET /api/members/enrichment-status
    */
   getEnrichmentStatus: async (): Promise<EnrichmentStatus> => {
-    const response = await api.get<EnrichmentStatus>(
+    const response = await backendClient.get<EnrichmentStatus>(
       '/api/members/enrichment-status'
     );
     return response.data;

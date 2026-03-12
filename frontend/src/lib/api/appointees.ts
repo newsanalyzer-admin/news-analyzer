@@ -4,16 +4,9 @@
  * Client for interacting with the Java backend /api/appointees endpoints.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type { Appointee, AppointmentType } from '@/types/appointee';
 import type { Page, PaginationParams } from '@/types/pagination';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 10000,
-});
 
 /**
  * Appointee list parameters
@@ -32,7 +25,7 @@ export const appointeesApi = {
    * GET /api/appointees
    */
   list: async (params: AppointeeListParams = {}): Promise<Page<Appointee>> => {
-    const response = await api.get<Page<Appointee>>('/api/appointees', { params });
+    const response = await backendClient.get<Page<Appointee>>('/api/appointees', { params });
     return response.data;
   },
 
@@ -41,7 +34,7 @@ export const appointeesApi = {
    * GET /api/appointees/{id}
    */
   getById: async (id: string): Promise<Appointee> => {
-    const response = await api.get<Appointee>(`/api/appointees/${id}`);
+    const response = await backendClient.get<Appointee>(`/api/appointees/${id}`);
     return response.data;
   },
 
@@ -50,7 +43,7 @@ export const appointeesApi = {
    * GET /api/appointees/search
    */
   search: async (query: string, limit: number = 20): Promise<Appointee[]> => {
-    const response = await api.get<Appointee[]>('/api/appointees/search', {
+    const response = await backendClient.get<Appointee[]>('/api/appointees/search', {
       params: { q: query, limit },
     });
     return response.data;
@@ -61,7 +54,7 @@ export const appointeesApi = {
    * GET /api/appointees/by-agency/{orgId}
    */
   getByAgency: async (orgId: string): Promise<Appointee[]> => {
-    const response = await api.get<Appointee[]>(`/api/appointees/by-agency/${orgId}`);
+    const response = await backendClient.get<Appointee[]>(`/api/appointees/by-agency/${orgId}`);
     return response.data;
   },
 
@@ -70,7 +63,7 @@ export const appointeesApi = {
    * GET /api/appointees/by-type/{type}
    */
   getByType: async (type: AppointmentType): Promise<Appointee[]> => {
-    const response = await api.get<Appointee[]>(`/api/appointees/by-type/${type}`);
+    const response = await backendClient.get<Appointee[]>(`/api/appointees/by-type/${type}`);
     return response.data;
   },
 
@@ -79,7 +72,7 @@ export const appointeesApi = {
    * GET /api/appointees/cabinet
    */
   getCabinet: async (): Promise<Appointee[]> => {
-    const response = await api.get<Appointee[]>('/api/appointees/cabinet');
+    const response = await backendClient.get<Appointee[]>('/api/appointees/cabinet');
     return response.data;
   },
 
@@ -88,7 +81,7 @@ export const appointeesApi = {
    * GET /api/appointees/count
    */
   getCount: async (): Promise<number> => {
-    const response = await api.get<number>('/api/appointees/count');
+    const response = await backendClient.get<number>('/api/appointees/count');
     return response.data;
   },
 };

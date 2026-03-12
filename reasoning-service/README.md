@@ -195,6 +195,51 @@ mypy app/
 docker build -t newsanalyzer-reasoning-service:latest .
 ```
 
+## Running with Observability (Outside Docker)
+
+When running the reasoning service on your host machine, OTel is initialized automatically by `app/telemetry.py` (called from `main.py` at startup). It reads standard `OTEL_*` environment variables to configure trace and metric export.
+
+1. The observability stack must be running in Docker (from the root of the repo):
+   ```bash
+   docker compose -f docker-compose.dev.yml up -d
+   ```
+
+2. Start the service with OTel env vars:
+
+   **Linux / macOS:**
+   ```bash
+   OTEL_SERVICE_NAME=newsanalyzer-reasoning \
+   OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
+   OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+   OTEL_TRACES_SAMPLER=always_on \
+   OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev \
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+   **Windows (PowerShell):**
+   ```powershell
+   $env:OTEL_SERVICE_NAME="newsanalyzer-reasoning"
+   $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+   $env:OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+   $env:OTEL_TRACES_SAMPLER="always_on"
+   $env:OTEL_RESOURCE_ATTRIBUTES="deployment.environment=dev"
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+   **Windows (Command Prompt):**
+   ```cmd
+   set OTEL_SERVICE_NAME=newsanalyzer-reasoning
+   set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+   set OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+   set OTEL_TRACES_SAMPLER=always_on
+   set OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+Once running, traces and metrics will appear in Grafana at http://localhost:3001.
+
+> **Note:** The key difference from Docker is `localhost:4317` instead of `otel-collector:4317`. Distributed tracing across services works regardless of whether they run in Docker or on the host — the W3C `traceparent` header propagates trace context over HTTP.
+
 ## Performance
 
 - **Average response time:** ~50ms (vs 500ms in V1's subprocess approach)

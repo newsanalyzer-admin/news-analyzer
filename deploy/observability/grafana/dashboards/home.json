@@ -1,0 +1,292 @@
+{
+  "uid": "home",
+  "title": "NewsAnalyzer — Home",
+  "description": "Landing page with service health overview and navigation to all dashboards",
+  "tags": ["observability", "newsanalyzer"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "templating": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "",
+      "type": "text",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "# NewsAnalyzer v2 — Observability\n\nWelcome to the observability dashboard. Use the panels below to check service health and navigate to detailed views.",
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Backend — Request Rate",
+      "description": "Current request rate for the Spring Boot backend",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null },
+              { "color": "green", "value": 0.01 }
+            ]
+          },
+          "noValue": "No data"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "area",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-backend\"}[5m]))",
+          "legendFormat": "Backend"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Frontend — Event Loop Utilization",
+      "description": "Node.js event loop utilization ratio for the Next.js frontend. Next.js does not expose HTTP server metrics via the standard OTel HTTP instrumentation; ELU is the best available proxy for frontend load.",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null },
+              { "color": "green", "value": 0.01 },
+              { "color": "yellow", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
+            ]
+          },
+          "noValue": "No data"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "area",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_utilization_ratio{service_name=\"newsanalyzer-frontend\"}",
+          "legendFormat": "Frontend ELU"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Reasoning — Request Rate",
+      "description": "Current request rate for the FastAPI reasoning service",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null },
+              { "color": "green", "value": 0.01 }
+            ]
+          },
+          "noValue": "No data"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "area",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-reasoning\"}[5m]))",
+          "legendFormat": "Reasoning"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Backend — Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          },
+          "noValue": "0%"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "none",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-backend\", http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-backend\"}[5m]))",
+          "legendFormat": "Backend Errors"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Frontend — Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          },
+          "noValue": "0%"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "none",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-frontend\", http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-frontend\"}[5m]))",
+          "legendFormat": "Frontend Errors"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Reasoning — Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          },
+          "noValue": "0%"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "none",
+        "colorMode": "background",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-reasoning\", http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service_name=\"newsanalyzer-reasoning\"}[5m]))",
+          "legendFormat": "Reasoning Errors"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Dashboard Navigation",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 11 },
+      "options": {
+        "mode": "markdown",
+        "content": "### Dashboards\n\n| Dashboard | Description |\n|-----------|-------------|\n| [Service Overview](/d/service-overview) | RED metrics (Rate, Errors, Duration) for all services |\n| [Backend JVM](/d/backend-jvm) | JVM heap, GC, threads, HikariCP for Spring Boot |\n| [Reasoning Service](/d/reasoning-service) | Python runtime, request metrics by endpoint |\n| [Distributed Traces](/d/distributed-traces) | Tempo trace search with service and duration filters |\n| [Log Explorer](/d/log-explorer) | Centralized logs with trace ID correlation |",
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Alerts (Future)",
+      "type": "text",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 11 },
+      "options": {
+        "mode": "markdown",
+        "content": "### Alerting\n\nAlert rules and notification channels will be configured in a future epic.\n\n**Planned alerts:**\n- Error rate > 5% for any service\n- P95 latency > 2s for any service\n- JVM heap > 80% of max\n- HikariCP pending connections > 0 for extended period\n- Log error rate spike detection\n\n*See: Future Considerations in the OBS-1 epic.*",
+        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false }
+      }
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}

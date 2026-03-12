@@ -1,6 +1,6 @@
 # NewsAnalyzer v2 - Technology Stack
 
-**Last Updated:** 2025-11-27
+**Last Updated:** 2026-03-11
 **Version:** 2.0.0-SNAPSHOT
 
 ---
@@ -65,6 +65,13 @@ NewsAnalyzer v2 is a polyglot application consisting of three main services:
 | Lombok | (managed by Spring Boot) | Boilerplate reduction |
 | JaCoCo | 0.8.11 | Code coverage reporting |
 
+### Observability (OBS-1)
+
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| OpenTelemetry Java Agent | 2.x | Zero-code auto-instrumentation (HTTP, JPA, JDBC, Redis) |
+| Micrometer Registry Prometheus | (managed by Spring Boot) | JVM/HikariCP metrics via Actuator `/actuator/prometheus` |
+
 ### Testing
 
 | Component | Purpose |
@@ -128,6 +135,20 @@ NewsAnalyzer v2 is a polyglot application consisting of three main services:
 | Vitest | 1.2.0 | Unit testing framework |
 | Vitest UI | 1.2.0 | Test UI dashboard |
 | Playwright | 1.41.0 | E2E testing |
+
+### Observability (OBS-1)
+
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| `@opentelemetry/api` | ^1.9.0 | OTel API surface |
+| `@opentelemetry/sdk-node` | ^0.213.0 | Server-side OTel SDK (NodeSDK orchestrator) |
+| `@opentelemetry/auto-instrumentations-node` | ^0.71.0 | Auto-instrumentation for HTTP, fetch, etc. |
+| `@opentelemetry/exporter-trace-otlp-grpc` | ^0.213.0 | Trace export via OTLP/gRPC |
+| `@opentelemetry/exporter-metrics-otlp-grpc` | ^0.213.0 | Metric export via OTLP/gRPC |
+| `@opentelemetry/resources` | ^2.6.0 | Resource attributes (service.name) |
+| `@opentelemetry/sdk-metrics` | ^2.6.0 | Metric SDK (PeriodicExportingMetricReader) |
+| `@opentelemetry/semantic-conventions` | ^1.40.0 | Standard attribute names |
+| `web-vitals` | ^5.1.0 | Core Web Vitals (LCP, CLS, INP) |
 
 ### Code Quality
 
@@ -200,6 +221,15 @@ NewsAnalyzer v2 is a polyglot application consisting of three main services:
 | pytest-cov | 4.1.0 | Coverage reporting |
 | pytest-asyncio | 0.23.3 | Async test support |
 
+### Observability (OBS-1)
+
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| `opentelemetry-distro` | 0.48+ | OTel Python distribution (auto-instrumentation bootstrap) |
+| `opentelemetry-exporter-otlp` | 1.27+ | OTLP trace/metric export |
+| `opentelemetry-instrumentation-fastapi` | (auto) | FastAPI route instrumentation |
+| `opentelemetry-instrumentation-httpx` | (auto) | HTTPX client instrumentation |
+
 ### Code Quality
 
 | Component | Version | Purpose |
@@ -225,6 +255,18 @@ NewsAnalyzer v2 is a polyglot application consisting of three main services:
 |-----------|---------|---------|
 | Docker | 24+ | Container runtime |
 | Docker Compose | 2.20+ | Multi-container orchestration |
+
+### Observability Stack (OBS-1)
+
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| OpenTelemetry Collector | latest | Telemetry pipeline — receives OTLP, exports to backends |
+| Grafana | 11+ | Unified dashboards for metrics, logs, and traces |
+| Prometheus | 2.x | Metrics storage & query (PromQL) |
+| Grafana Loki | 3.x | Log aggregation & query (LogQL) |
+| Grafana Tempo | 2.x | Distributed trace storage & query (TraceQL) |
+
+All services emit telemetry via OTLP to the OTel Collector, which routes metrics to Prometheus, logs to Loki, and traces to Tempo. Grafana provides cross-signal correlation (log → trace, trace → log). See `deploy/observability/` for configuration.
 
 ### CI/CD (Planned)
 
@@ -292,6 +334,12 @@ NewsAnalyzer v2 is a polyglot application consisting of three main services:
 | Reasoning Service | 8000 | 8000 |
 | PostgreSQL | 5432 | 5432 |
 | Redis | 6379 | 6379 |
+| Grafana | 3001 | 3001 |
+| Prometheus | 9090 | 9090 |
+| Loki | 3100 | 3100 |
+| Tempo | 3200 | 3200 |
+| OTel Collector (gRPC) | 4317 | 4317 |
+| OTel Collector (HTTP) | 4318 | 4318 |
 
 ---
 

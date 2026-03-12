@@ -1,0 +1,60 @@
+schema: 1
+story: 'OBS-1.5'
+story_title: 'Grafana Dashboards & Correlation'
+gate: PASS
+status_reason: 'All 10 acceptance criteria met. Six provisioned dashboards with RED metrics, JVM/Python runtime views, trace search, log exploration, and home navigation. Three low-severity maintainability findings related to template variable edge cases.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-11T03:15:00Z'
+
+top_issues:
+  - id: 'MNT-001'
+    severity: low
+    finding: 'Log Explorer level filter uses content regex |~ "(?i)$level" which excludes lines without level strings when "All" is selected'
+    suggested_action: 'Switch to Loki label filter | detected_level =~ "$level" or conditionally omit the pipe'
+    suggested_owner: dev
+  - id: 'MNT-002'
+    severity: low
+    finding: 'Distributed Traces template variables use empty string for "All" which may send service.name="" to Tempo instead of omitting the filter'
+    suggested_action: 'Verify with live Tempo queries; adjust TraceQL filter logic if empty values cause no-results'
+    suggested_owner: dev
+  - id: 'MNT-003'
+    severity: low
+    finding: 'Web Vitals metric names (web_vitals_lcp/cls/inp) assume Prometheus remote write dot-to-underscore conversion — not yet verified with live data'
+    suggested_action: 'Run docker compose up and confirm metrics appear in Prometheus with expected names'
+    suggested_owner: dev
+
+waiver: { active: false }
+
+quality_score: 100
+expires: '2026-03-25T03:15:00Z'
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No credentials in dashboard JSON. All volumes mounted read-only. Production Grafana password-protected.'
+  performance:
+    status: PASS
+    notes: 'All queries use bounded rate() windows. Tempo queries limited to 10-20 results. 30s refresh interval.'
+  reliability:
+    status: PASS
+    notes: 'Dashboards provisioned as immutable JSON (allowUiUpdates: false). Delete volume and restart to recover.'
+  maintainability:
+    status: PASS
+    notes: 'Consistent UIDs, cross-linking, tags, and panel descriptions across all 6 dashboards.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'Fix Log Explorer level filter to use label-based filtering instead of content regex'
+      refs: ['deploy/observability/grafana/dashboards/log-explorer.json']
+    - action: 'Verify Tempo TraceQL search handles empty template variable values correctly'
+      refs: ['deploy/observability/grafana/dashboards/distributed-traces.json']
+    - action: 'Confirm Web Vitals metric names match Prometheus after live validation'
+      refs: ['deploy/observability/grafana/dashboards/service-overview.json']

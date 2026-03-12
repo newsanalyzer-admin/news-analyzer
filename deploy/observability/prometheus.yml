@@ -1,0 +1,27 @@
+# Prometheus Configuration
+# Receives OTel metrics via remote write AND scrapes Actuator endpoints directly
+# Image: prom/prometheus:v2.51.0
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Scrape jobs — direct pull from service endpoints
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # OTel Collector self-metrics (how the Collector itself is performing)
+  - job_name: "otel-collector"
+    static_configs:
+      - targets: ["otel-collector:8888"]
+
+  # Backend Actuator — JVM/Micrometer-native metrics (HikariCP, GC, threads)
+  # This target will show DOWN until OBS-1.2 adds micrometer-registry-prometheus
+  # Pre-configured so it "just works" once the dependency lands
+  - job_name: "backend-actuator"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["backend:8080"]

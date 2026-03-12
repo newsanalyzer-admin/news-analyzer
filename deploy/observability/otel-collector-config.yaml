@@ -1,0 +1,75 @@
+# OpenTelemetry Collector Configuration
+# Central telemetry pipeline: receives from all services, routes to backends
+# Image: otel/opentelemetry-collector-contrib:0.98.0 (contrib required for loki + prometheusremotewrite)
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Safety valve — prevents OOM if telemetry spikes
+  # Goes FIRST in pipeline so it can drop data before processing costs memory
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 256
+    spike_limit_mib: 64
+
+  # Batches telemetry before export — reduces network overhead
+  # Sends when batch hits 200 items OR 5s timeout, whichever comes first
+  batch:
+    send_batch_size: 200
+    timeout: 5s
+
+exporters:
+  # Metrics → Prometheus via remote write (push model)
+  # Requires --web.enable-remote-write-receiver on Prometheus
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Logs → Loki via HTTP push
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+
+  # Traces → Tempo via OTLP gRPC (Tempo speaks OTLP natively)
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Debug exporter — logs telemetry to Collector stdout (dev only, useful for troubleshooting)
+  debug:
+    verbosity: basic
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheusremotewrite, debug]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [loki, debug]
+
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo, debug]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888

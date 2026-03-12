@@ -5,7 +5,7 @@
  * and enriching Person records via the backend proxy.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type {
   LegislatorsSearchParams,
   LegislatorsSearchResponse,
@@ -17,12 +17,8 @@ import type {
   LegislatorExistsResponse,
 } from '@/types/legislators-search';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 30000, // GitHub can be slow on first fetch
-});
+// GitHub API proxy calls can be slow on first fetch — override the default 10s client timeout
+const SLOW_TIMEOUT = { timeout: 30000 };
 
 /**
  * Legislators Repo API client
@@ -35,9 +31,10 @@ export const legislatorsSearchApi = {
   searchLegislators: async (
     params: LegislatorsSearchParams
   ): Promise<LegislatorsSearchResponse> => {
-    const response = await api.get<LegislatorsSearchResponse>(
+    const response = await backendClient.get<LegislatorsSearchResponse>(
       '/api/admin/search/legislators',
       {
+        ...SLOW_TIMEOUT,
         params: {
           name: params.name || undefined,
           bioguideId: params.bioguideId || undefined,
@@ -55,8 +52,9 @@ export const legislatorsSearchApi = {
    * GET /api/admin/search/legislators/{bioguideId}
    */
   getLegislatorDetail: async (bioguideId: string): Promise<LegislatorDetail> => {
-    const response = await api.get<LegislatorDetail>(
-      `/api/admin/search/legislators/${bioguideId}`
+    const response = await backendClient.get<LegislatorDetail>(
+      `/api/admin/search/legislators/${bioguideId}`,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -66,8 +64,9 @@ export const legislatorsSearchApi = {
    * GET /api/admin/import/legislators/{bioguideId}/preview
    */
   previewEnrichment: async (bioguideId: string): Promise<EnrichmentPreview> => {
-    const response = await api.get<EnrichmentPreview>(
-      `/api/admin/import/legislators/${bioguideId}/preview`
+    const response = await backendClient.get<EnrichmentPreview>(
+      `/api/admin/import/legislators/${bioguideId}/preview`,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -79,9 +78,10 @@ export const legislatorsSearchApi = {
   enrichPerson: async (
     request: LegislatorEnrichmentRequest
   ): Promise<LegislatorEnrichmentResult> => {
-    const response = await api.post<LegislatorEnrichmentResult>(
+    const response = await backendClient.post<LegislatorEnrichmentResult>(
       '/api/admin/import/legislators/enrich',
-      request
+      request,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -93,8 +93,9 @@ export const legislatorsSearchApi = {
   checkLegislatorExists: async (
     bioguideId: string
   ): Promise<LegislatorExistsResponse> => {
-    const response = await api.get<LegislatorExistsResponse>(
-      `/api/admin/import/legislators/${bioguideId}/exists`
+    const response = await backendClient.get<LegislatorExistsResponse>(
+      `/api/admin/import/legislators/${bioguideId}/exists`,
+      SLOW_TIMEOUT
     );
     return response.data;
   },

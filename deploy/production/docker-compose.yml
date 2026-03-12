@@ -37,10 +37,20 @@ services:
       - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - REASONING_SERVICE_URL=http://reasoning-service:8000
+      # OpenTelemetry configuration (OBS-1.2)
+      - OTEL_SERVICE_NAME=newsanalyzer-backend
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=parentbased_traceidratio
+      - OTEL_TRACES_SAMPLER_ARG=0.1
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=prod
     depends_on:
       - postgres
       - redis
       - reasoning-service
+      - otel-collector
     networks:
       - newsanalyzer-network
     healthcheck:
@@ -57,8 +67,16 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=/api
+      # OpenTelemetry configuration (OBS-1.4)
+      - OTEL_SERVICE_NAME=newsanalyzer-frontend
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=parentbased_traceidratio
+      - OTEL_TRACES_SAMPLER_ARG=0.1
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=prod
     depends_on:
       - backend
+      - otel-collector
     networks:
       - newsanalyzer-network
 
@@ -72,6 +90,15 @@ services:
       - DEBUG=False
       - BACKEND_API_URL=http://backend:8080
       - LOG_LEVEL=INFO
+      # OpenTelemetry configuration (OBS-1.3)
+      - OTEL_SERVICE_NAME=newsanalyzer-reasoning
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_SAMPLER=parentbased_traceidratio
+      - OTEL_TRACES_SAMPLER_ARG=0.1
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=prod
+    depends_on:
+      - otel-collector
     networks:
       - newsanalyzer-network
     healthcheck:
@@ -123,6 +150,126 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - newsanalyzer-network
+
+  # ============================================================
+  # Observability Stack (OBS-1.1)
+  # SECURITY: Only Grafana exposed via nginx. All other ports internal-only.
+  # ============================================================
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.98.0
+    container_name: newsanalyzer-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ../observability/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    # NO ports exposed — internal-only on Docker network
+    networks:
+      - newsanalyzer-network
+    # No healthcheck — scratch-based image has no shell tools (wget/curl)
+    mem_limit: 512m
+    cpus: 0.5
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: newsanalyzer-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-remote-write-receiver"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+    volumes:
+      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /mnt/HC_Volume_1/prometheus:/prometheus
+    # NO ports exposed — internal-only
+    networks:
+      - newsanalyzer-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 1g
+    cpus: 0.5
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: newsanalyzer-loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki-config.yaml", "-config.expand-env=true"]
+    environment:
+      - LOKI_RETENTION_PERIOD=720h  # 30 days for production
+    volumes:
+      - ../observability/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - /mnt/HC_Volume_1/loki:/loki
+    # NO ports exposed — internal-only
+    networks:
+      - newsanalyzer-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+    cpus: 0.5
+
+  tempo:
+    image: grafana/tempo:2.4.0
+    container_name: newsanalyzer-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo/tempo-config.yaml", "-config.expand-env=true"]
+    environment:
+      - TEMPO_BLOCK_RETENTION=720h  # 30 days for production
+    volumes:
+      - ../observability/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+      - /mnt/HC_Volume_1/tempo:/var/tempo
+    # NO ports exposed — internal-only
+    networks:
+      - newsanalyzer-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 512m
+    cpus: 0.5
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: newsanalyzer-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_HTTP_PORT=3001
+      - GF_SERVER_ROOT_URL=https://${DOMAIN:-localhost}/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/home.json
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - /mnt/HC_Volume_1/grafana:/var/lib/grafana
+    # Exposed on 3001 — should be proxied through nginx with auth
+    ports:
+      - "127.0.0.1:3001:3001"
+    networks:
+      - newsanalyzer-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+    mem_limit: 512m
+    cpus: 0.5
 
 networks:
   newsanalyzer-network:

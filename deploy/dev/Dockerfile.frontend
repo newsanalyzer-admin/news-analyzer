@@ -8,6 +8,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copy config files needed at runtime (not volume-mounted)
+COPY tsconfig.json next.config.js ./
+
 # Create public directory if it does not exist
 RUN mkdir -p public
 
@@ -15,4 +18,8 @@ RUN mkdir -p public
 EXPOSE 3000
 
 # Source code is volume-mounted at runtime for HMR
-CMD ["npm", "run", "dev"]
+# Next.js 14.1.x bug: dev server crashes if .next/server/instrumentation.js doesn't exist
+# when experimentalInstrumentationHook is enabled. Create a stub so the server can start;
+# Next.js HMR will replace it with the real compiled file on first load.
+# Fixed upstream in Next.js 14.2.0 — remove this workaround when upgrading.
+CMD ["sh", "-c", "mkdir -p .next/server && touch .next/server/instrumentation.js && npm run dev"]

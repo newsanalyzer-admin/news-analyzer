@@ -4,7 +4,7 @@
  * Client for interacting with the Java backend /api/committees endpoints.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type {
   Committee,
   CommitteeMembership,
@@ -12,13 +12,6 @@ import type {
 } from '@/types/committee';
 import type { Page, PaginationParams } from '@/types/pagination';
 import type { SyncJobStatus } from '@/types/sync';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 10000,
-});
 
 /**
  * Committee list parameters
@@ -37,7 +30,7 @@ export const committeesApi = {
    * GET /api/committees
    */
   list: async (params: CommitteeListParams = {}): Promise<Page<Committee>> => {
-    const response = await api.get<Page<Committee>>('/api/committees', { params });
+    const response = await backendClient.get<Page<Committee>>('/api/committees', { params });
     return response.data;
   },
 
@@ -46,7 +39,7 @@ export const committeesApi = {
    * GET /api/committees/{code}
    */
   getByCode: async (code: string): Promise<Committee> => {
-    const response = await api.get<Committee>(`/api/committees/${code}`);
+    const response = await backendClient.get<Committee>(`/api/committees/${code}`);
     return response.data;
   },
 
@@ -58,7 +51,7 @@ export const committeesApi = {
     code: string,
     params: PaginationParams = {}
   ): Promise<Page<CommitteeMembership>> => {
-    const response = await api.get<Page<CommitteeMembership>>(
+    const response = await backendClient.get<Page<CommitteeMembership>>(
       `/api/committees/${code}/members`,
       { params }
     );
@@ -73,7 +66,7 @@ export const committeesApi = {
     code: string,
     params: PaginationParams = {}
   ): Promise<Page<Committee>> => {
-    const response = await api.get<Page<Committee>>(
+    const response = await backendClient.get<Page<Committee>>(
       `/api/committees/${code}/subcommittees`,
       { params }
     );
@@ -88,7 +81,7 @@ export const committeesApi = {
     chamber: CommitteeChamber,
     params: PaginationParams = {}
   ): Promise<Page<Committee>> => {
-    const response = await api.get<Page<Committee>>(
+    const response = await backendClient.get<Page<Committee>>(
       `/api/committees/by-chamber/${chamber}`,
       { params }
     );
@@ -103,7 +96,7 @@ export const committeesApi = {
     name: string,
     params: PaginationParams = {}
   ): Promise<Page<Committee>> => {
-    const response = await api.get<Page<Committee>>('/api/committees/search', {
+    const response = await backendClient.get<Page<Committee>>('/api/committees/search', {
       params: { name, ...params },
     });
     return response.data;
@@ -114,7 +107,7 @@ export const committeesApi = {
    * GET /api/committees/count
    */
   getCount: async (): Promise<number> => {
-    const response = await api.get<number>('/api/committees/count');
+    const response = await backendClient.get<number>('/api/committees/count');
     return response.data;
   },
 
@@ -123,7 +116,7 @@ export const committeesApi = {
    * POST /api/committees/sync → 202 Accepted
    */
   triggerSync: async (): Promise<SyncJobStatus> => {
-    const response = await api.post<SyncJobStatus>('/api/committees/sync');
+    const response = await backendClient.post<SyncJobStatus>('/api/committees/sync');
     return response.data;
   },
 
@@ -132,7 +125,7 @@ export const committeesApi = {
    * POST /api/committees/sync/memberships → 202 Accepted
    */
   triggerMembershipSync: async (congress?: number): Promise<SyncJobStatus> => {
-    const response = await api.post<SyncJobStatus>('/api/committees/sync/memberships', null, {
+    const response = await backendClient.post<SyncJobStatus>('/api/committees/sync/memberships', null, {
       params: congress ? { congress } : undefined,
     });
     return response.data;

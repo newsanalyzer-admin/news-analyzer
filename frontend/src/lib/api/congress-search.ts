@@ -4,7 +4,8 @@
  * Client for searching and importing Congressional member data via the backend proxy.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { backendClient } from './client';
 import type {
   CongressSearchParams,
   CongressSearchResponse,
@@ -15,12 +16,8 @@ import type {
 } from '@/types/congress-search';
 import type { Member } from '@/types/member';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 30000, // Congress.gov can be slow
-});
+// Congress.gov API proxy calls can be slow — override the default 10s client timeout
+const SLOW_TIMEOUT = { timeout: 30000 };
 
 /**
  * Rate limit info extracted from response headers
@@ -41,9 +38,10 @@ export const congressSearchApi = {
   searchMembers: async (
     params: CongressSearchParams
   ): Promise<{ data: CongressSearchResponse; rateLimit: RateLimitInfo }> => {
-    const response: AxiosResponse<CongressSearchResponse> = await api.get(
+    const response: AxiosResponse<CongressSearchResponse> = await backendClient.get(
       '/api/admin/search/congress/members',
       {
+        ...SLOW_TIMEOUT,
         params: {
           name: params.name || undefined,
           state: params.state || undefined,
@@ -74,8 +72,9 @@ export const congressSearchApi = {
    * GET /api/admin/search/congress/members/{bioguideId}
    */
   getMemberDetail: async (bioguideId: string): Promise<CongressMemberDetail> => {
-    const response = await api.get<CongressMemberDetail>(
-      `/api/admin/search/congress/members/${bioguideId}`
+    const response = await backendClient.get<CongressMemberDetail>(
+      `/api/admin/search/congress/members/${bioguideId}`,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -87,9 +86,10 @@ export const congressSearchApi = {
   importMember: async (
     request: CongressMemberImportRequest
   ): Promise<CongressImportResult> => {
-    const response = await api.post<CongressImportResult>(
+    const response = await backendClient.post<CongressImportResult>(
       '/api/admin/import/congress/member',
-      request
+      request,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -101,11 +101,11 @@ export const congressSearchApi = {
   checkMemberExists: async (
     bioguideId: string
   ): Promise<{ exists: boolean; id: string | null; name: string | null }> => {
-    const response = await api.get<{
+    const response = await backendClient.get<{
       exists: boolean;
       id: string | null;
       name: string | null;
-    }>(`/api/admin/import/congress/member/${bioguideId}/exists`);
+    }>(`/api/admin/import/congress/member/${bioguideId}/exists`, SLOW_TIMEOUT);
     return response.data;
   },
 
@@ -115,7 +115,7 @@ export const congressSearchApi = {
    */
   getLocalMember: async (bioguideId: string): Promise<Member | null> => {
     try {
-      const response = await api.get<Member>(`/api/members/${bioguideId}`);
+      const response = await backendClient.get<Member>(`/api/members/${bioguideId}`, SLOW_TIMEOUT);
       return response.data;
     } catch {
       return null;

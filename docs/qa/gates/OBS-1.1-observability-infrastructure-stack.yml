@@ -1,0 +1,67 @@
+schema: 1
+story: 'OBS-1.1'
+story_title: 'Observability Infrastructure Stack'
+gate: PASS
+status_reason: 'All 10 ACs met. Medium concern (retention mismatch) resolved via env var expansion with -config.expand-env=true. Two low-priority items accepted as-is.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-10T00:30:00-07:00'
+
+top_issues:
+  - id: 1
+    severity: medium
+    title: 'RESOLVED — Loki/Tempo production retention was 7d instead of specified 30d'
+    description: 'Fixed via env var expansion (-config.expand-env=true). Production compose now sets LOKI_RETENTION_PERIOD=720h and TEMPO_BLOCK_RETENTION=720h. Verified via /config and /status/config endpoints.'
+    refs: ['deploy/observability/loki-config.yaml', 'deploy/observability/tempo-config.yaml']
+    resolved: true
+  - id: 2
+    severity: low
+    title: 'Prometheus scrape interval 15s in production (story specifies 30s)'
+    description: 'Accepted as-is. Impact minimal within 1GB memory limit.'
+    refs: ['deploy/observability/prometheus.yml']
+    suggested_owner: dev
+    accepted: true
+  - id: 3
+    severity: low
+    title: 'Debug exporter active in production OTel Collector'
+    description: 'Accepted as-is. At verbosity:basic, provides useful troubleshooting capability with minimal overhead.'
+    refs: ['deploy/observability/otel-collector-config.yaml']
+    suggested_owner: dev
+    accepted: true
+
+waiver: { active: false }
+
+quality_score: 95  # 100 - (0 × 20 FAILs) - (0 × 10 medium, resolved) - (2 × 2.5 low, accepted) = 95
+expires: '2026-03-24T00:30:00-07:00'
+
+evidence:
+  tests_reviewed: 0  # Infrastructure story — validated via smoke test, not unit tests
+  risks_identified: 3
+  risks_resolved: 1
+  risks_accepted: 2
+  smoke_test_verified: true
+  containers_verified: 7
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Internal-only ports in production, 127.0.0.1 Grafana binding, env var credentials, read-only config mounts, resource limits on all services'
+  performance:
+    status: PASS
+    notes: 'Memory limiter processor (256MiB), batch processing (200/5s), resource limits (mem_limit + cpus) on all services'
+  reliability:
+    status: PASS
+    notes: 'Health checks on 4/5 services (OTel excluded — scratch image, documented), restart:unless-stopped, depends_on with service_healthy conditions'
+  maintainability:
+    status: PASS
+    notes: 'Env var expansion (-config.expand-env=true) enables per-environment config from single files. Retention parameterized for Loki and Tempo.'
+
+recommendations:
+  immediate: []  # No blocking issues
+  future:
+    - action: 'Consider parameterizing Prometheus scrape interval if 15s causes storage pressure in production'
+      refs: ['deploy/observability/prometheus.yml']
+    - action: 'Consider removing debug exporter from production if log noise becomes an issue'
+      refs: ['deploy/observability/otel-collector-config.yaml']

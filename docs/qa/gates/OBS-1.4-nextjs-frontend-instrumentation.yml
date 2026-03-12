@@ -1,0 +1,29 @@
+schema: 1
+story: 'OBS-1.4'
+gate: PASS
+status_reason: 'All 9 acceptance criteria met. Server-side OTel SDK, shared Axios client with trace propagation, and client-side Web Vitals all implemented correctly. TypeScript compiles clean. Three low-severity maintainability findings.'
+reviewer: 'Quinn'
+updated: '2026-03-11T02:30:00Z'
+top_issues:
+  - id: 'SEC-001'
+    severity: low
+    finding: '/api/vitals route has no input validation — forwards arbitrary metric names/values from client to OTel Collector'
+    suggested_action: 'Add basic validation (allowlist metric names to web_vitals.lcp/cls/inp, validate value is numeric)'
+  - id: 'MNT-001'
+    severity: low
+    finding: 'next.config.js removeConsole in production will strip OTel initialization console.log — verification step 7 wont work in prod'
+    suggested_action: 'Consider using a proper logger or process.stdout.write for startup confirmation instead of console.log'
+  - id: 'MNT-002'
+    severity: low
+    finding: '@opentelemetry/semantic-conventions package installed but unused after switching to string literal service.name'
+    suggested_action: 'Remove unused package or use ATTR_SERVICE_NAME constant for type safety'
+ac_coverage:
+  total: 9
+  covered: 9
+  gaps: []
+nfr_validation:
+  security: PASS
+  performance: PASS
+  reliability: PASS
+  maintainability: PASS
+waiver: { active: false }

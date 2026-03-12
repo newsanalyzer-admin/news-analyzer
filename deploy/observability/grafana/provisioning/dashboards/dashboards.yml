@@ -1,0 +1,16 @@
+# Grafana Dashboard Provider
+# Tells Grafana to auto-load dashboard JSON files from the mounted directory
+# Actual dashboard JSONs are created in OBS-1.5
+
+apiVersion: 1
+
+providers:
+  - name: "NewsAnalyzer"
+    orgId: 1
+    folder: "NewsAnalyzer"
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

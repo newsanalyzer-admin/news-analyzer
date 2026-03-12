@@ -1,0 +1,238 @@
+{
+  "uid": "distributed-traces",
+  "title": "Distributed Traces",
+  "description": "Tempo trace search with service and duration filters, plus recent slow traces",
+  "tags": ["observability", "newsanalyzer", "traces"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "custom",
+        "label": "Service",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ""
+        },
+        "options": [
+          { "selected": true, "text": "All", "value": "" },
+          { "selected": false, "text": "newsanalyzer-backend", "value": "newsanalyzer-backend" },
+          { "selected": false, "text": "newsanalyzer-frontend", "value": "newsanalyzer-frontend" },
+          { "selected": false, "text": "newsanalyzer-reasoning", "value": "newsanalyzer-reasoning" }
+        ],
+        "query": ",newsanalyzer-backend,newsanalyzer-frontend,newsanalyzer-reasoning"
+      },
+      {
+        "name": "min_duration",
+        "type": "custom",
+        "label": "Min Duration",
+        "current": {
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "options": [
+          { "selected": true, "text": "None", "value": "" },
+          { "selected": false, "text": "100ms", "value": "100ms" },
+          { "selected": false, "text": "500ms", "value": "500ms" },
+          { "selected": false, "text": "1s", "value": "1s" },
+          { "selected": false, "text": "5s", "value": "5s" }
+        ],
+        "query": ",100ms,500ms,1s,5s"
+      },
+      {
+        "name": "status",
+        "type": "custom",
+        "label": "Status",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ""
+        },
+        "options": [
+          { "selected": true, "text": "All", "value": "" },
+          { "selected": false, "text": "Error", "value": "error" },
+          { "selected": false, "text": "OK", "value": "unset" }
+        ],
+        "query": ",error,unset"
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "Service Overview",
+      "type": "link",
+      "icon": "external link",
+      "url": "/d/service-overview",
+      "tooltip": "RED metrics for all services"
+    },
+    {
+      "title": "Log Explorer",
+      "type": "link",
+      "icon": "external link",
+      "url": "/d/log-explorer",
+      "tooltip": "Loki log exploration"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Trace Search",
+      "description": "Search for traces by service, duration, and status. Click a trace ID to view the full waterfall.",
+      "type": "table",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Trace ID" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Trace",
+                    "url": "/explore?orgId=1&left={\"datasource\":\"tempo\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"tempo\",\"uid\":\"tempo\"},\"queryType\":\"traceql\",\"query\":\"${__data.fields[\"Trace ID\"]}\"}],\"range\":{\"from\":\"now-1h\",\"to\":\"now\"}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [{ "displayName": "Duration", "desc": true }],
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "tempo", "uid": "tempo" },
+          "queryType": "traceqlSearch",
+          "filters": [
+            {
+              "id": "service-name",
+              "tag": "service.name",
+              "operator": "=",
+              "value": ["$service"],
+              "scope": "resource"
+            },
+            {
+              "id": "min-duration",
+              "tag": "duration",
+              "operator": ">",
+              "value": ["$min_duration"]
+            },
+            {
+              "id": "status",
+              "tag": "status",
+              "operator": "=",
+              "value": ["$status"],
+              "scope": "span"
+            }
+          ],
+          "limit": 20
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Recent Slow Traces (>1s)",
+      "description": "Top 10 slowest traces in the selected time range",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Trace ID" },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "View Trace",
+                    "url": "/explore?orgId=1&left={\"datasource\":\"tempo\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"tempo\",\"uid\":\"tempo\"},\"queryType\":\"traceql\",\"query\":\"${__data.fields[\"Trace ID\"]}\"}],\"range\":{\"from\":\"now-1h\",\"to\":\"now\"}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [{ "displayName": "Duration", "desc": true }],
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "tempo", "uid": "tempo" },
+          "queryType": "traceqlSearch",
+          "filters": [
+            {
+              "id": "min-duration",
+              "tag": "duration",
+              "operator": ">",
+              "value": ["1s"]
+            }
+          ],
+          "limit": 10
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Trace-to-Logs",
+      "description": "Search logs by trace ID — paste a trace ID to find correlated log entries",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service_name=~\"newsanalyzer-.+\"} |~ \"trace\"",
+          "legendFormat": ""
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}

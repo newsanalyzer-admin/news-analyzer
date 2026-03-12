@@ -4,16 +4,9 @@
  * Client for interacting with the Java backend /api/judges endpoints.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type { Judge, JudgeStats, CourtLevel, Circuit } from '@/types/judge';
 import type { Page, PaginationParams } from '@/types/pagination';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 10000,
-});
 
 /**
  * Judge list parameters
@@ -36,7 +29,7 @@ export const judgesApi = {
    * GET /api/judges
    */
   list: async (params: JudgeListParams = {}): Promise<Page<Judge>> => {
-    const response = await api.get<Page<Judge>>('/api/judges', { params });
+    const response = await backendClient.get<Page<Judge>>('/api/judges', { params });
     return response.data;
   },
 
@@ -45,7 +38,7 @@ export const judgesApi = {
    * GET /api/judges/{id}
    */
   getById: async (id: string): Promise<Judge> => {
-    const response = await api.get<Judge>(`/api/judges/${id}`);
+    const response = await backendClient.get<Judge>(`/api/judges/${id}`);
     return response.data;
   },
 
@@ -54,7 +47,7 @@ export const judgesApi = {
    * GET /api/judges/search
    */
   search: async (q: string): Promise<Judge[]> => {
-    const response = await api.get<Judge[]>('/api/judges/search', {
+    const response = await backendClient.get<Judge[]>('/api/judges/search', {
       params: { q },
     });
     return response.data;
@@ -65,7 +58,7 @@ export const judgesApi = {
    * GET /api/judges/stats
    */
   getStats: async (): Promise<JudgeStats> => {
-    const response = await api.get<JudgeStats>('/api/judges/stats');
+    const response = await backendClient.get<JudgeStats>('/api/judges/stats');
     return response.data;
   },
 };

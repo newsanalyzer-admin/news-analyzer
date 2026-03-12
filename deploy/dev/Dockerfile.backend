@@ -13,6 +13,10 @@ COPY mvnw .
 COPY .mvn .mvn
 RUN chmod +x mvnw
 
+# Download OpenTelemetry Java agent (pinned version for reproducibility)
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.12.0/opentelemetry-javaagent.jar /opt/opentelemetry-javaagent.jar
+RUN chmod 644 /opt/opentelemetry-javaagent.jar
+
 # Expose application port and JMX port for VisualVM
 EXPOSE 8080 9010
 

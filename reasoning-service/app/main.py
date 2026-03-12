@@ -10,6 +10,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import entities, reasoning, fallacies, government_orgs
+from app.telemetry import init_telemetry, instrument_app
+
+# Initialize OTel BEFORE app creation — providers must be set
+# before FastAPI and HTTPX are instrumented (OBS-1.3)
+init_telemetry()
 
 app = FastAPI(
     title="NewsAnalyzer Reasoning Service",
@@ -27,6 +32,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Instrument FastAPI AFTER app creation and middleware setup (OBS-1.3)
+instrument_app(app)
 
 
 @app.get("/")

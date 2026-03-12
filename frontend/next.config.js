@@ -4,6 +4,24 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
 
+  // Required in Next.js 14 to load instrumentation.ts (OTel SDK init).
+  // Became stable in Next.js 15, so this flag can be removed on upgrade.
+  experimental: {
+    instrumentationHook: true,
+    // OTel packages use native gRPC bindings and Node.js-only APIs — webpack
+    // cannot bundle them. Marking them as server externals tells Next.js to
+    // require() them at runtime instead of bundling. Renamed to
+    // serverExternalPackages in Next.js 15.
+    serverComponentsExternalPackages: [
+      '@opentelemetry/sdk-node',
+      '@opentelemetry/auto-instrumentations-node',
+      '@opentelemetry/exporter-trace-otlp-grpc',
+      '@opentelemetry/exporter-metrics-otlp-grpc',
+      '@opentelemetry/resources',
+      '@opentelemetry/sdk-metrics',
+    ],
+  },
+
   // Image optimization configuration
   images: {
     remotePatterns: [
@@ -154,6 +172,25 @@ const nextConfig = {
   // Optimization
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Belt-and-suspenders: explicitly exclude OTel packages from webpack bundling.
+  // serverComponentsExternalPackages (above) handles Server Components, but
+  // instrumentation.ts is compiled via a separate webpack pass in Next.js 14.x
+  // that may not honour that config. This webpack hook covers both cases.
+  webpack(config, { isServer }) {
+    if (isServer) {
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : [config.externals]),
+        '@opentelemetry/sdk-node',
+        '@opentelemetry/auto-instrumentations-node',
+        '@opentelemetry/exporter-trace-otlp-grpc',
+        '@opentelemetry/exporter-metrics-otlp-grpc',
+        '@opentelemetry/resources',
+        '@opentelemetry/sdk-metrics',
+      ];
+    }
+    return config;
   },
 }
 

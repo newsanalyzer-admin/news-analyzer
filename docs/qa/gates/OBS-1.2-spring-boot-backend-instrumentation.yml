@@ -1,0 +1,62 @@
+schema: 1
+story: 'OBS-1.2'
+story_title: 'Spring Boot Backend Instrumentation'
+gate: PASS
+status_reason: 'All 11 ACs met with verification evidence. Zero application code changes — config-only auto-instrumentation. OTel agent v2.12.0 confirmed active with all 3 telemetry signals flowing.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-03-10T02:50:00-07:00'
+
+top_issues:
+  - id: 1
+    severity: info
+    title: 'Two production-capable Dockerfiles need to stay in sync'
+    description: 'backend/Dockerfile (used by CI) and backend/Dockerfile.prod (multi-stage) both include OTel agent. Updating agent version requires touching both files. Pre-existing debt, not introduced by this story.'
+    refs: ['backend/Dockerfile', 'backend/Dockerfile.prod']
+    suggested_owner: dev
+  - id: 2
+    severity: info
+    title: 'Monitor OTEL_LOGS_EXPORTER=otlp volume in production'
+    description: 'All Logback logs exported via OTLP in addition to file/console output. Could be chatty under high traffic. Consider setting to none and relying on Loki direct collection if volume becomes an issue.'
+    refs: ['deploy/production/docker-compose.yml']
+    suggested_owner: dev
+
+waiver: { active: false }
+
+quality_score: 100  # No FAILs, no CONCERNS — clean pass
+
+expires: '2026-03-24T02:50:00-07:00'
+
+evidence:
+  tests_reviewed: 0  # Infrastructure/config story — manual Docker Compose verification per story Testing section
+  risks_identified: 0
+  verification_evidence:
+    - 'OTel agent startup: [otel.javaagent] opentelemetry-javaagent - version: 2.12.0'
+    - 'Trace IDs in logs: [trace=57dbbce751b3061e1c661eef88a744fd span=194d2f994f25c302]'
+    - 'Collector received: TracesExporter (4 spans), MetricsExporter (26 metrics), LogsExporter (log records)'
+    - '/actuator/health returns {"status":"UP"}'
+    - '/actuator/prometheus returns Prometheus-format metrics'
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No sensitive data in OTEL_* env vars. Agent JAR from official GitHub releases over HTTPS. Read-only permissions (644). No new ports exposed.'
+  performance:
+    status: PASS
+    notes: 'OTel agent ~5-10% overhead mitigated by 10% sampling in prod. OTEL_LOGS_EXPORTER=otlp adds log export overhead — monitor in production.'
+  reliability:
+    status: PASS
+    notes: 'depends_on otel-collector (service_started) in dev, list-style in prod. Agent gracefully handles collector unavailability with buffering and retry. Dev healthcheck start_period tight for cold builds (cosmetic, not production issue).'
+  maintainability:
+    status: PASS
+    notes: 'All config externalized via env vars. Agent version pinned (v2.12.0) for reproducibility. Clear comments on JMX_OPTS + javaagent pattern. Two Dockerfiles need sync — pre-existing debt.'
+
+recommendations:
+  immediate: []  # No blocking issues
+  future:
+    - action: 'Consider consolidating backend/Dockerfile and backend/Dockerfile.prod into single multi-stage Dockerfile'
+      refs: ['backend/Dockerfile', 'backend/Dockerfile.prod']
+    - action: 'Monitor OTEL_LOGS_EXPORTER=otlp log volume in production; consider switching to none if chatty'
+      refs: ['deploy/production/docker-compose.yml']

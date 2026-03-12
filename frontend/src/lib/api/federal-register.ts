@@ -4,7 +4,7 @@
  * Client for searching and importing Federal Register documents via the backend proxy.
  */
 
-import axios from 'axios';
+import { backendClient } from './client';
 import type {
   FederalRegisterSearchParams,
   FederalRegisterSearchResponse,
@@ -14,12 +14,8 @@ import type {
   FederalRegisterImportResult,
 } from '@/types/federal-register';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: BACKEND_URL,
-  timeout: 30000,
-});
+// External API proxy calls can be slow — override the default 10s client timeout
+const SLOW_TIMEOUT = { timeout: 30000 };
 
 /**
  * Federal Register API client
@@ -32,9 +28,10 @@ export const federalRegisterApi = {
   searchDocuments: async (
     params: FederalRegisterSearchParams
   ): Promise<FederalRegisterSearchResponse> => {
-    const response = await api.get<FederalRegisterSearchResponse>(
+    const response = await backendClient.get<FederalRegisterSearchResponse>(
       '/api/admin/search/federal-register/documents',
       {
+        ...SLOW_TIMEOUT,
         params: {
           keyword: params.keyword || undefined,
           agencyId: params.agencyId || undefined,
@@ -54,8 +51,9 @@ export const federalRegisterApi = {
    * GET /api/admin/search/federal-register/documents/{documentNumber}
    */
   getDocumentDetail: async (documentNumber: string): Promise<FederalRegisterDocumentDetail> => {
-    const response = await api.get<FederalRegisterDocumentDetail>(
-      `/api/admin/search/federal-register/documents/${encodeURIComponent(documentNumber)}`
+    const response = await backendClient.get<FederalRegisterDocumentDetail>(
+      `/api/admin/search/federal-register/documents/${encodeURIComponent(documentNumber)}`,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -65,8 +63,9 @@ export const federalRegisterApi = {
    * GET /api/admin/search/federal-register/agencies
    */
   getAgencies: async (): Promise<FederalRegisterAgency[]> => {
-    const response = await api.get<FederalRegisterAgency[]>(
-      '/api/admin/search/federal-register/agencies'
+    const response = await backendClient.get<FederalRegisterAgency[]>(
+      '/api/admin/search/federal-register/agencies',
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -78,9 +77,10 @@ export const federalRegisterApi = {
   importDocument: async (
     request: FederalRegisterImportRequest
   ): Promise<FederalRegisterImportResult> => {
-    const response = await api.post<FederalRegisterImportResult>(
+    const response = await backendClient.post<FederalRegisterImportResult>(
       '/api/admin/import/federal-register/document',
-      request
+      request,
+      SLOW_TIMEOUT
     );
     return response.data;
   },
@@ -92,11 +92,11 @@ export const federalRegisterApi = {
   checkDocumentExists: async (
     documentNumber: string
   ): Promise<{ exists: boolean; id: string | null; title: string | null }> => {
-    const response = await api.get<{
+    const response = await backendClient.get<{
       exists: boolean;
       id: string | null;
       title: string | null;
-    }>(`/api/admin/import/federal-register/document/${encodeURIComponent(documentNumber)}/exists`);
+    }>(`/api/admin/import/federal-register/document/${encodeURIComponent(documentNumber)}/exists`, SLOW_TIMEOUT);
     return response.data;
   },
 };

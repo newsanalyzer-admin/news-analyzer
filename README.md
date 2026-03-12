@@ -138,6 +138,7 @@ constructing a verdict. The Tier 2 pathway is planned for Phase 2.
 - **Backend:** Spring Boot 3.2 (Java 17) REST API
 - **Reasoning Service:** Python FastAPI + SWI-Prolog
 - **Databases:** PostgreSQL + Redis (only 2 databases - V1 had 5!)
+- **Observability:** OpenTelemetry + Grafana (Prometheus, Loki, Tempo)
 - **Infrastructure:** Docker Compose on Hetzner Cloud
 - **CI/CD:** GitHub Actions
 
@@ -154,13 +155,15 @@ newsanalyzer-v2/
 ├── backend/              # Spring Boot Java backend (REST API)
 ├── frontend/             # Next.js TypeScript frontend
 ├── reasoning-service/    # Python FastAPI (entity extraction, Prolog)
+├── deploy/               # Docker Compose, Dockerfiles, observability config
+│   ├── dev/              # Local development (hot reload)
+│   ├── production/       # Hetzner Cloud deployment + nginx
+│   └── observability/    # OTel Collector, Prometheus, Loki, Tempo, Grafana dashboards
 ├── docs/                 # Architecture & documentation
-│   ├── architecture.md                      # Complete architecture
-│   └── newsanalyzer-brownfield-analysis.md  # V1 failure analysis
-├── nginx/                # Nginx reverse proxy config
+│   ├── architecture/     # Tech stack, source tree, coding standards
+│   └── stories/          # Epics & user stories (BMAD framework)
 ├── .github/workflows/    # CI/CD pipelines
-├── docker-compose.yml    # Local development
-└── docker-compose.prod.yml  # Production deployment
+└── docker-compose.dev.yml  # Infra-only dev stack (Postgres + Redis + Observability)
 ```
 
 ---
@@ -186,11 +189,13 @@ git clone https://github.com/newsanalyzer-admin/news-analyzer.git
 cd news-analyzer
 ```
 
-### 2. Start Databases
+### 2. Start Infrastructure
 
 ```bash
-docker-compose -f docker-compose.dev.yml up -d postgres redis
+docker compose -f docker-compose.dev.yml up -d
 ```
+
+This starts PostgreSQL, Redis, and the full observability stack (OTel Collector, Prometheus, Loki, Tempo, Grafana). Grafana is available at [http://localhost:3001](http://localhost:3001) with pre-provisioned dashboards.
 
 ### 3. Run Backend
 
@@ -304,7 +309,7 @@ sources (Phase 1, Phase 3) before Tier 2 enrichment sources (Phase 2)
 — ensuring the factual foundation is solid before adding contextual 
 enrichment.
 
-**Current Phase:** Phase 3 Complete - OWL Reasoning ✅
+**Current Phase:** Observability Complete - OBS-1 ✅
 
 ### ✅ Phase 1: Schema.org Foundation (COMPLETE)
 - ✅ PostgreSQL schema with JSONB support
@@ -323,6 +328,16 @@ enrichment.
   what is explicitly stated
 - ✅ Consistency validation with cardinality constraints
 - ✅ SPARQL query support for complex entity relationships
+
+### ✅ OBS-1: Full-Stack Observability (COMPLETE)
+- ✅ OpenTelemetry Collector + Grafana LGTM stack (Prometheus, Loki, Tempo)
+- ✅ Spring Boot auto-instrumentation (OTel Java Agent + Micrometer/Actuator)
+- ✅ FastAPI auto-instrumentation (OTel Python SDK)
+- ✅ Next.js server-side traces + client-side Core Web Vitals (LCP, CLS, INP)
+- ✅ Distributed tracing across all 3 services with W3C Trace Context
+- ✅ Log-to-trace correlation (click trace ID in Loki → opens trace in Tempo)
+- ✅ 6 pre-provisioned Grafana dashboards (Service Overview, Backend JVM, Reasoning Service, Distributed Traces, Log Explorer, Home)
+- ✅ Production-ready with configurable sampling rates
 
 ### 🚧 Phase 2: Schema.org Enrichment (NEXT)
 - Entity library and persistence
@@ -358,6 +373,7 @@ Open source for transparency and community benefit.
 | **Python Service** | FastAPI + SWI-Prolog | 0.109+ |
 | **Database** | PostgreSQL | 15+ |
 | **Cache** | Redis | 7+ |
+| **Observability** | OpenTelemetry, Grafana, Prometheus, Loki, Tempo | latest |
 | **Hosting** | Hetzner Cloud (Germany) | - |
 | **CI/CD** | GitHub Actions | - |
 

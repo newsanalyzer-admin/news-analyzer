@@ -1,6 +1,6 @@
 # NewsAnalyzer v2 - Source Tree
 
-**Last Updated:** 2025-12-28
+**Last Updated:** 2026-03-11
 **Version:** 2.0.0-SNAPSHOT
 
 ---
@@ -121,9 +121,14 @@ frontend/
 ├── public/                         # Static assets
 │
 ├── src/
+│   ├── instrumentation.ts          # OTel server-side init (Next.js hook) (OBS-1.4)
+│   │
 │   ├── app/                        # Next.js App Router pages
-│   │   ├── layout.tsx              # Root layout
+│   │   ├── layout.tsx              # Root layout (includes WebVitalsReporter)
 │   │   ├── page.tsx                # Home page (hero)
+│   │   ├── api/
+│   │   │   └── vitals/
+│   │   │       └── route.ts        # Web Vitals → OTel Collector proxy (OBS-1.4)
 │   │   │
 │   │   ├── knowledge-base/         # Knowledge Explorer (Epic UI-2)
 │   │   │   ├── layout.tsx          # KnowledgeExplorer shell
@@ -142,6 +147,7 @@ frontend/
 │   │   └── committees/             # Committees
 │   │
 │   ├── components/
+│   │   ├── WebVitalsReporter.tsx    # Client-side Core Web Vitals (LCP, CLS, INP) (OBS-1.4)
 │   │   ├── knowledge-base/         # Knowledge Explorer components
 │   │   │   ├── KnowledgeExplorer.tsx  # Main layout shell
 │   │   │   ├── EntityTypeSelector.tsx # Entity type tabs
@@ -178,10 +184,15 @@ frontend/
 │   │   │   └── peopleConfig.ts     # People subtype configs (judges, members, appointees)
 │   │   │
 │   │   └── api/                    # API clients
+│   │       ├── client.ts           # Shared Axios clients with trace propagation (OBS-1.4)
 │   │       ├── entities.ts
 │   │       ├── judges.ts
 │   │       ├── members.ts
-│   │       └── appointees.ts
+│   │       ├── appointees.ts
+│   │       ├── committees.ts
+│   │       ├── federal-register.ts
+│   │       ├── legislators-search.ts
+│   │       └── congress-search.ts
 │   │
 │   ├── hooks/                      # React Query hooks
 │   │   ├── useGovernmentOrgs.ts    # Organization data hooks
@@ -238,6 +249,7 @@ reasoning-service/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py                     # FastAPI application entry
+│   ├── telemetry.py                # OTel SDK initialization (OBS-1.3)
 │   │
 │   ├── api/                        # REST endpoints
 │   │   ├── __init__.py
@@ -505,20 +517,40 @@ deploy/
 │   ├── Dockerfile.backend              # JDK + Maven + JMX for VisualVM
 │   ├── Dockerfile.frontend             # Node dev server with HMR
 │   └── Dockerfile.reasoning            # Python + spaCy + Prolog, uvicorn --reload
-└── production/                          # Hetzner Cloud deployment
-    ├── docker-compose.yml              # Production (pulls GHCR images)
-    ├── docker-compose.build.yml        # Production (builds from source on server)
-    └── nginx/                          # Nginx reverse proxy config
-        ├── nginx.conf
-        └── conf.d/newsanalyzer.conf
+├── production/                          # Hetzner Cloud deployment
+│   ├── docker-compose.yml              # Production (pulls GHCR images)
+│   ├── docker-compose.build.yml        # Production (builds from source on server)
+│   └── nginx/                          # Nginx reverse proxy config
+│       ├── nginx.conf
+│       └── conf.d/newsanalyzer.conf
+└── observability/                       # Observability stack config (OBS-1)
+    ├── otel-collector-config.yml        # OTel Collector pipeline (receivers → exporters)
+    ├── prometheus.yml                   # Prometheus scrape config
+    ├── loki-config.yml                  # Loki storage & retention config
+    ├── tempo-config.yml                 # Tempo trace storage config
+    └── grafana/
+        ├── dashboards/                  # Pre-provisioned Grafana dashboards
+        │   ├── home.json               # Landing page with health + navigation
+        │   ├── service-overview.json    # RED metrics for all 3 services
+        │   ├── backend-jvm.json         # JVM heap, GC, threads, HikariCP
+        │   ├── reasoning-service.json   # Python runtime, request metrics
+        │   ├── distributed-traces.json  # Tempo trace search with filters
+        │   └── log-explorer.json        # Loki logs with trace correlation
+        └── provisioning/
+            ├── datasources/
+            │   └── datasources.yml      # Prometheus, Loki, Tempo data sources
+            └── dashboards/
+                └── dashboards.yml       # Dashboard auto-loading provider
 ```
 
 | Compose File | Purpose | Usage |
 |---|---|---|
-| `docker-compose.dev.yml` (root) | Infra-only dev (Postgres + Redis) | `docker compose up` |
-| `deploy/dev/docker-compose.yml` | Full stack local dev with hot reload | `docker compose -f deploy/dev/docker-compose.yml up --build` |
-| `deploy/production/docker-compose.yml` | Production on Hetzner (GHCR images) | `docker compose -f deploy/production/docker-compose.yml up -d` |
+| `docker-compose.dev.yml` (root) | Infra-only dev (Postgres + Redis + Observability) | `docker compose up` |
+| `deploy/dev/docker-compose.yml` | Full stack local dev with hot reload + observability | `docker compose -f deploy/dev/docker-compose.yml up --build` |
+| `deploy/production/docker-compose.yml` | Production on Hetzner (GHCR images + observability) | `docker compose -f deploy/production/docker-compose.yml up -d` |
 | `deploy/production/docker-compose.build.yml` | Production (builds from source) | `docker compose -f deploy/production/docker-compose.build.yml up -d` |
+
+All three active Compose files include the observability stack (OTel Collector, Prometheus, Loki, Tempo, Grafana) with pre-provisioned dashboards. Config files live in `deploy/observability/`.
 
 ---
 
@@ -544,7 +576,7 @@ AIProject2/
 | `frontend/` | User interface, client-side state | TypeScript |
 | `reasoning-service/` | NLP, OWL reasoning, enrichment | Python 3.11 |
 | `api-tests/` | API integration tests (REST Assured) | Java 17 |
-| `deploy/` | Docker Compose files and Dockerfiles (dev + production) | YAML/Dockerfile |
+| `deploy/` | Docker Compose files, Dockerfiles, and observability config | YAML/Dockerfile/JSON |
 | `docs/` | All project documentation | Markdown |
 | `.bmad-core/` | BMAD methodology framework | YAML/Markdown |
 | `.claude/` | Claude Code agent commands | Markdown |
