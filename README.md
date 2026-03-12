@@ -9,6 +9,22 @@
 
 ---
 
+## About This Project
+
+NewsAnalyzer is both a genuine civic technology project and a 
+demonstration of quality engineering practices across a polyglot 
+AI application stack.
+
+The engineering decisions documented here — structured data modeling 
+for bias mitigation, OWL-based semantic reasoning, modular monolith 
+architecture, production observability — reflect real tradeoffs made 
+for real reasons, documented in the 
+[brownfield analysis](docs/newsanalyzer-brownfield-analysis.md).
+
+Built by [Steve Kosuth-Wood](https://www.linkedin.com/in/steve-kosuth-wood-532a909/)
+
+---
+
 ## 🌍 Mission: Transparency & Independence
 
 NewsAnalyzer v2 is built with **transparency** and **independence** as core principles:
@@ -22,6 +38,7 @@ For a news analysis platform, independence from major tech companies ensures unb
 
 ---
 
+
 ## 🎯 What It Does
 
 NewsAnalyzer extracts and analyzes entities from news articles with Schema.org support:
@@ -32,6 +49,84 @@ NewsAnalyzer extracts and analyzes entities from news articles with Schema.org s
 - **🎨 Interactive Visualization** - Real-time entity display with filtering (Phase 1 ✅)
 - **🧠 OWL Reasoning** - Semantic inference and entity classification (Phase 3 ✅)
 - **🔗 External Linking** - Wikidata, DBpedia integration (Phase 2 - Coming Soon)
+
+---
+
+
+## Why Structured Data — The Bias Problem
+
+Most AI fact-checking approaches make the same architectural mistake: 
+ingest reference documents as vectors and let the LLM reason over 
+retrieved text chunks.
+
+The problem: LLMs don't neutrally extract facts from documents. They 
+pattern-match on text, inheriting whatever framing and implicit bias 
+exists in how source material was written. An AI reasoning over a 
+government document written by a policy supporter will "see" that 
+policy differently than if the same facts had been written by a critic.
+
+NewsAnalyzer addresses this by forcing all reference data through 
+explicit structured data models before the AI layer touches it. A 
+senator's voting record isn't stored as a document — it's structured 
+objects with defined fields. The AI works with facts, not text.
+
+This design decision came directly from applying experimental psychology 
+methodology to AI system design: controlled measurement requires 
+isolating variables. Unstructured text is an uncontrolled variable.
+
+The tradeoff: every new data source requires explicit data modeling. 
+There are no shortcuts that maintain evaluation integrity. This is a 
+deliberate choice of reliability over development velocity.
+
+---
+
+## Data Source Hierarchy
+
+NewsAnalyzer distinguishes between two categories of reference data, 
+and treats them differently in analysis:
+
+### Tier 1: Official Sources (Factual Ground Truth)
+Primary government sources used as the authoritative basis for 
+factual accuracy verdicts. When NewsAnalyzer flags a claim as 
+inaccurate, it is because an official source directly contradicts it.
+
+| Source | Data | Authority |
+|--------|------|-----------|
+| congress.gov | Bills, votes, legislative activity | U.S. Congress |
+| house.gov / senate.gov | Member records, committees | U.S. Legislature |
+| govinfo.gov | Authenticated federal documents | GPO |
+| BLS | Employment, inflation, wage data | Dept. of Labor |
+| BEA | GDP, economic indicators | Dept. of Commerce |
+| FEC | Campaign finance records | Fed. Election Commission |
+
+
+### Tier 2: Enrichment Sources (Planned — Phase 2)
+Designed but not yet implemented. Will provide entity enrichment 
+and contextual relationships — useful for understanding connections 
+between entities, but explicitly not used as the basis for factual 
+accuracy verdicts.
+
+When implemented, analysis outputs drawing on Tier 2 sources will 
+be flagged differently from Tier 1-grounded verdicts, preserving 
+the distinction between authoritative fact and contextual inference.
+
+| Source | Data | Limitation |
+|--------|------|------------|
+| Wikidata | Entity relationships, identifiers | Community-maintained |
+| DBpedia | Structured Wikipedia data | Derivative of Wikipedia |
+
+### Why This Matters
+
+A system that treats Wikidata and an official congressional 
+voting record as equivalent reference sources will produce 
+analysis that sounds authoritative but isn't. The accuracy 
+of a factual verdict is only as good as the authority of 
+its source.
+
+This hierarchy is enforced architecturally — Tier 1 and Tier 2 
+data are designed to flow through separate pathways so the analysis 
+layer always knows the authority level of any fact before 
+constructing a verdict. The Tier 2 pathway is planned for Phase 2.
 
 ---
 
@@ -71,6 +166,10 @@ newsanalyzer-v2/
 ---
 
 ## 🚀 Quick Start
+
+> **Live Demo:** [newsanalyzer.org](http://newsanalyzer.org) — 
+> running on Hetzner Cloud, Germany
+- Note: Live Demo may be behind current code boase.
 
 ### Prerequisites
 
@@ -197,6 +296,14 @@ We welcome contributions! Here's how:
 
 ## 📊 Project Status
 
+> **Live Demo:** [newsanalyzer.org](http://newsanalyzer.org) — 
+> running on Hetzner Cloud, Germany
+
+**Development is sequenced by source reliability:** Tier 1 official 
+sources (Phase 1, Phase 3) before Tier 2 enrichment sources (Phase 2) 
+— ensuring the factual foundation is solid before adding contextual 
+enrichment.
+
 **Current Phase:** Phase 3 Complete - OWL Reasoning ✅
 
 ### ✅ Phase 1: Schema.org Foundation (COMPLETE)
@@ -210,12 +317,12 @@ We welcome contributions! Here's how:
 
 ### ✅ Phase 3: OWL Reasoning (COMPLETE)
 - ✅ Custom NewsAnalyzer ontology (7 classes, 10 properties)
-- ✅ RDFLib + OWL-RL reasoner integration
-- ✅ Automated entity classification via inference rules
+- ✅ SWI-Prolog integration for formal logical inference
+- ✅ Automated entity classification via ontology-based inference rules
+  — entities classified by what can be *inferred* about them, not just 
+  what is explicitly stated
 - ✅ Consistency validation with cardinality constraints
-- ✅ SPARQL query support for complex relationships
-- ✅ API endpoints: /entities/reason, /ontology/stats, /query/sparql
-- ✅ Comprehensive unit tests
+- ✅ SPARQL query support for complex entity relationships
 
 ### 🚧 Phase 2: Schema.org Enrichment (NEXT)
 - Entity library and persistence
@@ -259,15 +366,42 @@ Open source for transparency and community benefit.
 ## 🎓 Learning from V1
 
 NewsAnalyzer v2 is a **greenfield rewrite** that fixes critical V1 mistakes:
+## Learning From V1: The Brownfield Analysis
 
-| V1 Mistake | V2 Solution | Improvement |
-|------------|-------------|-------------|
-| 5 databases (PG, Neo4j, Mongo, Redis, ES) | 2 databases (PG, Redis) | ✅ 60% reduction |
-| Government-entity-first model | Unified entity model | ✅ Flexible, extensible |
-| Java subprocess → Python (500ms) | HTTP API (50ms) | ✅ 10x faster |
-| AWS consideration | Hetzner (Germany) | ✅ Independent |
+NewsAnalyzer v2 is a complete greenfield rewrite of a failed 
+first attempt. Rather than quietly discarding v1, the failure 
+was systematically documented in a 
+[full brownfield analysis](docs/analysis/newsanalyzer-brownfield-analysis.md )
+that drove every significant architectural decision in v2.
 
-See [brownfield analysis](docs/newsanalyzer-brownfield-analysis.md) for full details.
+The core lesson:
+
+> *"Design your data model for the BROADEST set of information 
+> sources from day one, not the first source you implement."*
+
+The fatal flaw in v1 was treating government entities as 
+architecturally special — building separate database schemas, 
+service layers, and models for each entity type — rather than 
+recognizing that a senator, a corporation, and a geographic 
+location are all just *entities with different properties*. 
+This decision made the system increasingly rigid as requirements 
+evolved, eventually making the ontology and reasoning 
+requirements impossible to retrofit without a complete rewrite.
+
+| V1 Mistake | Root Cause | V2 Solution |
+|---|---|---|
+| 5 databases (PG, Neo4j, Mongo, Redis, ES) | Premature optimization for use cases that never materialized | PostgreSQL + Redis only |
+| Separate models per entity type | Government-entity-first thinking | Unified JSONB entity model |
+| Java → Python via subprocess (500ms) | Integration designed as afterthought | HTTP API (50ms, 10x faster) |
+| Late ontology discovery | Requirements discovered after architecture locked | Schema.org designed in from day one |
+| Unstructured document ingestion | Standard RAG approach | Structured data models — prevents LLM bias contamination |
+
+The last row is the one not present in most architectural 
+post-mortems: discovering that the standard approach to AI 
+knowledge bases produces evaluations contaminated by source 
+document framing — and that structured data modeling is the 
+correct mitigation.
+
 
 ---
 
