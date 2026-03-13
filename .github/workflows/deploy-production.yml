@@ -109,6 +109,13 @@ jobs:
             echo "=== Removing leftover containers ==="
             docker rm -f newsanalyzer-postgres newsanalyzer-redis newsanalyzer-backend newsanalyzer-frontend newsanalyzer-reasoning-service newsanalyzer-nginx newsanalyzer-certbot newsanalyzer-otel-collector newsanalyzer-prometheus newsanalyzer-loki newsanalyzer-tempo newsanalyzer-grafana 2>/dev/null || true
 
+            echo "=== Ensuring data directory permissions ==="
+            mkdir -p /mnt/HC_Volume_1/{prometheus,loki,tempo,grafana}
+            chown -R 65534:65534 /mnt/HC_Volume_1/prometheus
+            chown -R 10001:10001 /mnt/HC_Volume_1/loki
+            chown -R 10001:10001 /mnt/HC_Volume_1/tempo
+            chown -R 472:472 /mnt/HC_Volume_1/grafana
+
             echo "=== Pulling latest images ==="
             docker compose --env-file .env -f deploy/production/docker-compose.yml pull
 
