@@ -8,8 +8,8 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { context, propagation } from '@opentelemetry/api';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-const REASONING_URL = process.env.NEXT_PUBLIC_REASONING_SERVICE_URL || 'http://localhost:8001';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+const REASONING_URL = process.env.NEXT_PUBLIC_REASONING_SERVICE_URL || '';
 
 /**
  * Injects trace context headers into outbound requests.

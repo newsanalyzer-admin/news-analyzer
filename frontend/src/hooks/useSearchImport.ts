@@ -13,7 +13,7 @@ import type {
   FilterValues,
 } from '@/types/search-import';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Query key factory for search imports

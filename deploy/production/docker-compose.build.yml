@@ -70,8 +70,8 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_BACKEND_URL=/api
-      - NEXT_PUBLIC_REASONING_SERVICE_URL=/api/reasoning
+      # Server-side rewrite target — used by next.config.js rewrites() at runtime
+      - BACKEND_INTERNAL_URL=http://backend:8080
     depends_on:
       - backend
     networks:

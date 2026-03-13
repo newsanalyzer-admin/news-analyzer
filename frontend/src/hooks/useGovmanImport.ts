@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GovmanImportResult, GovmanImportStatus } from '@/types/govman';
 import { govOrgKeys } from './useGovernmentOrgs';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Query key factory for GOVMAN import operations

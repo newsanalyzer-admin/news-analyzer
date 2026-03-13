@@ -35,7 +35,7 @@ export default function UsCodePage() {
   const [error, setError] = useState<string | null>(null);
   const [expandedTitle, setExpandedTitle] = useState<number | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
   const fetchTitles = useCallback(async () => {
     try {

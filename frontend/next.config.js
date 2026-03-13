@@ -134,14 +134,15 @@ const nextConfig = {
     ]
   },
 
-  // API proxy configuration for development
+  // API proxy — server-side only, so use BACKEND_INTERNAL_URL (not NEXT_PUBLIC_).
+  // In production Docker, set BACKEND_INTERNAL_URL=http://backend:8080.
+  // In local dev, defaults to http://localhost:8080.
   async rewrites() {
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || 'http://localhost:8080';
     return [
       {
         source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`
-          : 'http://localhost:8080/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ]
   },

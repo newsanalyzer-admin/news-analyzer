@@ -66,7 +66,8 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=/api
+      # Server-side rewrite target — used by next.config.js rewrites() at runtime
+      - BACKEND_INTERNAL_URL=http://backend:8080
       # OpenTelemetry configuration (OBS-1.4)
       - OTEL_SERVICE_NAME=newsanalyzer-frontend
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317

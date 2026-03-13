@@ -14,7 +14,7 @@ import type {
 } from '@/types/government-org';
 import type { SyncJobStatus } from '@/types/sync';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Query params for paginated list
