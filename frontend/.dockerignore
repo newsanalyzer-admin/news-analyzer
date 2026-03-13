@@ -1,0 +1,9 @@
+node_modules
+.next
+coverage
+vitest.config.ts
+src/test
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
