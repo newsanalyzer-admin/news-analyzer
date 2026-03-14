@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class StatuteController {
 
     private final StatuteRepository statuteRepository;

@@ -37,7 +37,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class PresidencyController {
 
     private final PresidencyService presidencyService;

@@ -42,7 +42,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RestController
 @RequestMapping("/api/admin/import/statutes")
 @Tag(name = "US Code Import", description = "US Code XML file upload and import operations")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class StatuteImportController {
 
     private static final Logger log = LoggerFactory.getLogger(StatuteImportController.class);

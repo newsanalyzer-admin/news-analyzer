@@ -47,7 +47,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Government Organizations", description = "Manage US Government organizational structure")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class GovernmentOrganizationController {
 
     private final GovernmentOrganizationService service;

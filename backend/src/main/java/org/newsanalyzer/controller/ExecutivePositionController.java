@@ -32,7 +32,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/positions/executive")
 @Tag(name = "Executive Positions", description = "Executive branch position lookup")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 @RequiredArgsConstructor
 public class ExecutivePositionController {
 

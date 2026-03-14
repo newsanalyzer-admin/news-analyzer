@@ -38,7 +38,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin/import")
 @Tag(name = "Admin Import", description = "Import data from external APIs")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class AdminImportController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminImportController.class);

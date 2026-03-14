@@ -43,7 +43,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/committees")
 @Tag(name = "Committees", description = "Congressional committee lookup")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class CommitteeController {
 
     private static final Logger log = LoggerFactory.getLogger(CommitteeController.class);

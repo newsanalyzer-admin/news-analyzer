@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/members")
 @Tag(name = "Members", description = "Congressional member lookup")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class MemberController {
 
     private static final Logger log = LoggerFactory.getLogger(MemberController.class);

@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RestController
 @RequestMapping("/api/admin/import/govman")
 @Tag(name = "GOVMAN Import", description = "Government Manual XML import operations")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class GovmanImportController {
 
     private static final Logger log = LoggerFactory.getLogger(GovmanImportController.class);

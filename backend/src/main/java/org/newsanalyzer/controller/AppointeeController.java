@@ -35,7 +35,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/appointees")
 @Tag(name = "Appointees", description = "Executive branch appointee lookup")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 @RequiredArgsConstructor
 public class AppointeeController {
 

@@ -34,7 +34,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin/search")
 @Tag(name = "Admin Search", description = "Search external APIs for data import")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class AdminSearchController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminSearchController.class);

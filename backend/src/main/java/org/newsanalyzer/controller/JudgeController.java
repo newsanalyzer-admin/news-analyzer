@@ -30,7 +30,6 @@ import java.util.UUID;
 @RequestMapping("/api/judges")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class JudgeController {
 
     private final JudgeService judgeService;

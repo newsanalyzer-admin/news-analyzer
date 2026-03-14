@@ -37,7 +37,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/sync")
 @Tag(name = "Admin Sync", description = "Administrative data synchronization operations")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class AdminSyncController {
 
     private static final Logger log = LoggerFactory.getLogger(AdminSyncController.class);

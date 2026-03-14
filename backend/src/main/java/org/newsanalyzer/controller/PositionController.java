@@ -41,7 +41,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/positions")
 @Tag(name = "Positions", description = "Congressional positions (seats)")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class PositionController {
 
     private static final Logger log = LoggerFactory.getLogger(PositionController.class);
