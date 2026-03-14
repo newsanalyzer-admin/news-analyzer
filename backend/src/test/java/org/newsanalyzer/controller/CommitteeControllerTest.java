@@ -10,6 +10,7 @@ import org.newsanalyzer.model.CommitteeChamber;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CommitteeType;
 import org.newsanalyzer.model.MembershipRole;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.service.CommitteeMembershipSyncService;
 import org.newsanalyzer.service.CommitteeService;
@@ -93,7 +94,7 @@ class CommitteeControllerTest {
         testMember.setId(UUID.randomUUID());
         testMember.setBioguideId("S000033");
         testMember.setIndividualId(UUID.randomUUID());
-        testMember.setChamber(CongressionalMember.Chamber.SENATE);
+        testMember.setChamber(Chamber.SENATE);
         testMember.setState("VT");
 
         testMembership = new CommitteeMembership();

@@ -1,6 +1,6 @@
 package org.newsanalyzer.repository;
 
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.DataSource;
 import org.newsanalyzer.model.PositionHolding;
 import org.springframework.data.domain.Page;

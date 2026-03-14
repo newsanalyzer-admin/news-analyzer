@@ -62,7 +62,7 @@ public class GovernmentPosition {
 
     @Column(name = "chamber", length = 20)
     @Enumerated(EnumType.STRING)
-    private Person.Chamber chamber;
+    private Chamber chamber;
 
     @Column(name = "state", length = 2)
     @Size(min = 2, max = 2, message = "State must be 2-letter code if provided")
@@ -154,7 +154,7 @@ public class GovernmentPosition {
      */
     public String getDisplayName() {
         if (branch == Branch.LEGISLATIVE && chamber != null) {
-            if (chamber == Person.Chamber.SENATE) {
+            if (chamber == Chamber.SENATE) {
                 return String.format("Senator from %s (Class %d)", state, senateClass);
             } else {
                 return String.format("Representative from %s-%d", state, district);
@@ -171,7 +171,7 @@ public class GovernmentPosition {
      */
     public String getShortIdentifier() {
         if (branch == Branch.LEGISLATIVE && chamber != null && state != null) {
-            if (chamber == Person.Chamber.SENATE) {
+            if (chamber == Chamber.SENATE) {
                 return String.format("%s-Sen-%d", state, senateClass);
             } else {
                 return String.format("%s-%02d", state, district);
@@ -185,14 +185,14 @@ public class GovernmentPosition {
      * Check if this is a Senate position
      */
     public boolean isSenatePosition() {
-        return branch == Branch.LEGISLATIVE && chamber == Person.Chamber.SENATE;
+        return branch == Branch.LEGISLATIVE && chamber == Chamber.SENATE;
     }
 
     /**
      * Check if this is a House position
      */
     public boolean isHousePosition() {
-        return branch == Branch.LEGISLATIVE && chamber == Person.Chamber.HOUSE;
+        return branch == Branch.LEGISLATIVE && chamber == Chamber.HOUSE;
     }
 
     /**

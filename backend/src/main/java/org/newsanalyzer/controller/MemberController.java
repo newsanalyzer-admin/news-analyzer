@@ -9,7 +9,7 @@ import org.newsanalyzer.dto.MemberDTO;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.CommitteeMembership;
 import org.newsanalyzer.model.CongressionalMember;
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.PositionHolding;
 import org.newsanalyzer.dto.SyncJobStatus;
 import org.newsanalyzer.service.CommitteeService;

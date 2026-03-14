@@ -570,7 +570,7 @@ class AdminSearchControllerTest {
                             .facebook("senatorsanders")
                             .build())
                     .externalIds(LegislatorDetailDTO.ExternalIdsInfo.builder()
-                            .govtrack(400357)
+                            .govtrack(400357L)
                             .opensecrets("N00000528")
                             .build())
                     .build();

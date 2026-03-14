@@ -179,15 +179,4 @@ public class CongressionalMember {
         return individual != null ? individual.getFullName() : null;
     }
 
-    // =====================================================================
-    // Enums
-    // =====================================================================
-
-    /**
-     * Congressional chamber
-     */
-    public enum Chamber {
-        SENATE,
-        HOUSE
-    }
 }

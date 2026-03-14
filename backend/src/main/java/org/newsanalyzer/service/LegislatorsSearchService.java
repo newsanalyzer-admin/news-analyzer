@@ -2,8 +2,8 @@ package org.newsanalyzer.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.dto.*;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,7 +29,7 @@ public class LegislatorsSearchService {
     private static final long CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
     private final LegislatorsRepoClient legislatorsRepoClient;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberRepository congressionalMemberRepository;
 
     // In-memory cache
     private List<LegislatorYamlRecord> cachedLegislators = new ArrayList<>();
@@ -37,9 +37,9 @@ public class LegislatorsSearchService {
     private final Object cacheLock = new Object();
 
     public LegislatorsSearchService(LegislatorsRepoClient legislatorsRepoClient,
-                                     PersonRepository personRepository) {
+                                     CongressionalMemberRepository congressionalMemberRepository) {
         this.legislatorsRepoClient = legislatorsRepoClient;
-        this.personRepository = personRepository;
+        this.congressionalMemberRepository = congressionalMemberRepository;
     }
 
     /**
@@ -111,7 +111,7 @@ public class LegislatorsSearchService {
                 // Check for local match
                 String localMatchId = null;
                 if (dto.getBioguideId() != null) {
-                    Optional<Person> existing = personRepository.findByBioguideId(dto.getBioguideId());
+                    Optional<CongressionalMember> existing = congressionalMemberRepository.findByBioguideId(dto.getBioguideId());
                     if (existing.isPresent()) {
                         localMatchId = existing.get().getId().toString();
                     }
@@ -153,13 +153,13 @@ public class LegislatorsSearchService {
     }
 
     /**
-     * Check if a bioguideId exists in the local Person table.
+     * Check if a bioguideId exists in the local CongressionalMember table.
      *
      * @param bioguideId The BioGuide ID to check
-     * @return Optional containing the Person if found
+     * @return Optional containing the CongressionalMember if found
      */
-    public Optional<Person> findLocalPerson(String bioguideId) {
-        return personRepository.findByBioguideId(bioguideId);
+    public Optional<CongressionalMember> findLocalMember(String bioguideId) {
+        return congressionalMemberRepository.findByBioguideId(bioguideId);
     }
 
     /**

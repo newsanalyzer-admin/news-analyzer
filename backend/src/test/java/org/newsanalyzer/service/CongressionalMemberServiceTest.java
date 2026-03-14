@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsanalyzer.model.CongressionalMember;
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.DataSource;
 import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.repository.CongressionalMemberRepository;

@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.dto.*;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.Individual;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
+import org.newsanalyzer.repository.IndividualRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,8 @@ public class LegislatorEnrichmentImportService {
 
     private final LegislatorsSearchService legislatorsSearchService;
     private final LegislatorsRepoClient legislatorsRepoClient;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberRepository congressionalMemberRepository;
+    private final IndividualRepository individualRepository;
     private final ObjectMapper objectMapper;
 
     /**
@@ -57,10 +60,10 @@ public class LegislatorEnrichmentImportService {
 
         LegislatorDetailDTO legislator = legislatorOpt.get();
 
-        // Find local Person
-        Optional<Person> personOpt = personRepository.findByBioguideId(bioguideId);
+        // Find local CongressionalMember + Individual
+        Optional<CongressionalMember> memberOpt = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
 
-        if (personOpt.isEmpty()) {
+        if (memberOpt.isEmpty()) {
             // No local match - can't enrich
             Map<String, Object> newExternalIds = buildExternalIdsMap(legislator.getExternalIds());
             Map<String, String> newSocialMedia = buildSocialMediaMap(legislator.getSocialMedia());
@@ -78,14 +81,15 @@ public class LegislatorEnrichmentImportService {
                     .build();
         }
 
-        Person person = personOpt.get();
+        CongressionalMember member = memberOpt.get();
+        Individual individual = member.getIndividual();
 
         // Calculate diff
         Map<String, Object> newExternalIds = buildExternalIdsMap(legislator.getExternalIds());
         Map<String, String> newSocialMedia = buildSocialMediaMap(legislator.getSocialMedia());
 
-        Map<String, Object> currentExternalIds = jsonNodeToMap(person.getExternalIds());
-        Map<String, Object> currentSocialMedia = jsonNodeToMap(person.getSocialMedia());
+        Map<String, Object> currentExternalIds = jsonNodeToMap(individual.getExternalIds());
+        Map<String, Object> currentSocialMedia = jsonNodeToMap(individual.getSocialMedia());
 
         List<String> fieldsToAdd = new ArrayList<>();
         List<String> fieldsToUpdate = new ArrayList<>();
@@ -114,12 +118,12 @@ public class LegislatorEnrichmentImportService {
                 .bioguideId(bioguideId)
                 .localMatch(true)
                 .currentPerson(EnrichmentPreview.PersonSnapshot.builder()
-                        .id(person.getId().toString())
-                        .name(person.getFirstName() + " " + person.getLastName())
+                        .id(individual.getId().toString())
+                        .name(individual.getFirstName() + " " + individual.getLastName())
                         .externalIds(currentExternalIds)
                         .socialMedia(currentSocialMedia)
-                        .enrichmentSource(person.getEnrichmentSource())
-                        .enrichmentVersion(person.getEnrichmentVersion())
+                        .enrichmentSource(member.getEnrichmentSource())
+                        .enrichmentVersion(member.getEnrichmentVersion())
                         .build())
                 .newData(EnrichmentPreview.EnrichmentData.builder()
                         .externalIds(newExternalIds)
@@ -132,23 +136,26 @@ public class LegislatorEnrichmentImportService {
     }
 
     /**
-     * Enrich a Person record from Legislators Repo data.
+     * Enrich a CongressionalMember + Individual from Legislators Repo data.
+     *
+     * externalIds and socialMedia are stored on Individual.
+     * enrichmentSource and enrichmentVersion are stored on CongressionalMember.
      *
      * @param bioguideId The BioGuide ID to enrich
      * @return Enrichment result
      */
     @Transactional
     public LegislatorEnrichmentResult enrichPerson(String bioguideId) {
-        log.info("Enriching person with bioguideId={}", bioguideId);
+        log.info("Enriching member with bioguideId={}", bioguideId);
 
-        // Find local Person
-        Optional<Person> personOpt = personRepository.findByBioguideId(bioguideId);
+        // Find local CongressionalMember + Individual
+        Optional<CongressionalMember> memberOpt = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
 
-        if (personOpt.isEmpty()) {
+        if (memberOpt.isEmpty()) {
             return LegislatorEnrichmentResult.builder()
                     .matched(false)
                     .bioguideId(bioguideId)
-                    .error("No local Person found with bioguideId: " + bioguideId)
+                    .error("No local CongressionalMember found with bioguideId: " + bioguideId)
                     .fieldsAdded(List.of())
                     .fieldsUpdated(List.of())
                     .totalChanges(0)
@@ -169,12 +176,13 @@ public class LegislatorEnrichmentImportService {
                     .build();
         }
 
-        Person person = personOpt.get();
+        CongressionalMember member = memberOpt.get();
+        Individual individual = member.getIndividual();
         LegislatorDetailDTO legislator = legislatorOpt.get();
 
-        // Get current values
-        Map<String, Object> currentExternalIds = jsonNodeToMap(person.getExternalIds());
-        Map<String, Object> currentSocialMedia = jsonNodeToMap(person.getSocialMedia());
+        // Get current values from Individual
+        Map<String, Object> currentExternalIds = jsonNodeToMap(individual.getExternalIds());
+        Map<String, Object> currentSocialMedia = jsonNodeToMap(individual.getSocialMedia());
 
         // Get new values
         Map<String, Object> newExternalIds = buildExternalIdsMap(legislator.getExternalIds());
@@ -183,30 +191,32 @@ public class LegislatorEnrichmentImportService {
         List<String> fieldsAdded = new ArrayList<>();
         List<String> fieldsUpdated = new ArrayList<>();
 
-        // Merge external IDs (only add, don't overwrite)
-        ObjectNode mergedExternalIds = mergeJsonNodes(person.getExternalIds(), newExternalIds, "externalIds", fieldsAdded);
-        person.setExternalIds(mergedExternalIds);
+        // Merge external IDs into Individual (only add, don't overwrite)
+        ObjectNode mergedExternalIds = mergeJsonNodes(individual.getExternalIds(), newExternalIds, "externalIds", fieldsAdded);
+        individual.setExternalIds(mergedExternalIds);
 
-        // Merge social media (only add, don't overwrite)
-        ObjectNode mergedSocialMedia = mergeJsonNodes(person.getSocialMedia(), newSocialMedia, "socialMedia", fieldsAdded);
-        person.setSocialMedia(mergedSocialMedia);
+        // Merge social media into Individual (only add, don't overwrite)
+        ObjectNode mergedSocialMedia = mergeJsonNodes(individual.getSocialMedia(), newSocialMedia, "socialMedia", fieldsAdded);
+        individual.setSocialMedia(mergedSocialMedia);
 
         // Get latest commit SHA for version tracking
         String commitSha = legislatorsRepoClient.fetchLatestCommitSha().orElse("unknown");
 
-        // Set enrichment tracking
-        person.setEnrichmentSource(ENRICHMENT_SOURCE);
-        person.setEnrichmentVersion(commitSha);
+        // Set enrichment tracking on CongressionalMember
+        member.setEnrichmentSource(ENRICHMENT_SOURCE);
+        member.setEnrichmentVersion(commitSha);
 
-        personRepository.save(person);
+        // Save both entities
+        individualRepository.save(individual);
+        congressionalMemberRepository.save(member);
 
-        log.info("Enriched person {}: added={}, updated={}",
+        log.info("Enriched member {}: added={}, updated={}",
                 bioguideId, fieldsAdded.size(), fieldsUpdated.size());
 
         return LegislatorEnrichmentResult.builder()
                 .matched(true)
-                .personId(person.getId().toString())
-                .personName(person.getFirstName() + " " + person.getLastName())
+                .personId(individual.getId().toString())
+                .personName(individual.getFirstName() + " " + individual.getLastName())
                 .bioguideId(bioguideId)
                 .fieldsAdded(fieldsAdded)
                 .fieldsUpdated(fieldsUpdated)

@@ -1,0 +1,16 @@
+schema: 1
+story: 'ARCH-1.9'
+gate: PASS
+status_reason: 'All acceptance criteria met. Person/PersonRepository fully removed, 5 services migrated, Chamber enum extracted, 765 backend + 687 frontend tests pass, manual verification complete.'
+reviewer: 'Quinn'
+updated: '2026-03-14T16:10:00Z'
+top_issues:
+  - id: 'MNT-001'
+    severity: low
+    finding: '5 test files contain comments referencing PersonRepository in migration history notes'
+    suggested_action: 'No action needed — comments document refactoring history and are informational only'
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Enrichment DTOs (EnrichmentPreview.PersonSnapshot, LegislatorEnrichmentResult.personId/personName) retain Person-era naming'
+    suggested_action: 'Consider renaming in a follow-up story for consistency, but not blocking since they are internal DTOs'
+waiver: { active: false }

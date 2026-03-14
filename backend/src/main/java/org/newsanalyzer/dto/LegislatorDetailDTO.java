@@ -106,15 +106,15 @@ public class LegislatorDetailDTO {
     public static class ExternalIdsInfo {
         private String bioguide;
         private String thomas;
-        private Integer govtrack;
+        private Long govtrack;
         private String opensecrets;
-        private Integer votesmart;
+        private Long votesmart;
         private List<String> fec;
         private String wikipedia;
         private String ballotpedia;
         private String icpsr;
         private String lis;
-        private Integer cspan;
-        private Integer houseHistory;
+        private Long cspan;
+        private Long houseHistory;
     }
 }

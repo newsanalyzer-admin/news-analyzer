@@ -8,7 +8,7 @@
 | **Epic Name** | Individual Table Refactor |
 | **Epic Type** | Architecture / Data Model |
 | **Priority** | HIGH (Foundational) |
-| **Status** | In Progress (8/9 stories Done, ARCH-1.9 remaining) |
+| **Status** | Done (9/9 stories complete, pending manual verification of ARCH-1.9) |
 | **Created** | 2026-01-08 |
 | **Owner** | Sarah (PO) |
 | **Depends On** | None (foundational change) |
@@ -262,7 +262,7 @@ public class CongressionalMember {
 | ARCH-1.6 | Update Services Layer | P1 | 5 pts | Done |
 | ARCH-1.7 | Update DTOs and Controllers | P1 | 4 pts | Done |
 | ARCH-1.8 | Update Frontend Types and Components | P1 | 1 pt (revised) | Done |
-| ARCH-1.9 | Verification and Cleanup | P2 | 2 pts | Draft |
+| ARCH-1.9 | Verification and Cleanup | P1 | 5 pts | Ready for Review |
 
 **Epic Total:** 36 story points *(revised from 32 per architect review)*
 

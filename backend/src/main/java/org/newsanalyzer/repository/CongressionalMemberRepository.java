@@ -1,5 +1,6 @@
 package org.newsanalyzer.repository;
 
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.CongressionalMember;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
      * @param chamber SENATE or HOUSE
      * @return list of members in that chamber
      */
-    List<CongressionalMember> findByChamber(CongressionalMember.Chamber chamber);
+    List<CongressionalMember> findByChamber(Chamber chamber);
 
     /**
      * Find all members by party.
@@ -103,7 +104,7 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
      * @param chamber SENATE or HOUSE
      * @return list of members matching both criteria
      */
-    List<CongressionalMember> findByStateAndChamber(String state, CongressionalMember.Chamber chamber);
+    List<CongressionalMember> findByStateAndChamber(String state, Chamber chamber);
 
     // =====================================================================
     // Paginated queries
@@ -115,7 +116,7 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
      * @param pageable pagination parameters
      * @return page of members
      */
-    Page<CongressionalMember> findByChamber(CongressionalMember.Chamber chamber, Pageable pageable);
+    Page<CongressionalMember> findByChamber(Chamber chamber, Pageable pageable);
 
     /**
      * Find all members by state with pagination.
@@ -147,7 +148,7 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
     @Query("SELECT cm FROM CongressionalMember cm " +
            "LEFT JOIN FETCH cm.individual " +
            "WHERE cm.chamber = :chamber")
-    List<CongressionalMember> findByChamberWithIndividual(@Param("chamber") CongressionalMember.Chamber chamber);
+    List<CongressionalMember> findByChamberWithIndividual(@Param("chamber") Chamber chamber);
 
     /**
      * Find all members by state with Individual eagerly loaded.
@@ -186,7 +187,7 @@ public interface CongressionalMemberRepository extends JpaRepository<Congression
      * @param chamber SENATE or HOUSE
      * @return count of members
      */
-    long countByChamber(CongressionalMember.Chamber chamber);
+    long countByChamber(Chamber chamber);
 
     /**
      * Count members by party.

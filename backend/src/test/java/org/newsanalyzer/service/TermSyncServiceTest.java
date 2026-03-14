@@ -62,12 +62,12 @@ class TermSyncServiceTest {
         testMember.setBioguideId("S000033");
         testMember.setIndividualId(UUID.randomUUID());
         testMember.setState("VT");
-        testMember.setChamber(CongressionalMember.Chamber.SENATE);
+        testMember.setChamber(Chamber.SENATE);
 
         testPosition = new GovernmentPosition();
         testPosition.setId(UUID.randomUUID());
         testPosition.setTitle("Senator");
-        testPosition.setChamber(Person.Chamber.SENATE);
+        testPosition.setChamber(Chamber.SENATE);
         testPosition.setState("VT");
         testPosition.setSenateClass(1);
         testPosition.setPositionType(PositionType.ELECTED);
@@ -99,7 +99,7 @@ class TermSyncServiceTest {
 
         when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
         when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
                 .thenReturn(Optional.empty());
@@ -150,13 +150,13 @@ class TermSyncServiceTest {
 
         GovernmentPosition housePosition = new GovernmentPosition();
         housePosition.setId(UUID.randomUUID());
-        housePosition.setChamber(Person.Chamber.HOUSE);
+        housePosition.setChamber(Chamber.HOUSE);
         housePosition.setState("VT");
         housePosition.setDistrict(0);
 
         when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndStateAndDistrict(Person.Chamber.HOUSE, "VT", 0))
+        when(positionRepository.findByChamberAndStateAndDistrict(Chamber.HOUSE, "VT", 0))
                 .thenReturn(Optional.of(housePosition));
         when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(102)))
                 .thenReturn(Optional.empty());
@@ -207,7 +207,7 @@ class TermSyncServiceTest {
 
         when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
         when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
                 .thenReturn(Optional.of(existingHolding));
@@ -262,7 +262,7 @@ class TermSyncServiceTest {
         member2.setBioguideId("P000197");
         member2.setIndividualId(UUID.randomUUID());
         member2.setState("CA");
-        member2.setChamber(CongressionalMember.Chamber.HOUSE);
+        member2.setChamber(Chamber.HOUSE);
 
         when(congressionalMemberService.findAll()).thenReturn(List.of(testMember, member2));
         when(congressionalMemberService.findByBioguideId(anyString())).thenReturn(Optional.empty());
@@ -299,7 +299,7 @@ class TermSyncServiceTest {
 
         when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
         when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(118)))
                 .thenReturn(Optional.empty());
@@ -365,7 +365,7 @@ class TermSyncServiceTest {
 
         when(congressionalMemberService.findByBioguideId("S000033")).thenReturn(Optional.of(testMember));
         when(congressApiClient.fetchMemberByBioguideId("S000033")).thenReturn(Optional.of(responseNode));
-        when(positionRepository.findByChamberAndState(Person.Chamber.SENATE, "VT"))
+        when(positionRepository.findByChamberAndState(Chamber.SENATE, "VT"))
                 .thenReturn(List.of(testPosition));
         when(holdingRepository.findByIndividualIdAndPositionIdAndCongress(any(), any(), eq(119)))
                 .thenReturn(Optional.empty());

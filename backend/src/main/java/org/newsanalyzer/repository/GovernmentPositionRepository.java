@@ -3,7 +3,7 @@ package org.newsanalyzer.repository;
 import org.newsanalyzer.model.AppointmentType;
 import org.newsanalyzer.model.Branch;
 import org.newsanalyzer.model.GovernmentPosition;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

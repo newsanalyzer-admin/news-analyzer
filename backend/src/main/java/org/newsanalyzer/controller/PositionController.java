@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.GovernmentPosition;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.PositionHolding;
 import org.newsanalyzer.repository.GovernmentPositionRepository;
 import org.newsanalyzer.repository.PositionHoldingRepository;

@@ -28,18 +28,18 @@ public class LegislatorYamlRecord {
     public static class LegislatorId {
         private String bioguide;
         private String thomas;
-        private Integer govtrack;
+        private Long govtrack;
         private String opensecrets;
-        private Integer votesmart;
+        private Long votesmart;
         private Object fec; // Can be String or List<String>
         private String wikipedia;
         private String ballotpedia;
         private String icpsr;
         private String lis;
         @JsonProperty("cspan")
-        private Integer cspan;
+        private Long cspan;
         @JsonProperty("house_history")
-        private Integer houseHistory;
+        private Long houseHistory;
         @JsonProperty("bioguide_previous")
         private List<String> bioguidesPrevious;
 

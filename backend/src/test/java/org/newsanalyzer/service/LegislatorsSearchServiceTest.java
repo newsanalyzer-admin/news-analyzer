@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsanalyzer.dto.*;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,13 +31,13 @@ class LegislatorsSearchServiceTest {
     private LegislatorsRepoClient legislatorsRepoClient;
 
     @Mock
-    private PersonRepository personRepository;
+    private CongressionalMemberRepository congressionalMemberRepository;
 
     private LegislatorsSearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchService = new LegislatorsSearchService(legislatorsRepoClient, personRepository);
+        searchService = new LegislatorsSearchService(legislatorsRepoClient, congressionalMemberRepository);
     }
 
     // =================================================================
@@ -234,38 +234,38 @@ class LegislatorsSearchServiceTest {
     // =================================================================
 
     @Test
-    @DisplayName("Should detect local match when Person exists")
-    void searchLegislators_personExists_setsLocalMatchId() {
+    @DisplayName("Should detect local match when CongressionalMember exists")
+    void searchLegislators_memberExists_setsLocalMatchId() {
         // Given
-        UUID personId = UUID.randomUUID();
-        Person existingPerson = new Person();
-        existingPerson.setId(personId);
-        existingPerson.setBioguideId("S000033");
+        UUID memberId = UUID.randomUUID();
+        CongressionalMember existingMember = new CongressionalMember();
+        existingMember.setId(memberId);
+        existingMember.setBioguideId("S000033");
 
         List<LegislatorYamlRecord> legislators = List.of(
                 createTestRecord("S000033", "Bernard", "Sanders", "VT", "Independent")
         );
         when(legislatorsRepoClient.fetchCurrentLegislators()).thenReturn(legislators);
         when(legislatorsRepoClient.fetchHistoricalLegislators()).thenReturn(List.of());
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(existingPerson));
+        when(congressionalMemberRepository.findByBioguideId("S000033")).thenReturn(Optional.of(existingMember));
 
         // When
         var response = searchService.searchLegislators(null, null, null, 1, 20);
 
         // Then
-        assertThat(response.getResults().get(0).getLocalMatchId()).isEqualTo(personId.toString());
+        assertThat(response.getResults().get(0).getLocalMatchId()).isEqualTo(memberId.toString());
     }
 
     @Test
-    @DisplayName("Should not set localMatchId when Person does not exist")
-    void searchLegislators_personNotExists_localMatchIdNull() {
+    @DisplayName("Should not set localMatchId when CongressionalMember does not exist")
+    void searchLegislators_memberNotExists_localMatchIdNull() {
         // Given
         List<LegislatorYamlRecord> legislators = List.of(
                 createTestRecord("S000033", "Bernard", "Sanders", "VT", "Independent")
         );
         when(legislatorsRepoClient.fetchCurrentLegislators()).thenReturn(legislators);
         when(legislatorsRepoClient.fetchHistoricalLegislators()).thenReturn(List.of());
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
+        when(congressionalMemberRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
 
         // When
         var response = searchService.searchLegislators(null, null, null, 1, 20);
@@ -406,9 +406,9 @@ class LegislatorsSearchServiceTest {
     void searchLegislators_withExternalIds_countsCorrectly() {
         // Given
         LegislatorYamlRecord record = createTestRecord("S000033", "Bernard", "Sanders", "VT", "Independent");
-        record.getId().setGovtrack(400357);
+        record.getId().setGovtrack(400357L);
         record.getId().setOpensecrets("N00000528");
-        record.getId().setVotesmart(27110);
+        record.getId().setVotesmart(27110L);
 
         when(legislatorsRepoClient.fetchCurrentLegislators()).thenReturn(List.of(record));
         when(legislatorsRepoClient.fetchHistoricalLegislators()).thenReturn(List.of());

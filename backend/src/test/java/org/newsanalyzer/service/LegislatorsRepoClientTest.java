@@ -219,9 +219,9 @@ class LegislatorsRepoClientTest {
         var externalIds = records.get(0).buildExternalIdsMap();
 
         // Then
-        assertThat(externalIds).containsEntry("govtrack", 400357);
+        assertThat(externalIds).containsEntry("govtrack", 400357L);
         assertThat(externalIds).containsEntry("opensecrets", "N00000528");
-        assertThat(externalIds).containsEntry("votesmart", 27110);
+        assertThat(externalIds).containsEntry("votesmart", 27110L);
         assertThat(externalIds).containsEntry("wikipedia", "Bernie Sanders");
         assertThat(externalIds).containsKey("fec");
     }

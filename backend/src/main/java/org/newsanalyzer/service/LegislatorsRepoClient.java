@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.newsanalyzer.config.LegislatorsConfig;
 import org.newsanalyzer.dto.LegislatorYamlRecord;
 import org.slf4j.Logger;
@@ -46,7 +47,9 @@ public class LegislatorsRepoClient {
                 .setConnectTimeout(Duration.ofMillis(config.getGithub().getTimeout()))
                 .setReadTimeout(Duration.ofMillis(config.getGithub().getTimeout()))
                 .build();
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setCodePointLimit(50 * 1024 * 1024); // 50 MB — legislators YAML files are ~10 MB
+        this.yamlMapper = new ObjectMapper(YAMLFactory.builder().loaderOptions(loaderOptions).build());
         this.yamlMapper.findAndRegisterModules();
         this.jsonMapper = jsonMapper;
     }

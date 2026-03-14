@@ -2,7 +2,7 @@ package org.newsanalyzer.service;
 
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.CongressionalMember;
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.Individual;
 import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.newsanalyzer.repository.IndividualRepository;

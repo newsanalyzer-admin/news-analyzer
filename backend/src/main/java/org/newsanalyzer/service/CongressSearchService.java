@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.newsanalyzer.dto.CongressMemberSearchDTO;
 import org.newsanalyzer.dto.CongressSearchResponse;
 import org.newsanalyzer.dto.CongressSearchResult;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,11 +33,11 @@ public class CongressSearchService {
     private static final String CONGRESS_GOV_BASE_URL = "https://www.congress.gov/member/";
 
     private final CongressApiClient congressApiClient;
-    private final PersonRepository personRepository;
+    private final CongressionalMemberRepository congressionalMemberRepository;
 
-    public CongressSearchService(CongressApiClient congressApiClient, PersonRepository personRepository) {
+    public CongressSearchService(CongressApiClient congressApiClient, CongressionalMemberRepository congressionalMemberRepository) {
         this.congressApiClient = congressApiClient;
-        this.personRepository = personRepository;
+        this.congressionalMemberRepository = congressionalMemberRepository;
     }
 
     /**
@@ -99,9 +99,9 @@ public class CongressSearchService {
                 // Check for duplicate in local database
                 String duplicateId = null;
                 if (dto.getBioguideId() != null) {
-                    Optional<Person> existingPerson = personRepository.findByBioguideId(dto.getBioguideId());
-                    if (existingPerson.isPresent()) {
-                        duplicateId = existingPerson.get().getId().toString();
+                    Optional<CongressionalMember> existingMember = congressionalMemberRepository.findByBioguideId(dto.getBioguideId());
+                    if (existingMember.isPresent()) {
+                        duplicateId = existingMember.get().getId().toString();
                     }
                 }
 

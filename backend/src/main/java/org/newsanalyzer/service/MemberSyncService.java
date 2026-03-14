@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.newsanalyzer.model.CongressionalMember;
-import org.newsanalyzer.model.CongressionalMember.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.Individual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

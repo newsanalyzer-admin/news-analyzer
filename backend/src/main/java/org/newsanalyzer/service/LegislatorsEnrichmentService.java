@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.newsanalyzer.dto.LegislatorYamlRecord;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.model.Individual;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
+import org.newsanalyzer.repository.IndividualRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,14 +32,17 @@ public class LegislatorsEnrichmentService {
     private static final Logger log = LoggerFactory.getLogger(LegislatorsEnrichmentService.class);
     private static final String ENRICHMENT_SOURCE = "LEGISLATORS_REPO";
 
-    private final PersonRepository personRepository;
+    private final CongressionalMemberRepository congressionalMemberRepository;
+    private final IndividualRepository individualRepository;
     private final LegislatorsRepoClient legislatorsRepoClient;
     private final ObjectMapper objectMapper;
 
-    public LegislatorsEnrichmentService(PersonRepository personRepository,
+    public LegislatorsEnrichmentService(CongressionalMemberRepository congressionalMemberRepository,
+                                        IndividualRepository individualRepository,
                                         LegislatorsRepoClient legislatorsRepoClient,
                                         ObjectMapper objectMapper) {
-        this.personRepository = personRepository;
+        this.congressionalMemberRepository = congressionalMemberRepository;
+        this.individualRepository = individualRepository;
         this.legislatorsRepoClient = legislatorsRepoClient;
         this.objectMapper = objectMapper;
     }
@@ -87,19 +92,21 @@ public class LegislatorsEnrichmentService {
             }
 
             try {
-                Optional<Person> personOpt = personRepository.findByBioguideId(bioguideId);
-                if (personOpt.isPresent()) {
-                    Person person = personOpt.get();
-                    enrichPerson(person, record, commitSha);
-                    personRepository.save(person);
+                Optional<CongressionalMember> memberOpt = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
+                if (memberOpt.isPresent()) {
+                    CongressionalMember member = memberOpt.get();
+                    Individual individual = member.getIndividual();
+                    enrichMember(member, individual, record, commitSha);
+                    individualRepository.save(individual);
+                    congressionalMemberRepository.save(member);
                     matched++;
                 } else {
                     notFound++;
-                    log.debug("No matching Person for bioguideId: {}", bioguideId);
+                    log.debug("No matching CongressionalMember for bioguideId: {}", bioguideId);
                 }
             } catch (Exception e) {
                 errors++;
-                log.error("Error enriching person {}: {}", bioguideId, e.getMessage());
+                log.error("Error enriching member {}: {}", bioguideId, e.getMessage());
             }
         }
 
@@ -109,27 +116,28 @@ public class LegislatorsEnrichmentService {
     }
 
     /**
-     * Enrich a single Person with data from a legislator record.
+     * Enrich a CongressionalMember + Individual with data from a legislator record.
+     * externalIds/socialMedia → Individual, enrichmentSource/enrichmentVersion → CongressionalMember.
      * Does NOT overwrite primary fields (name, party, state, etc.).
      */
-    private void enrichPerson(Person person, LegislatorYamlRecord record, String commitSha) {
-        // Merge external IDs
+    private void enrichMember(CongressionalMember member, Individual individual, LegislatorYamlRecord record, String commitSha) {
+        // Merge external IDs into Individual
         Map<String, Object> newExternalIds = record.buildExternalIdsMap();
         if (!newExternalIds.isEmpty()) {
-            JsonNode mergedExternalIds = mergeJsonNodes(person.getExternalIds(), newExternalIds);
-            person.setExternalIds(mergedExternalIds);
+            JsonNode mergedExternalIds = mergeJsonNodes(individual.getExternalIds(), newExternalIds);
+            individual.setExternalIds(mergedExternalIds);
         }
 
-        // Merge social media
+        // Merge social media into Individual
         Map<String, String> newSocialMedia = record.buildSocialMediaMap();
         if (!newSocialMedia.isEmpty()) {
-            JsonNode mergedSocialMedia = mergeJsonNodes(person.getSocialMedia(), newSocialMedia);
-            person.setSocialMedia(mergedSocialMedia);
+            JsonNode mergedSocialMedia = mergeJsonNodes(individual.getSocialMedia(), newSocialMedia);
+            individual.setSocialMedia(mergedSocialMedia);
         }
 
-        // Set enrichment tracking
-        person.setEnrichmentSource(ENRICHMENT_SOURCE);
-        person.setEnrichmentVersion(commitSha);
+        // Set enrichment tracking on CongressionalMember
+        member.setEnrichmentSource(ENRICHMENT_SOURCE);
+        member.setEnrichmentVersion(commitSha);
     }
 
     /**

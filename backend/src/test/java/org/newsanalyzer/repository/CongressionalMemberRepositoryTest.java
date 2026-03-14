@@ -3,6 +3,7 @@ package org.newsanalyzer.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.TestcontainersConfiguration;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.DataSource;
 import org.newsanalyzer.model.Individual;
@@ -95,7 +96,7 @@ class CongressionalMemberRepositoryTest {
         representative = CongressionalMember.builder()
                 .individualId(individual1.getId())
                 .bioguideId("P000197")
-                .chamber(CongressionalMember.Chamber.HOUSE)
+                .chamber(Chamber.HOUSE)
                 .state("CA")
                 .party("Democratic")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -104,7 +105,7 @@ class CongressionalMemberRepositoryTest {
         senator = CongressionalMember.builder()
                 .individualId(individual2.getId())
                 .bioguideId("S000148")
-                .chamber(CongressionalMember.Chamber.SENATE)
+                .chamber(Chamber.SENATE)
                 .state("NY")
                 .party("Democratic")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -121,7 +122,7 @@ class CongressionalMemberRepositoryTest {
 
         assertNotNull(saved.getId());
         assertEquals("P000197", saved.getBioguideId());
-        assertEquals(CongressionalMember.Chamber.HOUSE, saved.getChamber());
+        assertEquals(Chamber.HOUSE, saved.getChamber());
         assertEquals("CA", saved.getState());
         assertNotNull(saved.getCreatedAt());
         assertNotNull(saved.getUpdatedAt());
@@ -181,7 +182,7 @@ class CongressionalMemberRepositoryTest {
 
         assertTrue(found.isPresent());
         assertEquals("CA", found.get().getState());
-        assertEquals(CongressionalMember.Chamber.HOUSE, found.get().getChamber());
+        assertEquals(Chamber.HOUSE, found.get().getChamber());
     }
 
     @Test
@@ -250,9 +251,9 @@ class CongressionalMemberRepositoryTest {
         entityManager.flush();
 
         List<CongressionalMember> houseMembers = congressionalMemberRepository
-                .findByChamber(CongressionalMember.Chamber.HOUSE);
+                .findByChamber(Chamber.HOUSE);
         List<CongressionalMember> senateMembers = congressionalMemberRepository
-                .findByChamber(CongressionalMember.Chamber.SENATE);
+                .findByChamber(Chamber.SENATE);
 
         assertEquals(1, houseMembers.size());
         assertEquals("P000197", houseMembers.get(0).getBioguideId());
@@ -269,7 +270,7 @@ class CongressionalMemberRepositoryTest {
         CongressionalMember republican = CongressionalMember.builder()
                 .individualId(individual3.getId())
                 .bioguideId("M001165")
-                .chamber(CongressionalMember.Chamber.HOUSE)
+                .chamber(Chamber.HOUSE)
                 .state("CA")
                 .party("Republican")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -292,7 +293,7 @@ class CongressionalMemberRepositoryTest {
         CongressionalMember caSenator = CongressionalMember.builder()
                 .individualId(individual3.getId())
                 .bioguideId("F000062")
-                .chamber(CongressionalMember.Chamber.SENATE)
+                .chamber(Chamber.SENATE)
                 .state("CA")
                 .party("Democratic")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -301,9 +302,9 @@ class CongressionalMemberRepositoryTest {
         entityManager.flush();
 
         List<CongressionalMember> caHouse = congressionalMemberRepository
-                .findByStateAndChamber("CA", CongressionalMember.Chamber.HOUSE);
+                .findByStateAndChamber("CA", Chamber.HOUSE);
         List<CongressionalMember> caSenate = congressionalMemberRepository
-                .findByStateAndChamber("CA", CongressionalMember.Chamber.SENATE);
+                .findByStateAndChamber("CA", Chamber.SENATE);
 
         assertEquals(1, caHouse.size());
         assertEquals("P000197", caHouse.get(0).getBioguideId());
@@ -323,7 +324,7 @@ class CongressionalMemberRepositoryTest {
         CongressionalMember rep2 = CongressionalMember.builder()
                 .individualId(individual3.getId())
                 .bioguideId("M001165")
-                .chamber(CongressionalMember.Chamber.HOUSE)
+                .chamber(Chamber.HOUSE)
                 .state("CA")
                 .party("Republican")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -332,7 +333,7 @@ class CongressionalMemberRepositoryTest {
         entityManager.flush();
 
         Page<CongressionalMember> page = congressionalMemberRepository
-                .findByChamber(CongressionalMember.Chamber.HOUSE, PageRequest.of(0, 1));
+                .findByChamber(Chamber.HOUSE, PageRequest.of(0, 1));
 
         assertEquals(2, page.getTotalElements());
         assertEquals(1, page.getContent().size());
@@ -346,7 +347,7 @@ class CongressionalMemberRepositoryTest {
         CongressionalMember rep2 = CongressionalMember.builder()
                 .individualId(individual3.getId())
                 .bioguideId("M001165")
-                .chamber(CongressionalMember.Chamber.HOUSE)
+                .chamber(Chamber.HOUSE)
                 .state("CA")
                 .party("Republican")
                 .dataSource(DataSource.CONGRESS_GOV)
@@ -388,7 +389,7 @@ class CongressionalMemberRepositoryTest {
         entityManager.clear();
 
         List<CongressionalMember> houseMembers = congressionalMemberRepository
-                .findByChamberWithIndividual(CongressionalMember.Chamber.HOUSE);
+                .findByChamberWithIndividual(Chamber.HOUSE);
 
         assertEquals(1, houseMembers.size());
         assertNotNull(houseMembers.get(0).getIndividual());
@@ -419,8 +420,8 @@ class CongressionalMemberRepositoryTest {
         congressionalMemberRepository.save(senator);
         entityManager.flush();
 
-        assertEquals(1, congressionalMemberRepository.countByChamber(CongressionalMember.Chamber.HOUSE));
-        assertEquals(1, congressionalMemberRepository.countByChamber(CongressionalMember.Chamber.SENATE));
+        assertEquals(1, congressionalMemberRepository.countByChamber(Chamber.HOUSE));
+        assertEquals(1, congressionalMemberRepository.countByChamber(Chamber.SENATE));
     }
 
     @Test

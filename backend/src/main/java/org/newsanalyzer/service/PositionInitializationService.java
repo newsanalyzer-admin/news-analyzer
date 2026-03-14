@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.newsanalyzer.model.GovernmentOrganization;
 import org.newsanalyzer.model.GovernmentPosition;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.PositionType;
 import org.newsanalyzer.repository.GovernmentOrganizationRepository;
 import org.newsanalyzer.repository.GovernmentPositionRepository;

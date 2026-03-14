@@ -11,8 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsanalyzer.dto.CongressMemberSearchDTO;
 import org.newsanalyzer.dto.CongressSearchResponse;
 import org.newsanalyzer.dto.CongressSearchResult;
-import org.newsanalyzer.model.Person;
-import org.newsanalyzer.repository.PersonRepository;
+import org.newsanalyzer.model.CongressionalMember;
+import org.newsanalyzer.repository.CongressionalMemberRepository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +36,7 @@ class CongressSearchServiceTest {
     private CongressApiClient congressApiClient;
 
     @Mock
-    private PersonRepository personRepository;
+    private CongressionalMemberRepository congressionalMemberRepository;
 
     private ObjectMapper objectMapper;
     private CongressSearchService searchService;
@@ -44,7 +44,7 @@ class CongressSearchServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        searchService = new CongressSearchService(congressApiClient, personRepository);
+        searchService = new CongressSearchService(congressApiClient, congressionalMemberRepository);
     }
 
     // =========================================================================
@@ -74,7 +74,7 @@ class CongressSearchServiceTest {
         JsonNode response = objectMapper.readTree(apiResponse);
         when(congressApiClient.fetchMembers(eq(20), eq(0), eq(true))).thenReturn(Optional.of(response));
         when(congressApiClient.getRequestCount()).thenReturn(1);
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
+        when(congressionalMemberRepository.findByBioguideId("S000033")).thenReturn(Optional.empty());
 
         // When
         CongressSearchResponse<CongressMemberSearchDTO> result = searchService.searchMembers(
@@ -222,10 +222,10 @@ class CongressSearchServiceTest {
     @DisplayName("Should detect duplicates and return duplicateId")
     void searchMembers_duplicateExists_returnsDuplicateId() throws Exception {
         // Given
-        UUID existingPersonId = UUID.randomUUID();
-        Person existingPerson = new Person();
-        existingPerson.setId(existingPersonId);
-        existingPerson.setBioguideId("S000033");
+        UUID existingMemberId = UUID.randomUUID();
+        CongressionalMember existingMember = new CongressionalMember();
+        existingMember.setId(existingMemberId);
+        existingMember.setBioguideId("S000033");
 
         String apiResponse = """
             {
@@ -236,7 +236,7 @@ class CongressSearchServiceTest {
         JsonNode response = objectMapper.readTree(apiResponse);
         when(congressApiClient.fetchMembers(anyInt(), anyInt(), anyBoolean())).thenReturn(Optional.of(response));
         when(congressApiClient.getRequestCount()).thenReturn(1);
-        when(personRepository.findByBioguideId("S000033")).thenReturn(Optional.of(existingPerson));
+        when(congressionalMemberRepository.findByBioguideId("S000033")).thenReturn(Optional.of(existingMember));
 
         // When
         CongressSearchResponse<CongressMemberSearchDTO> result = searchService.searchMembers(
@@ -244,7 +244,7 @@ class CongressSearchServiceTest {
 
         // Then
         assertThat(result.getResults()).hasSize(1);
-        assertThat(result.getResults().get(0).getDuplicateId()).isEqualTo(existingPersonId.toString());
+        assertThat(result.getResults().get(0).getDuplicateId()).isEqualTo(existingMemberId.toString());
     }
 
     @Test

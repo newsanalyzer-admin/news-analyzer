@@ -8,10 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.newsanalyzer.dto.*;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.Individual;
-import org.newsanalyzer.model.Person;
 import org.newsanalyzer.model.Regulation;
 import org.newsanalyzer.repository.CongressionalMemberRepository;
-import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.RegulationRepository;
 import org.newsanalyzer.service.FederalRegisterImportService;
 import org.newsanalyzer.service.LegislatorEnrichmentImportService;
@@ -44,7 +42,6 @@ public class AdminImportController {
 
     private final MemberSyncService memberSyncService;
     private final CongressionalMemberRepository congressionalMemberRepository;
-    private final PersonRepository personRepository;
     private final FederalRegisterImportService federalRegisterImportService;
     private final RegulationRepository regulationRepository;
     private final LegislatorEnrichmentImportService legislatorEnrichmentImportService;
@@ -52,14 +49,12 @@ public class AdminImportController {
 
     public AdminImportController(MemberSyncService memberSyncService,
                                   CongressionalMemberRepository congressionalMemberRepository,
-                                  PersonRepository personRepository,
                                   FederalRegisterImportService federalRegisterImportService,
                                   RegulationRepository regulationRepository,
                                   LegislatorEnrichmentImportService legislatorEnrichmentImportService,
                                   LegislatorsSearchService legislatorsSearchService) {
         this.memberSyncService = memberSyncService;
         this.congressionalMemberRepository = congressionalMemberRepository;
-        this.personRepository = personRepository;
         this.federalRegisterImportService = federalRegisterImportService;
         this.regulationRepository = regulationRepository;
         this.legislatorEnrichmentImportService = legislatorEnrichmentImportService;
@@ -331,14 +326,17 @@ public class AdminImportController {
         // Check if exists in Legislators Repo
         boolean existsInRepo = legislatorsSearchService.getLegislatorByBioguideId(bioguideId).isPresent();
 
-        // Check if local Person match exists
-        Optional<Person> localPerson = personRepository.findByBioguideId(bioguideId);
+        // Check if local CongressionalMember match exists
+        Optional<CongressionalMember> localMember = congressionalMemberRepository.findByBioguideIdWithIndividual(bioguideId);
 
         return ResponseEntity.ok(new LegislatorExistsResponse(
                 existsInRepo,
-                localPerson.isPresent(),
-                localPerson.map(p -> p.getId().toString()).orElse(null),
-                localPerson.map(p -> p.getFirstName() + " " + p.getLastName()).orElse(null)
+                localMember.isPresent(),
+                localMember.map(m -> m.getId().toString()).orElse(null),
+                localMember.map(m -> {
+                    Individual ind = m.getIndividual();
+                    return ind != null ? ind.getFirstName() + " " + ind.getLastName() : "Unknown";
+                }).orElse(null)
         ));
     }
 

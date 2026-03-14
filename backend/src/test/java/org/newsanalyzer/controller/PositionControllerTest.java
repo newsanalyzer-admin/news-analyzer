@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.exception.ResourceNotFoundException;
 import org.newsanalyzer.model.GovernmentPosition;
-import org.newsanalyzer.model.Person.Chamber;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.PositionHolding;
 import org.newsanalyzer.model.PositionType;
 import org.newsanalyzer.model.DataSource;

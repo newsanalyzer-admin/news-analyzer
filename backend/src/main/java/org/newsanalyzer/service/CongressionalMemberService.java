@@ -2,6 +2,7 @@ package org.newsanalyzer.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.DataSource;
 import org.newsanalyzer.model.Individual;
@@ -114,7 +115,7 @@ public class CongressionalMemberService {
     /**
      * Find all members by chamber with Individual eagerly loaded.
      */
-    public List<CongressionalMember> findByChamberWithIndividual(CongressionalMember.Chamber chamber) {
+    public List<CongressionalMember> findByChamberWithIndividual(Chamber chamber) {
         return congressionalMemberRepository.findByChamberWithIndividual(chamber);
     }
 
@@ -132,14 +133,14 @@ public class CongressionalMemberService {
     /**
      * Find all members by chamber.
      */
-    public List<CongressionalMember> findByChamber(CongressionalMember.Chamber chamber) {
+    public List<CongressionalMember> findByChamber(Chamber chamber) {
         return congressionalMemberRepository.findByChamber(chamber);
     }
 
     /**
      * Find all members by chamber with pagination.
      */
-    public Page<CongressionalMember> findByChamber(CongressionalMember.Chamber chamber, Pageable pageable) {
+    public Page<CongressionalMember> findByChamber(Chamber chamber, Pageable pageable) {
         return congressionalMemberRepository.findByChamber(chamber, pageable);
     }
 
@@ -160,7 +161,7 @@ public class CongressionalMemberService {
     /**
      * Find all members by state and chamber.
      */
-    public List<CongressionalMember> findByStateAndChamber(String state, CongressionalMember.Chamber chamber) {
+    public List<CongressionalMember> findByStateAndChamber(String state, Chamber chamber) {
         return congressionalMemberRepository.findByStateAndChamber(state, chamber);
     }
 
@@ -171,7 +172,7 @@ public class CongressionalMemberService {
     /**
      * Count members by chamber.
      */
-    public long countByChamber(CongressionalMember.Chamber chamber) {
+    public long countByChamber(Chamber chamber) {
         return congressionalMemberRepository.countByChamber(chamber);
     }
 
@@ -220,7 +221,7 @@ public class CongressionalMemberService {
     public CongressionalMember findOrCreate(String bioguideId,
                                             String firstName, String lastName,
                                             java.time.LocalDate birthDate,
-                                            CongressionalMember.Chamber chamber,
+                                            Chamber chamber,
                                             String state, String party) {
         if (bioguideId == null || bioguideId.isBlank()) {
             throw new IllegalArgumentException("BioGuide ID is required");

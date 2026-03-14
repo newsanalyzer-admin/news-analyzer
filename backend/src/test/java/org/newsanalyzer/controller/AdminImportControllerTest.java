@@ -5,11 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.newsanalyzer.dto.CongressMemberImportRequest;
+import org.newsanalyzer.model.Chamber;
 import org.newsanalyzer.model.CongressionalMember;
 import org.newsanalyzer.model.Individual;
-import org.newsanalyzer.model.Person;
 import org.newsanalyzer.repository.CongressionalMemberRepository;
-import org.newsanalyzer.repository.PersonRepository;
 import org.newsanalyzer.repository.RegulationRepository;
 import org.newsanalyzer.service.FederalRegisterImportService;
 import org.newsanalyzer.service.LegislatorEnrichmentImportService;
@@ -61,9 +60,6 @@ class AdminImportControllerTest {
     private CongressionalMemberRepository congressionalMemberRepository;
 
     @MockBean
-    private PersonRepository personRepository;
-
-    @MockBean
     private FederalRegisterImportService federalRegisterImportService;
 
     @MockBean
@@ -95,7 +91,7 @@ class AdminImportControllerTest {
         testMember.setBioguideId("S000033");
         testMember.setIndividualId(testIndividual.getId());
         testMember.setIndividual(testIndividual);
-        testMember.setChamber(CongressionalMember.Chamber.SENATE);
+        testMember.setChamber(Chamber.SENATE);
         testMember.setState("VT");
     }
 
