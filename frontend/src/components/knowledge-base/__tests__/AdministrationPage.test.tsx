@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdministrationPage } from '../AdministrationPage';
 
 // Mock next/navigation for KBBreadcrumbs
@@ -14,10 +15,37 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+// Mock the hooks used by CurrentAdministration and its children
+vi.mock('@/hooks/usePresidencySync', () => ({
+  useCurrentPresidency: () => ({
+    data: null,
+    isLoading: false,
+    error: null,
+  }),
+  usePresidencyAdministration: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
+  usePresidencyExecutiveOrders: () => ({
+    data: { content: [], totalElements: 0, totalPages: 0, size: 10, number: 0 },
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+function renderWithQueryClient(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+}
+
 describe('AdministrationPage', () => {
   describe('Default Rendering', () => {
     it('renders the page title', () => {
-      render(<AdministrationPage />);
+      renderWithQueryClient(<AdministrationPage />);
 
       expect(
         screen.getByRole('heading', { level: 1, name: 'Presidential Administrations' })
@@ -25,14 +53,14 @@ describe('AdministrationPage', () => {
     });
 
     it('renders breadcrumbs with correct path', () => {
-      render(<AdministrationPage />);
+      renderWithQueryClient(<AdministrationPage />);
 
       expect(screen.getByText('Knowledge Base')).toBeInTheDocument();
       expect(screen.getByText('Executive Branch')).toBeInTheDocument();
     });
 
     it('renders back link to Executive Branch', () => {
-      render(<AdministrationPage />);
+      renderWithQueryClient(<AdministrationPage />);
 
       const backLink = screen.getByText('Back to Executive Branch');
       expect(backLink.closest('a')).toHaveAttribute(
@@ -41,15 +69,16 @@ describe('AdministrationPage', () => {
       );
     });
 
-    it('renders Current Administration placeholder section', () => {
-      render(<AdministrationPage />);
+    it('renders Current Administration section heading', () => {
+      renderWithQueryClient(<AdministrationPage />);
 
-      expect(screen.getByText('Current Administration')).toBeInTheDocument();
-      expect(screen.getByText(/coming in kb-2\.2/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Current Administration' })
+      ).toBeInTheDocument();
     });
 
     it('renders Historical Administrations placeholder section', () => {
-      render(<AdministrationPage />);
+      renderWithQueryClient(<AdministrationPage />);
 
       expect(screen.getByText('Historical Administrations')).toBeInTheDocument();
       expect(screen.getByText(/coming in kb-2\.3/i)).toBeInTheDocument();
@@ -58,26 +87,24 @@ describe('AdministrationPage', () => {
 
   describe('Loading State', () => {
     it('renders loading skeletons when isLoading is true', () => {
-      render(<AdministrationPage isLoading={true} />);
+      renderWithQueryClient(<AdministrationPage isLoading={true} />);
 
-      // Skeletons render animated pulse elements
       expect(document.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
 
-      // Placeholder content should NOT be visible during loading
       expect(screen.queryByText('Current Administration')).not.toBeInTheDocument();
     });
   });
 
   describe('Error State', () => {
     it('renders error message when error prop is provided', () => {
-      render(<AdministrationPage error="Network error" />);
+      renderWithQueryClient(<AdministrationPage error="Network error" />);
 
       expect(screen.getByText('Failed to load administration data')).toBeInTheDocument();
       expect(screen.getByText('Network error')).toBeInTheDocument();
     });
 
     it('does not render placeholder sections when in error state', () => {
-      render(<AdministrationPage error="Something went wrong" />);
+      renderWithQueryClient(<AdministrationPage error="Something went wrong" />);
 
       expect(screen.queryByText('Current Administration')).not.toBeInTheDocument();
       expect(screen.queryByText('Historical Administrations')).not.toBeInTheDocument();

@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Landmark, Users, History } from 'lucide-react';
+import { ArrowLeft, Landmark, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KBBreadcrumbs } from './KBBreadcrumbs';
+import { CurrentAdministration } from './CurrentAdministration';
 
 interface AdministrationPageProps {
   /** Force loading state (for testing/storybook) */
@@ -66,21 +67,10 @@ export function AdministrationPage({ isLoading = false, error = null }: Administ
         </p>
       </div>
 
-      {/* Current Administration Section Placeholder */}
+      {/* Current Administration Section (KB-2.2) */}
       <section className="mb-10">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Current Administration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Coming in KB-2.2 — Current president, vice president, staff, and executive orders.
-            </p>
-          </CardContent>
-        </Card>
+        <h2 className="text-xl font-semibold mb-4">Current Administration</h2>
+        <CurrentAdministration />
       </section>
 
       {/* Historical Administrations Section Placeholder */}

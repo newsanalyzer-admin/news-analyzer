@@ -107,6 +107,27 @@ export interface CabinetMemberDTO {
   endDate: string | null;
 }
 
+export interface ExecutiveOrderDTO {
+  id: string;
+  presidencyId: string;
+  eoNumber: number;
+  title: string;
+  signingDate: string;        // "yyyy-MM-dd" format
+  summary: string | null;
+  federalRegisterCitation: string | null;
+  federalRegisterUrl: string | null;
+  status: string | null;       // e.g. "ACTIVE", "REVOKED"
+  revokedByEo: number | null;
+}
+
+export interface ExecutiveOrderPage {
+  content: ExecutiveOrderDTO[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;  // current page (0-based)
+}
+
 export interface PresidencyAdministrationDTO {
   presidencyId: string;
   presidencyNumber: number;
@@ -205,6 +226,20 @@ async function fetchAllPresidencies(): Promise<PresidencyDTO[]> {
   return page.content;
 }
 
+async function fetchPresidencyExecutiveOrders(
+  presidencyId: string,
+  page: number,
+  size: number
+): Promise<ExecutiveOrderPage> {
+  const response = await fetch(
+    `${API_BASE}/api/presidencies/${presidencyId}/executive-orders?page=${page}&size=${size}`
+  );
+  if (!response.ok) {
+    throw new Error('Failed to fetch executive orders');
+  }
+  return response.json();
+}
+
 // ============================================================================
 // Hooks
 // ============================================================================
@@ -294,6 +329,22 @@ export function usePresidencyAdministration(presidencyId: string | null) {
   return useQuery({
     queryKey: presidencyKeys.administration(presidencyId || ''),
     queryFn: () => fetchPresidencyAdministration(presidencyId!),
+    enabled: !!presidencyId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch paginated executive orders for a presidency
+ */
+export function usePresidencyExecutiveOrders(
+  presidencyId: string | null,
+  page: number = 0,
+  size: number = 10
+) {
+  return useQuery({
+    queryKey: [...presidencyKeys.all, 'executive-orders', presidencyId, page, size] as const,
+    queryFn: () => fetchPresidencyExecutiveOrders(presidencyId!, page, size),
     enabled: !!presidencyId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
