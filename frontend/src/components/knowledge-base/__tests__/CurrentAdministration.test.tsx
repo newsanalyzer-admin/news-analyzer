@@ -169,7 +169,7 @@ describe('CurrentAdministration', () => {
 
       renderWithQueryClient(<CurrentAdministration />);
 
-      expect(screen.getByText(/failed to load current administration/i)).toBeInTheDocument();
+      expect(screen.getByText(/failed to load administration/i)).toBeInTheDocument();
       expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });

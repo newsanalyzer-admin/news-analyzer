@@ -1,12 +1,13 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Landmark, History } from 'lucide-react';
+import { ArrowLeft, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KBBreadcrumbs } from './KBBreadcrumbs';
 import { CurrentAdministration } from './CurrentAdministration';
+import { HistoricalAdministrations } from './HistoricalAdministrations';
 
 interface AdministrationPageProps {
   /** Force loading state (for testing/storybook) */
@@ -73,21 +74,12 @@ export function AdministrationPage({ isLoading = false, error = null }: Administ
         <CurrentAdministration />
       </section>
 
-      {/* Historical Administrations Section Placeholder */}
+      {/* Historical Administrations Section (KB-2.3) */}
       <section className="mb-10">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Historical Administrations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Coming in KB-2.3 — Browse all past presidential administrations with detailed records.
-            </p>
-          </CardContent>
-        </Card>
+        <h2 className="text-xl font-semibold mb-4">Historical Administrations</h2>
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-lg" />}>
+          <HistoricalAdministrations />
+        </Suspense>
       </section>
     </div>
   );

@@ -1,0 +1,12 @@
+schema: 1
+story: 'KB-2.3'
+gate: PASS
+status_reason: 'Well-structured story with clear URL state management pattern, non-consecutive terms edge case addressed, and shared component design specified.'
+reviewer: 'Quinn'
+updated: '2026-03-14T18:00:00Z'
+top_issues:
+  - id: 'REQ-001'
+    severity: low
+    finding: 'AC1 hardcodes "all 47 administrations" — this number will change with future presidents. The AC should say "all administrations" without a specific count.'
+    suggested_action: 'Update AC1 wording to "shows list of all administrations" to be future-proof.'
+waiver: { active: false }

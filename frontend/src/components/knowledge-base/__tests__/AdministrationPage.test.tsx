@@ -3,9 +3,11 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AdministrationPage } from '../AdministrationPage';
 
-// Mock next/navigation for KBBreadcrumbs
+// Mock next/navigation for KBBreadcrumbs + HistoricalAdministrations
 vi.mock('next/navigation', () => ({
   usePathname: () => '/knowledge-base/government/executive/administrations',
+  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 // Mock next/link to render a plain anchor
@@ -28,6 +30,11 @@ vi.mock('@/hooks/usePresidencySync', () => ({
   }),
   usePresidencyExecutiveOrders: () => ({
     data: { content: [], totalElements: 0, totalPages: 0, size: 10, number: 0 },
+    isLoading: false,
+    error: null,
+  }),
+  useAllPresidencies: () => ({
+    data: [],
     isLoading: false,
     error: null,
   }),
@@ -77,11 +84,12 @@ describe('AdministrationPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders Historical Administrations placeholder section', () => {
+    it('renders Historical Administrations section heading', () => {
       renderWithQueryClient(<AdministrationPage />);
 
-      expect(screen.getByText('Historical Administrations')).toBeInTheDocument();
-      expect(screen.getByText(/coming in kb-2\.3/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Historical Administrations' })
+      ).toBeInTheDocument();
     });
   });
 

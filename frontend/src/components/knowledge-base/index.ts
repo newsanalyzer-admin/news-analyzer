@@ -36,3 +36,8 @@ export { AdministrationStaff } from './AdministrationStaff';
 export type { AdministrationStaffProps } from './AdministrationStaff';
 export { AdministrationExecutiveOrders } from './AdministrationExecutiveOrders';
 export type { AdministrationExecutiveOrdersProps } from './AdministrationExecutiveOrders';
+export { AdministrationDetail } from './AdministrationDetail';
+export type { AdministrationDetailProps } from './AdministrationDetail';
+export { HistoricalAdministrations } from './HistoricalAdministrations';
+export { AdministrationListItem } from './AdministrationListItem';
+export type { AdministrationListItemProps } from './AdministrationListItem';
