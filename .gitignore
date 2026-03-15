@@ -200,4 +200,4 @@ nul
 # ============================================================================
 /backend/run-local.bat
 /frontend/run-local.bat
-/reasonin-service/run-local.bat
+/reasoning-service/run-local.bat
