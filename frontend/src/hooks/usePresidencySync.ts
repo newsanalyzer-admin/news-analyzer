@@ -16,8 +16,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 export interface PresidencySyncResult {
   presidenciesAdded: number;
   presidenciesUpdated: number;
-  personsAdded: number;
-  personsUpdated: number;
+  individualsAdded: number;
+  individualsUpdated: number;
   vpHoldingsAdded: number;
   errors: number;
   errorMessages: string[];
@@ -30,8 +30,8 @@ export interface PresidencySyncStatus {
     presidenciesAdded: number;
     presidenciesUpdated: number;
     totalPresidencies: number;
-    personsAdded: number;
-    personsUpdated: number;
+    individualsAdded: number;
+    individualsUpdated: number;
     vpHoldingsAdded: number;
     errors: number;
     errorMessages?: string[];
@@ -39,7 +39,7 @@ export interface PresidencySyncStatus {
 }
 
 export interface VicePresidentDTO {
-  personId: string;
+  individualId: string;
   fullName: string;
   firstName: string;
   lastName: string;
@@ -52,7 +52,7 @@ export interface PresidencyDTO {
   id: string;
   number: number;
   ordinalLabel: string;
-  personId: string;
+  individualId: string;
   presidentFullName: string;
   presidentFirstName: string;
   presidentLastName: string;
@@ -85,7 +85,7 @@ export interface PresidencyPage {
 
 export interface OfficeholderDTO {
   holdingId: string;
-  personId: string;
+  individualId: string;
   fullName: string;
   firstName: string;
   lastName: string;
@@ -98,7 +98,7 @@ export interface OfficeholderDTO {
 
 export interface CabinetMemberDTO {
   holdingId: string;
-  personId: string;
+  individualId: string;
   fullName: string;
   positionTitle: string;
   departmentName: string;

@@ -11,8 +11,8 @@
 | **Status** | DRAFT |
 | **Created** | 2026-01-08 |
 | **Owner** | Sarah (PO) |
-| **Depends On** | KB-1 Complete, **ARCH-1 Complete** (Individual table refactor) |
-| **Blocked By** | ARCH-1 (Individual Table Refactor) |
+| **Depends On** | KB-1 Complete, ARCH-1 Complete (Individual table refactor) |
+| **Blocked By** | ~~ARCH-1~~ (completed 2026-03-14) |
 | **Triggered By** | User request to consolidate President and VP pages into unified Administrations view |
 
 ## Executive Summary
@@ -86,9 +86,9 @@ The KB-1 epic already created the required data model:
 
 ```
 ┌─────────────────┐       ┌──────────────────┐       ┌───────────────────┐
-│     Person      │       │    Presidency    │       │  ExecutiveOrder   │
+│   Individual    │       │    Presidency    │       │  ExecutiveOrder   │
 ├─────────────────┤       ├──────────────────┤       ├───────────────────┤
-│ id (UUID)       │◄──────│ person_id (FK)   │       │ id (UUID)         │
+│ id (UUID)       │◄──────│ individual_id(FK)│       │ id (UUID)         │
 │ first_name      │       │ id (UUID)        │◄──────│ presidency_id(FK) │
 │ last_name       │       │ number (1-47)    │       │ eo_number         │
 │ birth_date      │       │ start_date       │       │ title             │
@@ -102,7 +102,7 @@ The KB-1 epic already created the required data model:
 ┌───────┴──────────────────────────┴──────────────────┐
 │                  PositionHolding                     │
 ├──────────────────────────────────────────────────────┤
-│ person_id (FK) ──────► Person (VP, CoS, Cabinet)     │
+│ individual_id (FK) ──► Individual (VP, CoS, Cabinet) │
 │ position_id (FK) ────► GovernmentPosition            │
 │ presidency_id (FK) ──► Presidency                    │
 │ start_date / end_date                                │
@@ -127,7 +127,7 @@ The KB-1 epic already created the required data model:
 | Endpoint | Purpose |
 |----------|---------|
 | `PUT /api/admin/presidencies/{id}` | Update presidency record |
-| `PUT /api/admin/persons/{id}` | Update person record (president/VP) |
+| `PUT /api/admin/individuals/{id}` | Update individual record (president/VP) |
 | `POST /api/admin/position-holdings` | Create position holding (VP, CoS, Cabinet) |
 | `PUT /api/admin/position-holdings/{id}` | Update position holding |
 | `DELETE /api/admin/position-holdings/{id}` | Delete position holding |
@@ -145,7 +145,7 @@ The KB-1 epic already created the required data model:
 2. **Admin Presidential Administrations Page**
    - Unified page at `/admin/knowledge-base/government/executive/administrations`
    - Sync controls (preserve existing sync functionality)
-   - CRUD forms for President, VP, Administration data
+   - CRUD forms for Presidency, Individual (President/VP), Administration data
    - Data tables with inline edit or modal edit
 
 3. **Navigation Updates**
@@ -154,12 +154,12 @@ The KB-1 epic already created the required data model:
    - Add redirects from old routes to new routes
 
 4. **Backend Admin CRUD Endpoints**
-   - Create admin endpoints for editing presidency and person records
+   - Create admin endpoints for editing presidency and individual records
    - Create admin endpoints for managing position holdings
 
 ### Out of Scope
 
-- Changes to Presidency/ExecutiveOrder/Person entities (already complete)
+- Changes to Presidency/ExecutiveOrder/Individual entities (already complete)
 - New data sources or sync integrations (existing Federal Register integration sufficient)
 - Mobile app considerations
 - Historical image gallery (future enhancement)
@@ -226,6 +226,13 @@ KB-2.2 (Current Admin Section) ──► KB-2.3 (Historical List)
 | AC6 | Tests cover page rendering and basic interactions |
 
 #### Technical Notes
+
+**Prerequisite — ARCH-1 Cleanup:**
+The frontend TypeScript DTOs in `frontend/src/hooks/usePresidencySync.ts` still reference `personId` instead of `individualId` (missed during ARCH-1 backend migration). Fix these types before building new components:
+- `VicePresidentDTO.personId` → `individualId`
+- `PresidencyDTO.personId` → `individualId`
+- `OfficeholderDTO.personId` → `individualId`
+- `CabinetMemberDTO.personId` → `individualId`
 
 **Files to Create:**
 - `frontend/src/app/knowledge-base/government/executive/administrations/page.tsx`
@@ -301,7 +308,7 @@ const { data: executiveOrders } = usePresidencyExecutiveOrders(currentPresidency
 | AC1 | Historical administrations section shows list of all 47 administrations |
 | AC2 | List displays: Presidency number, President name, Term dates, Party |
 | AC3 | Clicking an administration shows its full details (same as current admin section) |
-| AC4 | Selected administration state managed (URL param or local state) |
+| AC4 | Selected administration state managed via URL query param (`?presidency=45`) for shareability and browser back support |
 | AC5 | Current administration highlighted/badged in list |
 | AC6 | List is sortable (by number ascending/descending) |
 | AC7 | Smooth transition when switching between administrations |
@@ -320,14 +327,17 @@ const { data: executiveOrders } = usePresidencyExecutiveOrders(currentPresidency
 - `frontend/src/components/knowledge-base/AdministrationListItem.tsx`
 - `frontend/src/components/knowledge-base/AdministrationDetail.tsx` (shared between current & selected)
 
-**State Management:**
+**State Management (URL query param):**
 ```typescript
-const [selectedPresidencyId, setSelectedPresidencyId] = useState<string | null>(null);
+const searchParams = useSearchParams();
+const selectedNumber = searchParams.get('presidency');
 
 // If no selection, show current. If selection, show selected.
-const displayedPresidency = selectedPresidencyId
-  ? presidencies.find(p => p.id === selectedPresidencyId)
+const displayedPresidency = selectedNumber
+  ? presidencies.find(p => p.number === Number(selectedNumber))
   : currentPresidency;
+
+// Selection updates URL: ?presidency=45 (shareable, supports browser back)
 ```
 
 ---
@@ -349,7 +359,7 @@ const displayedPresidency = selectedPresidencyId
 | AC3 | Sync section: Add EO sync button with status display |
 | AC4 | Data management section: Presidencies table with edit action |
 | AC5 | Data management section: VP/Staff table filtered by selected presidency |
-| AC6 | Edit modals/forms for: Presidency details, Person (president/VP), PositionHolding |
+| AC6 | Edit modals/forms for: Presidency details, Individual (president/VP), PositionHolding |
 | AC7 | Delete confirmation dialogs for position holdings |
 | AC8 | Success/error toast notifications for all operations |
 | AC9 | Tests cover sync triggers and edit workflows |
@@ -361,12 +371,14 @@ const displayedPresidency = selectedPresidencyId
 - `frontend/src/components/admin/AdministrationSyncSection.tsx`
 - `frontend/src/components/admin/AdministrationDataSection.tsx`
 - `frontend/src/components/admin/PresidencyEditModal.tsx`
-- `frontend/src/components/admin/PersonEditModal.tsx`
+- `frontend/src/components/admin/IndividualEditModal.tsx`
 - `frontend/src/components/admin/PositionHoldingEditModal.tsx`
 
 **Reuse:**
 - PresidencySyncCard (refactor to accept sync type prop)
 - Existing presidencies table (add edit button column)
+
+**ARCH-1 Note:** The `Person` entity was renamed to `Individual` in ARCH-1 (completed 2026-03-14). All references to person/Person in this epic use the `Individual` entity and `individual_id` foreign keys.
 
 ---
 
@@ -383,11 +395,11 @@ const displayedPresidency = selectedPresidencyId
 | # | Criterion |
 |---|-----------|
 | AC1 | `PUT /api/admin/presidencies/{id}` updates presidency fields |
-| AC2 | `PUT /api/admin/persons/{id}` updates person fields (name, dates, birthplace) |
+| AC2 | `PUT /api/admin/individuals/{id}` updates individual fields (name, dates, birthplace) |
 | AC3 | `POST /api/admin/position-holdings` creates new position holding |
 | AC4 | `PUT /api/admin/position-holdings/{id}` updates existing position holding |
 | AC5 | `DELETE /api/admin/position-holdings/{id}` removes position holding |
-| AC6 | All endpoints require admin authentication |
+| AC6 | All endpoints under `/api/admin/` path prefix (auth enforcement deferred — Spring Security currently disabled per deployment config; path convention preserves future auth boundary) |
 | AC7 | Validation errors return proper 400 responses with messages |
 | AC8 | Audit logging for all changes (optional but recommended) |
 | AC9 | Controller tests cover all endpoints |
@@ -397,7 +409,7 @@ const displayedPresidency = selectedPresidencyId
 **Files to Create/Modify:**
 - `backend/src/main/java/org/newsanalyzer/controller/AdminPresidencyController.java` (new)
 - `backend/src/main/java/org/newsanalyzer/dto/PresidencyUpdateDTO.java` (new)
-- `backend/src/main/java/org/newsanalyzer/dto/PersonUpdateDTO.java` (new)
+- `backend/src/main/java/org/newsanalyzer/dto/IndividualUpdateDTO.java` (new)
 - `backend/src/main/java/org/newsanalyzer/dto/PositionHoldingCreateDTO.java` (new)
 - `backend/src/main/java/org/newsanalyzer/dto/PositionHoldingUpdateDTO.java` (new)
 - `backend/src/main/java/org/newsanalyzer/service/AdminPresidencyService.java` (new)
@@ -412,7 +424,7 @@ public record PresidencyUpdateDTO(
     PresidencyEndReason endReason
 ) {}
 
-public record PersonUpdateDTO(
+public record IndividualUpdateDTO(
     String firstName,
     String lastName,
     LocalDate birthDate,
@@ -422,7 +434,7 @@ public record PersonUpdateDTO(
 ) {}
 
 public record PositionHoldingCreateDTO(
-    UUID personId,
+    UUID individualId,
     UUID positionId,
     UUID presidencyId,
     LocalDate startDate,
@@ -455,8 +467,7 @@ public record PositionHoldingCreateDTO(
 #### Technical Notes
 
 **Files to Modify:**
-- `frontend/src/config/kbSidebarConfig.ts` (menu configuration)
-- `frontend/src/config/adminSidebarConfig.ts` (menu configuration)
+- `frontend/src/lib/menu-config.ts` (unified sidebar menu configuration — no separate config files exist)
 - `frontend/src/app/knowledge-base/government/executive/president/page.tsx` (add redirect)
 - `frontend/src/app/knowledge-base/government/executive/vice-president/page.tsx` (add redirect)
 - `frontend/src/app/admin/knowledge-base/government/executive/president/page.tsx` (add redirect)
@@ -654,13 +665,15 @@ export default function PresidentPage() {
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
 | 2026-01-08 | 1.0 | Initial epic creation | Sarah (PO) |
+| 2026-03-14 | 1.1 | Updated for ARCH-1 completion: Person→Individual rename, person_id→individual_id, PersonUpdateDTO→IndividualUpdateDTO, unblocked | John (PM) |
+| 2026-03-14 | 1.2 | Architect review: Added KB-2.1 prerequisite (frontend personId→individualId fix), KB-2.3 URL query param state, KB-2.5 AC6 auth clarification, KB-2.6 sidebar config file correction | Winston (Architect) |
 
 ## Approval
 
 | Role | Name | Date | Status |
 |------|------|------|--------|
 | Product Owner | Sarah (PO) | 2026-01-08 | DRAFTED |
-| Architect | Winston | TBD | PENDING |
+| Architect | Winston | 2026-03-14 | APPROVED (with modifications) |
 | Developer | TBD | TBD | - |
 
 ---

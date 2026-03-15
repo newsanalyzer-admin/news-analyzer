@@ -11,7 +11,7 @@ const mockAdministrationData: PresidencyAdministrationDTO = {
   vicePresidents: [
     {
       holdingId: 'h1',
-      personId: 'vp1',
+      individualId: 'vp1',
       fullName: 'JD Vance',
       firstName: 'JD',
       lastName: 'Vance',
@@ -25,7 +25,7 @@ const mockAdministrationData: PresidencyAdministrationDTO = {
   chiefsOfStaff: [
     {
       holdingId: 'h2',
-      personId: 'cos1',
+      individualId: 'cos1',
       fullName: 'Susie Wiles',
       firstName: 'Susie',
       lastName: 'Wiles',
@@ -58,7 +58,7 @@ const mockPresidency: PresidencyDTO = {
   id: '123',
   number: 47,
   ordinalLabel: '47th',
-  personId: 'p1',
+  individualId: 'p1',
   presidentFullName: 'Donald J. Trump',
   presidentFirstName: 'Donald',
   presidentLastName: 'Trump',
@@ -75,7 +75,7 @@ const mockPresidency: PresidencyDTO = {
   endReason: null,
   executiveOrderCount: null,
   vicePresidents: [
-    { personId: 'vp1', fullName: 'JD Vance', firstName: 'JD', lastName: 'Vance', startDate: '2025-01-20', endDate: null, termLabel: '2025-present' },
+    { individualId: 'vp1', fullName: 'JD Vance', firstName: 'JD', lastName: 'Vance', startDate: '2025-01-20', endDate: null, termLabel: '2025-present' },
   ],
   predecessorId: null,
   successorId: null,

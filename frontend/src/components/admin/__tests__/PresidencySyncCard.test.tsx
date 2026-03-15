@@ -147,8 +147,8 @@ describe('PresidencySyncCard', () => {
         presidenciesAdded: 47,
         presidenciesUpdated: 0,
         totalPresidencies: 47,
-        personsAdded: 79,
-        personsUpdated: 0,
+        individualsAdded: 79,
+        individualsUpdated: 0,
         vpHoldingsAdded: 52,
         errors: 0,
       },
@@ -178,7 +178,7 @@ describe('PresidencySyncCard', () => {
 
       render(<PresidencySyncCard />);
 
-      expect(screen.getByText('79')).toBeInTheDocument(); // Persons
+      expect(screen.getByText('79')).toBeInTheDocument(); // Individuals
       expect(screen.getByText('52')).toBeInTheDocument(); // VP Holdings
     });
   });
@@ -322,8 +322,8 @@ describe('PresidencySyncCard', () => {
             presidenciesAdded: 46,
             presidenciesUpdated: 0,
             totalPresidencies: 46,
-            personsAdded: 78,
-            personsUpdated: 0,
+            individualsAdded: 78,
+            individualsUpdated: 0,
             vpHoldingsAdded: 51,
             errors: 1,
           },

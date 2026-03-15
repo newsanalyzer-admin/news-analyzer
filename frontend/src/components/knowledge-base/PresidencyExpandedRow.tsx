@@ -61,7 +61,7 @@ export function PresidencyExpandedRow({ presidency }: PresidencyExpandedRowProps
             // Fallback to presidency VP data if administration not loaded
             <ul className="space-y-2">
               {presidency.vicePresidents.map((vp) => (
-                <li key={vp.personId} className="text-sm">
+                <li key={vp.individualId} className="text-sm">
                   <span className="font-medium">{vp.fullName}</span>
                   <span className="block text-muted-foreground text-xs">
                     {vp.termLabel}

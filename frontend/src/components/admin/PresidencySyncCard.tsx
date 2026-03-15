@@ -159,9 +159,9 @@ export function PresidencySyncCard() {
                 <>
                   <div className="flex items-center gap-2 text-sm">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Persons:</span>
+                    <span className="text-muted-foreground">Individuals:</span>
                     <span className="font-medium">
-                      {lastSync.personsAdded + lastSync.personsUpdated}
+                      {lastSync.individualsAdded + lastSync.individualsUpdated}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">

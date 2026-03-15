@@ -7,7 +7,7 @@ const mockPresidency: PresidencyDTO = {
   id: '123',
   number: 47,
   ordinalLabel: '47th',
-  personId: '456',
+  individualId: '456',
   presidentFullName: 'Donald J. Trump',
   presidentFirstName: 'Donald',
   presidentLastName: 'Trump',
@@ -25,7 +25,7 @@ const mockPresidency: PresidencyDTO = {
   executiveOrderCount: null,
   vicePresidents: [
     {
-      personId: '789',
+      individualId: '789',
       fullName: 'JD Vance',
       firstName: 'JD',
       lastName: 'Vance',
@@ -156,8 +156,8 @@ describe('PresidentCard', () => {
       const presidencyWithMultipleVPs = {
         ...mockPresidency,
         vicePresidents: [
-          { personId: '1', fullName: 'VP One', firstName: 'VP', lastName: 'One', startDate: '2021-01-20', endDate: '2022-01-20', termLabel: '2021-2022' },
-          { personId: '2', fullName: 'VP Two', firstName: 'VP', lastName: 'Two', startDate: '2022-01-20', endDate: null, termLabel: '2022-present' },
+          { individualId: '1', fullName: 'VP One', firstName: 'VP', lastName: 'One', startDate: '2021-01-20', endDate: '2022-01-20', termLabel: '2021-2022' },
+          { individualId: '2', fullName: 'VP Two', firstName: 'VP', lastName: 'Two', startDate: '2022-01-20', endDate: null, termLabel: '2022-present' },
         ],
       };
       render(<PresidentCard presidency={presidencyWithMultipleVPs} />);

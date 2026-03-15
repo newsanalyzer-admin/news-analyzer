@@ -1,8 +1,8 @@
 # NewsAnalyzer Project Roadmap
 
-**Document Version:** 4.3
+**Document Version:** 4.4
 **Created:** 2025-11-25
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-03-14
 **Status:** Active
 
 ---
@@ -63,14 +63,14 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 
 | Epic | Status | Progress | Description |
 |------|--------|----------|-------------|
-| **ARCH-1** | Ready for Sprint | 0% | Individual Table Refactor (Person → Individual + CongressionalMember) |
+| **ARCH-1** | Complete | 100% | Individual Table Refactor (Person → Individual + CongressionalMember) |
 
 ### Knowledge Base Track
 
 | Epic | Status | Progress | Description |
 |------|--------|----------|-------------|
 | **KB-1** | Complete | 100% | President of the United States Data |
-| **KB-2** | Draft (Blocked) | 0% | Presidential Administrations (blocked by ARCH-1) |
+| **KB-2** | Draft (Unblocked) | 0% | Presidential Administrations |
 
 ### Overall MVP Status
 
@@ -958,10 +958,11 @@ Core differentiator - cross-reference claims against authoritative sources.
 
 ### Epic ARCH-1: Individual Table Refactor
 
-**Status:** APPROVED
+**Status:** COMPLETE ✅
+**Completed:** 2026-03-14
 **Priority:** HIGH (Foundational)
 **Estimate:** 36 story points (9 stories)
-**Blocks:** KB-2
+**Blocks:** KB-2 (now unblocked)
 
 #### Overview
 
@@ -1009,7 +1010,7 @@ See Factbase Expansion Track for details.
 
 ### Epic KB-2: Presidential Administrations
 
-**Status:** DRAFT (Blocked by ARCH-1)
+**Status:** DRAFT (Unblocked — ARCH-1 complete)
 **Priority:** HIGH
 **Estimate:** 24 story points (7 stories)
 **Blocked By:** ARCH-1
@@ -1159,14 +1160,14 @@ Based on business requirements document objectives:
 
 | Epic | Document | Status |
 |------|----------|--------|
-| ARCH-1 | `docs/stories/ARCH-1/ARCH-1.epic-individual-table-refactor.md` | 🚀 Ready for Sprint |
+| ARCH-1 | `docs/stories/ARCH-1/ARCH-1.epic-individual-table-refactor.md` | ✅ Complete |
 
 ### Knowledge Base Epics
 
 | Epic | Document | Status |
 |------|----------|--------|
 | KB-1 | `docs/stories/KB-1/KB-1.epic-potus-data.md` | ✅ Complete |
-| KB-2 | `docs/stories/KB-2/KB-2.epic-presidential-administrations.md` | 📋 Draft (Blocked by ARCH-1) |
+| KB-2 | `docs/stories/KB-2/KB-2.epic-presidential-administrations.md` | 📋 Draft (Unblocked) |
 
 ### Phase Completion Summaries
 
@@ -1232,6 +1233,7 @@ Based on business requirements document objectives:
 | 2026-01-05 | 4.1 | **UI-6 Epic COMPLETE**: All 4 stories done - Backend GOVERNMENT_CORPORATION enum (V29 migration), sidebar expansion (6 sub-sections with icons), Executive Branch hub page (Article II reference, 6 nav cards), 6 sub-section pages (President, VP, EOP, Cabinet, Independent Agencies, Corporations); 54 new tests; 623 frontend tests passing, 590 backend tests passing |
 | 2026-01-07 | 4.2 | **KB-1 Epic COMPLETE**: All 6 stories done - Presidency and ExecutiveOrder entities (V30-V33 migrations), Person/term separation for non-consecutive terms (Cleveland 22/24, Trump 45/47), Presidential data sync from seed file (47 presidencies), Executive Orders sync from Federal Register API, Admin sync UI, KB President page with historical table; 18 backend tests for EO sync, 49 frontend tests for KB page |
 | 2026-01-08 | 4.3 | **New Tracks Added**: Architecture Track (ARCH-1) and Knowledge Base Track (KB-1, KB-2). **ARCH-1 Epic APPROVED**: Individual Table Refactor (36 pts, 9 stories) - separates universal person data from role-specific data (Person → Individual + CongressionalMember); approved by Winston with 7 modifications. **KB-2 Epic DRAFTED**: Presidential Administrations (24 pts, 7 stories) - consolidates President/VP pages into unified administrations view; blocked by ARCH-1. KB-1 moved from Factbase Expansion to Knowledge Base Track. |
+| 2026-03-14 | 4.4 | **ARCH-1 Epic COMPLETE**: All 9 stories done - Individual table refactor (Person→Individual, person_id→individual_id), CongressionalMember two-entity pattern, Chamber enum extraction, full migration (V34-V42), 765 backend tests passing. **KB-2 Unblocked**: Updated epic for ARCH-1 data model changes (Person→Individual, PersonUpdateDTO→IndividualUpdateDTO). Documentation Index updated. |
 
 ---
 
