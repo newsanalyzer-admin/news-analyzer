@@ -135,7 +135,7 @@ jobs:
         run: |
           echo "Verifying production health..."
           for i in {1..10}; do
-            if curl -sf http://${{ env.PRODUCTION_HOST }}/api/actuator/health > /dev/null 2>&1; then
+            if curl -sf http://${{ env.PRODUCTION_HOST }}/health > /dev/null 2>&1; then
               echo "Production is healthy!"
               exit 0
             fi
