@@ -113,7 +113,6 @@ class FederalRegisterClientDocumentTest {
                 "type": "Presidential Document",
                 "publication_date": "2024-07-04",
                 "signing_date": "2024-07-03",
-                "regulation_id_number": "1234-AB56",
                 "html_url": "https://federalregister.gov/d/2024-99999"
             }
             """;
@@ -127,7 +126,7 @@ class FederalRegisterClientDocumentTest {
         assertEquals("Presidential Document", doc.getType());
         assertEquals(LocalDate.of(2024, 7, 4), doc.getPublicationDate());
         assertEquals(LocalDate.of(2024, 7, 3), doc.getSigningDate());
-        assertEquals("1234-AB56", doc.getRegulationIdNumber());
+        assertNull(doc.getRegulationIdNumber());
     }
 
     @Test

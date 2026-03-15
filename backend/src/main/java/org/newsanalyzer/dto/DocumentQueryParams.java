@@ -125,7 +125,6 @@ public class DocumentQueryParams {
         url.append("&fields[]=agencies");
         url.append("&fields[]=cfr_references");
         url.append("&fields[]=docket_ids");
-        url.append("&fields[]=regulation_id_number");
         url.append("&fields[]=html_url");
         url.append("&fields[]=pdf_url");
 
