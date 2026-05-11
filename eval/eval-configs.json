@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "config": "promptfooconfig.yaml",
+    "transform": "reports/build-api-json.js",
+    "summarize": null,
+    "promptfooArgs": "-t datasets/gold/",
+    "description": "NER entity extraction — spaCy vs Claude across gov branches"
+  },
+  "bias": {
+    "config": "promptfoo-bias.yaml",
+    "transform": null,
+    "summarize": "reports/bias/scripts/summarize_results.py",
+    "promptfooArgs": "",
+    "description": "Cognitive bias detection — ontology-grounded"
+  },
+  "bias-ungrounded": {
+    "config": "promptfoo-bias-ungrounded.yaml",
+    "transform": null,
+    "summarize": "reports/bias/scripts/summarize_results.py",
+    "promptfooArgs": "",
+    "description": "Cognitive bias detection — ungrounded baseline"
+  }
+}

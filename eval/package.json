@@ -9,7 +9,10 @@
     "eval:legislative": "promptfoo eval -t datasets/gold/legislative.yaml",
     "eval:executive": "promptfoo eval -t datasets/gold/executive.yaml",
     "eval:judicial": "promptfoo eval -t datasets/gold/judicial.yaml",
-    "eval:all": "promptfoo eval -t datasets/gold/"
+    "eval:all": "promptfoo eval -t datasets/gold/",
+    "test": "node --test tests/test-manifest.js tests/test-eval-configs.js tests/test-extract-summary.js",
+    "test:shell": "bash tests/test-run-dryrun.sh",
+    "test:all": "npm test && npm run test:shell"
   },
   "devDependencies": {
     "promptfoo": "^0.121.3"

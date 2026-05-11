@@ -104,19 +104,7 @@ reasoning-service/entity_reference.db
 # EVALUATION HARNESS
 # ============================================================================
 eval/node_modules/
-eval/reports/*
-!eval/reports/.gitkeep
-!eval/reports/baseline/
-!eval/reports/build-api-json.js
-eval/reports/baseline/*.html
-!eval/reports/bias/
-eval/reports/bias/*
-!eval/reports/bias/summary.json
-!eval/reports/bias/baseline_results.json
-!eval/reports/bias/scripts/
-!eval/reports/bias-ungrounded/
-eval/reports/bias-ungrounded/*
-!eval/reports/bias-ungrounded/summary.json
+eval/reports/
 
 # ============================================================================
 # DOCKER & DEPLOYMENT
