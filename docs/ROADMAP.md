@@ -80,7 +80,7 @@ NewsAnalyzer v2 is a complete redesign from v1's failed architecture, implementi
 | **EVAL-2** | Complete | 100% | Entity Extraction Evaluation Harness (Promptfoo + Precision/Recall/F1) |
 | **EVAL-DASH** | Complete | 100% | AI Evaluation Portfolio Dashboard (surfaces EVAL-1/EVAL-2 work in frontend) |
 | **EVAL-3** | Complete | 100% | Cognitive Bias & Logical Fallacy Evaluation via Ontology |
-| **EVAL-4** | **In Progress** | 0% | Evaluation Results Pipeline (run history, automated publish, cross-run comparison) |
+| **EVAL-4** | **In Progress** | 25% | Evaluation Results Pipeline (run history, automated publish, cross-run comparison) |
 
 ### Model Training Track
 
@@ -1064,6 +1064,45 @@ Consolidate the separate President and Vice President pages into a unified **Pre
 
 ---
 
+## AI Evaluation Track
+
+**Status:** IN PROGRESS
+**Priority:** HIGHEST
+**Description:** Automate evaluation pipelines, preserve run history, and publish results to noometric.com to demonstrate AI evaluation methodology and enable before/after comparison for model fine-tuning work.
+
+### Epic EVAL-4: Evaluation Results Pipeline
+
+**Status:** IN PROGRESS — 1/4 Stories Ready for Review
+**Created:** 2026-04-06
+**Priority:** HIGHEST (Unblocks MT-1 SLM Fine-tuning)
+**Estimate:** 18 story points (4 stories, ~1 week)
+**Depends On:** EVAL-2 Complete ✅, EVAL-3 Complete ✅
+**Publish Target:** noometric.com (Cloudflare Pages)
+**Epic Document:** [`docs/stories/EVAL-4/EVAL-4.epic-evaluation-results-pipeline.md`](stories/EVAL-4/EVAL-4.epic-evaluation-results-pipeline.md)
+
+#### Overview
+
+Build an automated pipeline that runs evaluations, preserves run history, publishes results to noometric.com, and renders cross-run comparisons. Replaces the current manual workflow where results overwrite previous runs and publishing requires a full Docker deploy of the entire NewsAnalyzer stack.
+
+**Why this matters:**
+- **Unblocks MT-1** — Fine-tuning requires visible before/after comparison across eval runs. Without run history and a comparison view, fine-tuning work "disappears into a Jupyter notebook nobody sees."
+- **Operationalizes evaluation** — A reproducible, automated eval pipeline demonstrates thinking about reproducibility, reporting, and operationalizing evaluation — a portfolio-worthy skill for AI engineering roles.
+- **Content engine for noometric.com** — Every new evaluation becomes a live proof point on the Noometric consulting site, decoupled from the NewsAnalyzer deployment pipeline.
+
+#### Stories
+
+| ID | Story | Points | Status |
+|----|-------|--------|--------|
+| EVAL-4.1 | Run Script & Run History Infrastructure | 5 | Ready for Review |
+| EVAL-4.2 | Noometric Static Site Structure & Results Pages | 5 | Draft |
+| EVAL-4.3 | Cross-Run Comparison Page | 5 | Draft |
+| EVAL-4.4 | Publish Pipeline & GitHub Actions Integration | 3 | Draft |
+
+**Total: 18 story points**
+**Recommended execution order:** EVAL-4.1 → EVAL-4.2 → EVAL-4.3 and EVAL-4.4 in parallel
+
+---
+
 ## Future Vision
 
 ### Long-Term Goals (Year 2-3)
@@ -1193,6 +1232,12 @@ Based on business requirements document objectives:
 |------|----------|--------|
 | KB-1 | `docs/stories/KB-1/KB-1.epic-potus-data.md` | ✅ Complete |
 | KB-2 | `docs/stories/KB-2/KB-2.epic-presidential-administrations.md` | ✅ Complete |
+
+### AI Evaluation Epics
+
+| Epic | Document | Status |
+|------|----------|--------|
+| EVAL-4 | `docs/stories/EVAL-4/EVAL-4.epic-evaluation-results-pipeline.md` | In Progress |
 
 ### Phase Completion Summaries
 

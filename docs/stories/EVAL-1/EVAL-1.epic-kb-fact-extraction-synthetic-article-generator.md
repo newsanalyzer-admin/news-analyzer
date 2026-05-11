@@ -1,5 +1,22 @@
 # Epic EVAL-1: KB Fact Extraction & Synthetic Article Generator
 
+## Migration Note (2026-05-11)
+
+This epic was planned and executed when the reasoning-service lived in this repo. The reasoning-service has since been extracted to `noometric-intelligence` (`D:\VSCProjects\noometric-intelligence`). All Python implementation files built by this epic now live in that repo:
+
+| Component | Actual Location |
+|-----------|----------------|
+| `fact_extractor.py`, `fact_set_builder.py` | `noometric-intelligence/reasoning-service/app/services/eval/` |
+| `article_generator.py`, `perturbation_engine.py`, `batch_orchestrator.py` | `noometric-intelligence/reasoning-service/app/services/eval/` |
+| API endpoints (`/eval/facts/*`, `/eval/articles/*`, `/eval/batches/*`) | `noometric-intelligence/reasoning-service/app/api/eval/` |
+| Test dataset storage (Flyway migrations, Java backend) | This repo — `backend/` |
+
+The epic is DONE. Story-level acceptance criteria and test results below reflect the completed implementation.
+
+**Migration tracking:** `noometric-intelligence/docs/stories/EVAL-MIGRATION/EVAL-MIGRATION.epic-reasoning-service-origin.md`
+
+---
+
 ## Epic Overview
 
 | Field | Value |

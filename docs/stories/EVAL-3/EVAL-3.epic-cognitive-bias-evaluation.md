@@ -1,5 +1,34 @@
 # Epic EVAL-3: Cognitive Bias & Logical Fallacy Evaluation via Ontology
 
+## ⚠ Migration Note (2026-05-11)
+
+**Status corrected: COMPLETE.** This epic is fully implemented, but the implementation is split across two repositories. A developer arriving here should understand this split before reading the story-level status fields below (which reflect the original single-repo plan and have not been individually updated).
+
+| Component | Planned Location (original) | Actual Location (post-split) | Status |
+|-----------|----------------------------|------------------------------|--------|
+| OWL ontology (`cognitive-bias.ttl`, `cognitive-bias-shapes.ttl`) | `reasoning-service/ontology/` | `noometric-intelligence/reasoning-service/ontology/` | **DONE** |
+| SHACL validator (`shacl_validator.py`) | `reasoning-service/app/services/` | `noometric-intelligence/reasoning-service/app/services/` | **DONE** |
+| OWL reasoner extension (`owl_reasoner.py`) | `reasoning-service/app/services/` | `noometric-intelligence/reasoning-service/app/services/` | **DONE** |
+| Ontology-grounded bias detector (`bias_detector.py`) | `reasoning-service/app/services/eval/` | `noometric-intelligence/reasoning-service/app/services/eval/` | **DONE** |
+| Bias detection API endpoints (`/eval/bias/detect`, `/fallacies/detect`) | `reasoning-service/app/api/eval/` | `noometric-intelligence/reasoning-service/app/api/eval/bias.py` | **DONE** |
+| Bias gold datasets (`synthetic_biased.yaml`, `curated_biased.yaml`) | `eval/datasets/bias/` | **Both repos** — `eval/datasets/bias/` in both | **DONE** |
+| Promptfoo evaluation harness (`promptfoo-bias.yaml`, `bias_scorer.py`) | `eval/` | **This repo** — `eval/` | **DONE** |
+| Baseline evaluation results | `eval/reports/bias/` | **This repo** — `eval/reports/bias/` | **DONE** |
+
+**Why the split happened:** The `reasoning-service` (Python/FastAPI) was extracted from this repo into `noometric-intelligence` (`D:\VSCProjects\noometric-intelligence`) as proprietary IP. All reasoning-service implementation files migrated there. The Promptfoo harness, gold datasets, and evaluation reports remain here as they are part of the public NewsAnalyzer evaluation showcase.
+
+**For EVAL-5 developers:** The EVAL-5 stories in `noometric-intelligence/docs/stories/EVAL-5/` depend on EVAL-3's bias detector and gold datasets. Both prerequisites are available:
+- Bias detector: `noometric-intelligence/reasoning-service/app/services/eval/bias_detector.py` ✓
+- Gold datasets: `noometric-intelligence/eval/datasets/bias/` ✓ (authoritative copy — see note below)
+
+**Gold dataset ownership:** The `noometric-intelligence` copy of the bias gold datasets (`eval/datasets/bias/`) is authoritative. The copies in this repo (`eval/datasets/bias/`) are mirrors used by the Promptfoo harness. If you add or correct gold data, update the `noometric-intelligence` copy first.
+
+**Implementation story (noometric-intelligence):** `noometric-intelligence/docs/stories/EVAL-3/EVAL-3.epic-cognitive-bias-evaluation.md` — this is the active implementation record; the file you are reading is the original specification and public showcase record.
+
+**Migration tracking:** `noometric-intelligence/docs/stories/EVAL-MIGRATION/EVAL-MIGRATION.epic-reasoning-service-origin.md`
+
+---
+
 ## Epic Overview
 
 | Field | Value |
@@ -9,10 +38,10 @@
 | **Track** | AI Evaluation / Knowledge Engineering |
 | **Epic Type** | New Feature — Neuro-Symbolic AI + Ontology Engineering |
 | **Priority** | HIGHEST (Job Search — demonstrates both AI Eval AND KE skills) |
-| **Status** | PROPOSED |
+| **Status** | COMPLETE — see migration note above |
 | **Created** | 2026-03-27 |
 | **Owner** | Sarah (PO) |
-| **Depends On** | EVAL-1 Complete, EVAL-2 Complete, EVAL-DASH Complete |
+| **Depends On** | EVAL-1 Complete ✓, EVAL-2 Complete ✓ |
 | **Blocked By** | None |
 | **Estimated Effort** | ~1.5 weeks (5 stories, all required) |
 

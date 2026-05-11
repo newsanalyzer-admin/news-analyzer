@@ -1,5 +1,24 @@
 # Epic EVAL-2: Entity Extraction Evaluation Harness
 
+## Migration Note (2026-05-11)
+
+This epic was planned and executed when the reasoning-service lived in this repo. The reasoning-service has since been extracted to `noometric-intelligence` (`D:\VSCProjects\noometric-intelligence`). Python implementation files built by this epic are split:
+
+| Component | Actual Location |
+|-----------|----------------|
+| `llm_entity_extractor.py` | `noometric-intelligence/reasoning-service/app/services/eval/` |
+| LLM extraction endpoint (`/eval/extract/llm`) | `noometric-intelligence/reasoning-service/app/api/eval/extraction.py` |
+| Gold datasets (`eval/datasets/gold/`) | **This repo** — `eval/datasets/gold/` |
+| Gold derivation script (`eval/datasets/scripts/`) | **This repo** — `eval/datasets/` |
+| Promptfoo harness (`eval/promptfooconfig.yaml`, `eval/assertions/entity_scorer.py`) | **This repo** — `eval/` |
+| Evaluation reports (`eval/reports/baseline/`) | **This repo** — `eval/reports/` |
+
+The epic is COMPLETE. Story-level acceptance criteria and test results below reflect the completed implementation.
+
+**Migration tracking:** `noometric-intelligence/docs/stories/EVAL-MIGRATION/EVAL-MIGRATION.epic-reasoning-service-origin.md`
+
+---
+
 ## Epic Overview
 
 | Field | Value |

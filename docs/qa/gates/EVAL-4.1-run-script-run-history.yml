@@ -1,0 +1,69 @@
+schema: 1
+story: "EVAL-4.1"
+story_title: "Run Script & Run History Infrastructure"
+gate: PASS
+status_reason: "All 35 tests pass (28 Node.js + 7 shell). All 8 ACs verified — AC8 implemented in code but lacks an explicit test. Three minor improvements logged as non-blocking future work."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-04-20T00:00:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "SCRIPT-001"
+    severity: low
+    finding: "run-eval.sh uses 'python' instead of 'python3' on line 163 (summarize step)"
+    suggested_action: "Replace 'python' with 'python3' before CI usage to ensure cross-platform portability"
+    suggested_owner: dev
+  - id: "TEST-001"
+    severity: low
+    finding: "AC8 (duplicate timestamp → counter suffix) has no explicit test case"
+    suggested_action: "Add dry-run shell test that runs the script twice in the same minute and asserts a -1 suffixed directory is created"
+    suggested_owner: dev
+  - id: "MAINT-001"
+    severity: low
+    finding: "Hardcoded 'Claude Sonnet' extractor key in extract-summary.js line 43"
+    suggested_action: "When MT-1 adds new extractors, refactor to read extractor name from eval-configs.json rather than hardcoding"
+    suggested_owner: dev
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 3 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "python vs python3 portability before any CI eval runs"
+      - "hardcoded extractor key before MT-1 adds new model providers"
+
+quality_score: 92
+
+expires: "2026-05-04T00:00:00Z"
+
+evidence:
+  tests_reviewed: 35
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "Eval-type validated against registry before shell expansion; no credential handling"
+  performance:
+    status: PASS
+    notes: "Developer CLI tool — latency not a concern"
+  reliability:
+    status: PASS
+    notes: "set -euo pipefail; duplicate timestamp counter; manifest backup/restore in tests"
+  maintainability:
+    status: PASS
+    notes: "Clean single-responsibility scripts; eval-configs.json registry is a solid extension point; well-documented"
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Replace 'python' with 'python3' in run-eval.sh line 163"
+      refs: ["eval/run-eval.sh"]
+    - action: "Add explicit AC8 dry-run test for duplicate timestamp counter"
+      refs: ["eval/tests/test-run-dryrun.sh"]
+    - action: "Parameterize extractor key in extract-summary.js before MT-1"
+      refs: ["eval/scripts/extract-summary.js"]
