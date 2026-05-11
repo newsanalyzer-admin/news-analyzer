@@ -40,8 +40,7 @@ services:
   # Frontend - run manually with pnpm for hot reload
   # Use: cd frontend && pnpm dev
 
-  # Reasoning Service - run manually with uvicorn for hot reload
-  # Use: cd reasoning-service && uvicorn app.main:app --reload
+  # Reasoning Service runs in noometric-intelligence (external). Set REASONING_SERVICE_URL in .env.
 
   # ============================================================
   # Observability Stack (OBS-1.1)
